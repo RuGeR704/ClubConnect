@@ -1,0 +1,4 @@
+package main.java.Storage;
+
+public class PagamentoDAO {
+}
