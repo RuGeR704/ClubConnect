@@ -1,0 +1,127 @@
+/* 1. IMPORT FONT */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* 2. SOVRASCRITTURA VARIABILI BOOTSTRAP */
+:root {
+    /* Palette ClubConnect */
+    --club-blue: #1E3A5F;
+    --club-teal: #26A9BC;
+    --club-yellow: #F4C430;
+    --club-red: #E65142;
+    --club-bg: #F4F6F9;
+
+    /* Mappatura sui colori semantici di Bootstrap */
+    --bs-primary: var(--club-blue);
+    --bs-primary-rgb: 30, 58, 95; /* Necessario per le ombre/focus */
+
+    --bs-secondary: var(--club-teal);
+    --bs-secondary-rgb: 38, 169, 188;
+
+    --bs-warning: var(--club-yellow);
+    --bs-danger: var(--club-red);
+
+    --bs-body-bg: var(--club-bg);
+    --bs-body-font-family: 'Poppins', sans-serif;
+
+    /* Arrotondamenti più morbidi */
+    --bs-border-radius: 10px;
+    --bs-border-radius-lg: 16px;
+}
+
+/* 3. STILI GLOBALI */
+body {
+    color: #4b5563; /* Grigio testo più morbido del nero */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    color: var(--club-blue);
+}
+
+a {
+    text-decoration: none;
+}
+
+/* 4. SIDEBAR PERSONALIZZATA */
+.sidebar {
+    background-color: var(--club-blue);
+    min-height: 100vh;
+    color: white;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    z-index: 100;
+}
+
+.sidebar .nav-link {
+    color: rgba(255,255,255,0.7);
+    padding: 12px 20px;
+    margin-bottom: 4px;
+    border-radius: 8px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    color: white;
+    background-color: rgba(255,255,255,0.1);
+}
+
+.sidebar .nav-link.active {
+    background-color: rgba(38, 169, 188, 0.2); /* Teal trasparente */
+    border-left: 4px solid var(--club-teal);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* 5. LOGO */
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: white;
+    padding: 1.5rem;
+}
+
+.brand-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+}
+
+.brand-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* 6. COMPONENTI EXTRA */
+/* Card con ombra e hover */
+.card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* Bottoni con testo bianco (fix per il Teal che è chiaro) */
+.btn-secondary {
+    color: white !important;
+}
+.btn-primary {
+    background-color: var(--club-blue);
+    border-color: var(--club-blue);
+}
+
+/* Badge Arrotondati */
+.badge {
+    padding: 0.5em 0.8em;
+    font-weight: 600;
+}
