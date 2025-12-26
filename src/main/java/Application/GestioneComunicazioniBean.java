@@ -1,4 +1,3 @@
-package main.java.Application;
-
+package Application;
 public class GestioneComunicazioniBean {
 }

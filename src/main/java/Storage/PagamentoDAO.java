@@ -1,4 +1,4 @@
-package main.java.Storage;
+package Storage;
 
 public class PagamentoDAO {
 }
