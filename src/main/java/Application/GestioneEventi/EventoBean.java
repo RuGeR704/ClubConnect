@@ -2,6 +2,7 @@ package Application.GestioneEventi;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class EventoBean implements Serializable {
     private int id_evento;
@@ -12,7 +13,7 @@ public class EventoBean implements Serializable {
     private double costo;
     private int posti_disponibili;
     private int capienza_massima;
-    private LocalDate data_ora;
+    private LocalDateTime data_ora;
 
     public int getId_evento() {
         return id_evento;
@@ -78,11 +79,11 @@ public class EventoBean implements Serializable {
         this.capienza_massima = capienza_massima;
     }
 
-    public LocalDate getData_ora() {
+    public LocalDateTime getData_ora() {
         return data_ora;
     }
 
-    public void setData_ora(LocalDate data_ora) {
+    public void setData_ora(LocalDateTime data_ora) {
         this.data_ora = data_ora;
     }
 }
