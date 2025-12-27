@@ -12,7 +12,7 @@ public abstract class GruppoBean implements Serializable {
     private String regole;
     private String slogan;
     private boolean stato;
-    private boolean tipoGruppo;
+    private boolean tipoGruppo; //true=club
 
     public int getId_gruppo() {
         return id_gruppo;

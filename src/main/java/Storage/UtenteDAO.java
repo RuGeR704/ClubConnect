@@ -1,7 +1,6 @@
 package Storage;
 
 import Application.GestioneAccount.UtenteBean;
-import com.mysql.cj.x.protobuf.MysqlxPrepare;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,11 +34,9 @@ public class UtenteDAO {
         return utenti;
     }
 
-    public UtenteBean doRetrieveById(int id) throws SQLException{
+    public UtenteBean doRetrieveById(Connection con,int id) throws SQLException{
         UtenteBean c = null;
-        try(Connection con = ConPool.getConnection();
-            PreparedStatement ps = con.prepareStatement(
-                    "SELECT * FROM Utente WHERE id_utente = ?")){
+        try(PreparedStatement ps = con.prepareStatement("SELECT * FROM Utente WHERE id_utente = ?")){
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()){
                 while (rs.next()){
@@ -59,8 +56,7 @@ public class UtenteDAO {
         return c;
     }
 
-    public void doUpdate(UtenteBean p) throws SQLException{
-        try (Connection con = ConPool.getConnection()){
+    public void doUpdate(Connection con,UtenteBean p) throws SQLException{
             try (PreparedStatement ps = con.prepareStatement(
                     "UPDATE Utente SET username = ?, passwordhash = SHA1(?), nome = ?, cognome = ?, email = ?, data_nascita = ?, cellulare = ?, stato = ?, is_admin = ? WHERE id_utente = ?")) {
                 ps.setString(1, p.getUsername());
@@ -75,21 +71,17 @@ public class UtenteDAO {
                 ps.setInt(10, p.getId_utente());
                 ps.executeUpdate();
             }
-        }
     }
 
-    public void doDelete(int id)throws SQLException{
-        try (Connection con = ConPool.getConnection()){
+    public void doDelete(Connection con,int id)throws SQLException{
             try (PreparedStatement ps = con.prepareStatement(
                     "DELETE FROM Utente WHERE id_utente = ?")) {
                 ps.setInt(1, id);
                 ps.executeUpdate();
             }
-        }
     }
 
-    public void doSave(UtenteBean p) throws SQLException{
-        try (Connection con = ConPool.getConnection()){
+    public void doSave(Connection con, UtenteBean p) throws SQLException{
             try(PreparedStatement ps = con.prepareStatement(
                     "INSERT INTO Utente (username, passwordhash, nome, cognome, email, data_nascita, cellulare, stato, is_admin) VALUES (?, SHA(?), ?, ?, ?, ? ,?, ?, ?)")) {
                 ps.setString(1, p.getUsername());
@@ -103,6 +95,5 @@ public class UtenteDAO {
                 ps.setBoolean(9, p.isAdmin());
                 ps.executeUpdate();
             }
-        }
     }
 }
