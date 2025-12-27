@@ -2,12 +2,13 @@ package Application.GestioneEventi;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class PartecipazioneBean implements Serializable {
     private int id_partecipazione;
     private int id_evento;
     private int id_utente;
-    private LocalDate data_registrazione;
+    private LocalDateTime data_registrazione;
 
     public int getId_partecipazione() {
         return id_partecipazione;
@@ -33,11 +34,11 @@ public class PartecipazioneBean implements Serializable {
         this.id_utente = id_utente;
     }
 
-    public LocalDate getData_registrazione() {
+    public LocalDateTime getData_registrazione() {
         return data_registrazione;
     }
 
-    public void setData_registrazione(LocalDate data_registrazione) {
+    public void setData_registrazione(LocalDateTime data_registrazione) {
         this.data_registrazione = data_registrazione;
     }
 }

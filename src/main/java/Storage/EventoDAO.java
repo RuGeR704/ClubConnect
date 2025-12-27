@@ -2,6 +2,7 @@ package Storage;
 
 import Application.GestioneComunicazioni.ComunicazioniBean;
 import Application.GestioneEventi.EventoBean;
+import Application.GestioneEventi.PartecipazioneBean;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -50,7 +51,7 @@ public class EventoDAO {
         return Eventi;
     }
 
-    public EventoBean DoRetrieveById(Connection con,int id_evento) throws SQLException {
+    public EventoBean DoRetrieveEventoById(Connection con,int id_evento) throws SQLException {
             EventoBean e = null;
             try(PreparedStatement ps = con.prepareStatement("SELECT * FROM Evento WHERE id_evento= ?")) {
             ps.setInt(1, id_evento);
@@ -76,6 +77,7 @@ public class EventoDAO {
         }
         return e;
     }
+
     public void DoUpdate(Connection con,EventoBean e) throws SQLException {
             String query = "UPDATE Evento SET id_gruppo=?, nome=?, descrizione=?, foto=?,costo=?, posti_disponibili=?, capienza_massima=?, data_ora=? WHERE id_evento=?";
             try (PreparedStatement ps = con.prepareStatement(query)) {
@@ -117,6 +119,65 @@ public class EventoDAO {
                 ps.setTimestamp(8, java.sql.Timestamp.valueOf(e.getData_ora()));
             } else {
                 ps.setNull(8, java.sql.Types.TIMESTAMP);
+            }
+            ps.executeUpdate();
+        }
+    }
+    //retrieve orario partecipazione
+    public PartecipazioneBean DoRetrievePartecipazioneById(Connection con,int id_partecipazione) throws SQLException {
+        PartecipazioneBean e = null;
+        try(PreparedStatement ps = con.prepareStatement("SELECT * FROM Partecipazione WHERE id_partecipazione= ?")) {
+            ps.setInt(1, id_partecipazione);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    e = new PartecipazioneBean();
+                    e.setId_partecipazione(rs.getInt("id_partecipazione"));
+                    e.setId_evento(rs.getInt("id_evento"));
+                    e.setId_utente(rs.getInt("id_utente"));
+                    java.sql.Timestamp data_registrazione = rs.getTimestamp("data_registrazione");
+                    if (data_registrazione != null) {
+                        e.setData_registrazione(data_registrazione.toLocalDateTime());
+                    } else {
+                        e.setData_registrazione(null);
+                    }
+                }
+            }
+        }
+        return e;
+    }
+
+    public List<PartecipazioneBean> DoRetrievePartecipazioneAll(Connection con) throws SQLException {
+        List<PartecipazioneBean> partecipazioni = new ArrayList<PartecipazioneBean>();;
+        PartecipazioneBean e = null;
+        try(PreparedStatement ps = con.prepareStatement("SELECT * FROM Partecipazione")) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    e = new PartecipazioneBean();
+                    e.setId_partecipazione(rs.getInt("id_partecipazione"));
+                    e.setId_evento(rs.getInt("id_evento"));
+                    e.setId_utente(rs.getInt("id_utente"));
+                    java.sql.Timestamp data_registrazione = rs.getTimestamp("data_registrazione");
+                    if (data_registrazione != null) {
+                        e.setData_registrazione(data_registrazione.toLocalDateTime());
+                    } else {
+                        e.setData_registrazione(null);
+                    }
+                    partecipazioni.add(e);
+                }
+            }
+        }
+        return partecipazioni;
+    }
+
+    public void DoSavePartecipazioni(Connection con,PartecipazioneBean e) throws SQLException {
+        String query = "INSERT INTO Partecipazione (id_evento, id_utente, data_registrazione) VALUES (?,?,?)";
+        try (PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, e.getId_evento());
+            ps.setInt(2, e.getId_utente());
+            if (e.getData_registrazione() != null) {
+                ps.setTimestamp(3, java.sql.Timestamp.valueOf(e.getData_registrazione()));
+            } else {
+                ps.setNull(3, java.sql.Types.TIMESTAMP);
             }
             ps.executeUpdate();
         }
