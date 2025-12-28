@@ -96,4 +96,29 @@ public class UtenteDAO {
                 ps.executeUpdate();
             }
     }
+
+    public UtenteBean DoRetrieveEmailPassword(String email,String password) throws SQLException{
+        UtenteBean c=null;
+        try (Connection con = ConPool.getConnection();
+             PreparedStatement ps = con.prepareStatement(
+                     "SELECT * FROM Utente WHERE email = ? AND passwordhash = SHA1(?)")) {
+            ps.setString(1, email);
+            ps.setString(2, password);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    c = new UtenteBean();
+                    c.setId_utente(rs.getInt("id_utente"));
+                    c.setUsername(rs.getString("Username"));
+                    c.setNome(rs.getString("nome"));
+                    c.setCognome(rs.getString("cognome"));
+                    c.setEmail(rs.getString("email"));
+                    c.setData_nascita(rs.getDate("data_nascita").toLocalDate());
+                    c.setCellulare(rs.getString("cellulare"));
+                    c.setStato(rs.getInt("stato"));
+                    c.setIsadmin(rs.getBoolean("isAdmin") || c.getId_utente() == 1);
+                }
+            }
+        }
+        return c;
+    }
 }
