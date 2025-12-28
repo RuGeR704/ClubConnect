@@ -1,6 +1,7 @@
 package Presentation.AutenticazioneController;
 
 import Application.GestioneAccount.UtenteBean;
+import Storage.ConPool;
 import Storage.UtenteDAO;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -17,6 +18,7 @@ import java.sql.SQLException;
 public class LoginServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        request.getRequestDispatcher("/login.jsp").forward(request, response);
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -24,13 +26,14 @@ public class LoginServlet extends HttpServlet {
         String password=request.getParameter("password");
         if (email == null || email.isBlank() || password == null || password.isBlank()) {
             request.setAttribute("errore", "Per favore compila tutti i campi."); // sempre per sapere che errore è
-            request.getRequestDispatcher("/Login.jsp").forward(request, response);
+            request.getRequestDispatcher("/login.jsp").forward(request, response);
             return;
         }
         UtenteBean utente=null;
         try{
-            UtenteDAO dao=new UtenteDAO();
-             utente= dao.DoRetrieveEmailPassword(email,password);
+            UtenteDAO dao = new UtenteDAO();
+             utente = dao.DoRetrieveEmailPassword(ConPool.getConnection(), email, password);
+             System.out.println(utente.getEmail());
         }catch(SQLException e){
             e.printStackTrace();
         }
@@ -43,7 +46,6 @@ public class LoginServlet extends HttpServlet {
             request.setAttribute("errore", "Email o password errati."); // per vedere gli errori
             RequestDispatcher rd = request.getRequestDispatcher("/login.jsp");
             rd.forward(request, response);
-            return;
         }
     }
 

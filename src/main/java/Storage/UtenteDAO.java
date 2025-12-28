@@ -83,7 +83,7 @@ public class UtenteDAO {
 
     public void doSave(Connection con, UtenteBean p) throws SQLException{
         try(PreparedStatement ps = con.prepareStatement(
-                "INSERT INTO Utente (username, passwordhash, nome, cognome, email, data_nascita, cellulare, stato, is_admin) VALUES (?, SHA(?), ?, ?, ?, ? ,?, ?, ?)")) {
+                "INSERT INTO Utente (username, passwordhash, nome, cognome, email, data_nascita, cellulare, stato, is_admin) VALUES (?, ?, ?, ?, ?, ? ,?, ?, ?)")) {
             ps.setString(1, p.getUsername());
             ps.setString(2, p.getPasswordhash());
             ps.setString(3, p.getNome());
@@ -94,27 +94,41 @@ public class UtenteDAO {
             ps.setInt(8, p.getStato());
             ps.setBoolean(9, p.isAdmin());
             ps.executeUpdate();
+        } catch (SQLException e) {
+            if(e.getErrorCode() == 1062) { //se trova duplicati email o username
+                String messaggioErrore = e.getMessage();
+
+                if (messaggioErrore.contains("email")) {
+                    throw new SQLException("L'email inserita è già stata utilizzata");
+                } else if (messaggioErrore.contains("username")) {
+                    throw new SQLException("L'username inserito non è disponibile");
+                } else {
+                    throw new SQLException("Dati duplicati (Email o username già esistenti)");
+                }
+            }
+            throw e;
         }
     }
-    public UtenteBean DoRetrieveEmailPassword(String email,String password) throws SQLException{
-        UtenteBean c=null;
-        try (Connection con = ConPool.getConnection();
-             PreparedStatement ps = con.prepareStatement(
+
+    public UtenteBean DoRetrieveEmailPassword(Connection con, String email,String password) throws SQLException{
+        UtenteBean c = null;
+        try (PreparedStatement ps = con.prepareStatement(
                      "SELECT * FROM Utente WHERE email = ? AND passwordhash = SHA1(?)")) {
             ps.setString(1, email);
             ps.setString(2, password);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
+                if (rs.next()) {
                     c = new UtenteBean();
                     c.setId_utente(rs.getInt("id_utente"));
                     c.setUsername(rs.getString("Username"));
                     c.setNome(rs.getString("nome"));
                     c.setCognome(rs.getString("cognome"));
                     c.setEmail(rs.getString("email"));
+                    c.setPasswordhash(rs.getString("passwordhash"));
                     c.setData_nascita(rs.getDate("data_nascita").toLocalDate());
                     c.setCellulare(rs.getString("cellulare"));
                     c.setStato(rs.getInt("stato"));
-                    c.setIsadmin(rs.getBoolean("isAdmin") || c.getId_utente() == 1);
+                    c.setIsadmin(rs.getBoolean("is_admin") || c.getId_utente() == 1);
                 }
             }
         }
