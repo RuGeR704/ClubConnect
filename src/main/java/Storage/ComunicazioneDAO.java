@@ -33,9 +33,11 @@ public class ComunicazioneDAO {
         return comunicazioni;
     }
 
-    public ComunicazioniBean doRetrieveById(Connection con,int id) throws SQLException {
+    public ComunicazioniBean doRetrieveById(int id) throws SQLException {
         ComunicazioniBean c = new ComunicazioniBean();
-        try (PreparedStatement ps = con.prepareStatement("SELECT * FROM Comunicazioni WHERE id_comunicazione = ?")) {
+        try (Connection con = ConPool.getConnection();
+            PreparedStatement ps = con.prepareStatement(
+                    "SELECT * FROM Comunicazioni WHERE id_comunicazione = ?")) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -53,8 +55,10 @@ public class ComunicazioneDAO {
         return c;
     }
 
-    public void doUpdate (Connection con,ComunicazioniBean c) throws SQLException {
-        try (PreparedStatement ps = con.prepareStatement("UPDATE Comunicazione SET id_gruppo = ?, id_autore = ?, contenuto = ?, foto = ?, data_pubblicazione = ? WHERE id_comunicazione = ?")) {
+    public void doUpdate (ComunicazioniBean c) throws SQLException {
+        try (Connection con = ConPool.getConnection();
+        PreparedStatement ps = con.prepareStatement(
+                "UPDATE Comunicazione SET id_gruppo = ?, id_autore = ?, contenuto = ?, foto = ?, data_pubblicazione = ? WHERE id_comunicazione = ?")) {
             ps.setInt(1, c.getId_gruppo());
             ps.setInt(2, c.getId_autore());
             ps.setString(3, c.getContenuto());
@@ -65,15 +69,18 @@ public class ComunicazioneDAO {
         }
     }
 
-    public void doDelete (Connection con,ComunicazioniBean c) throws SQLException {
-        try (PreparedStatement ps = con.prepareStatement("DELETE FROM Comunicazioni WHERE id_comunicazione = ?")) {
+    public void doDelete (ComunicazioniBean c) throws SQLException {
+        try (Connection con = ConPool.getConnection();
+        PreparedStatement ps = con.prepareStatement(
+                "DELETE FROM Comunicazioni WHERE id_comunicazione = ?")) {
             ps.setInt(1, c.getId_comunicazione());
             ps.executeUpdate();
         }
     }
 
-    public void doSave(Connection con,ComunicazioniBean c) throws SQLException {
-        try (PreparedStatement ps = con.prepareStatement(
+    public void doSave(ComunicazioniBean c) throws SQLException {
+        try (Connection con = ConPool.getConnection();
+        PreparedStatement ps = con.prepareStatement(
                 "INSERT INTO Comunicazione (id_gruppo, id_autore, contenuto, foto, data_pubblicazione, is_global) VALUES (?, ?, ?, ?, ?, ?)")){
             ps.setInt(1, c.getId_gruppo());
             ps.setInt(2, c.getId_autore());

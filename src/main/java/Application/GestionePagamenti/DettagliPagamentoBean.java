@@ -1,14 +1,14 @@
 package Application.GestionePagamenti;
 
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class DettagliPagamentoBean implements Serializable {
     private int id_pagamento;
-    private int id_club;
+    private int id_gruppo;
     private int id_metodo;
     private double importo;
-    private LocalDate data_tansazione;
+    private LocalDateTime data_tansazione;
 
     public int getId_pagamento() {
         return id_pagamento;
@@ -18,12 +18,12 @@ public class DettagliPagamentoBean implements Serializable {
         this.id_pagamento = id_pagamento;
     }
 
-    public int getId_club() {
-        return id_club;
+    public int getId_gruppo() {
+        return id_gruppo;
     }
 
-    public void setId_club(int id_club) {
-        this.id_club = id_club;
+    public void setId_gruppo(int id_gruppo) {
+        this.id_gruppo = id_gruppo;
     }
 
     public int getId_metodo() {
@@ -42,11 +42,11 @@ public class DettagliPagamentoBean implements Serializable {
         this.importo = importo;
     }
 
-    public LocalDate getData_tansazione() {
+    public LocalDateTime getData_tansazione() {
         return data_tansazione;
     }
 
-    public void setData_tansazione(LocalDate data_tansazione) {
+    public void setData_tansazione(LocalDateTime data_tansazione) {
         this.data_tansazione = data_tansazione;
     }
 
