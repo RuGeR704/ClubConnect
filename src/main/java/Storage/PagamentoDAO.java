@@ -35,18 +35,18 @@ public class PagamentoDAO {
         try (Connection con = ConPool.getConnection();
              PreparedStatement ps = con.prepareStatement(
                      "SELECT * FROM Metodo_Pagamento WHERE id_metodo = ?")) {
-             ps.setInt(1, id_metodo);
-             try(ResultSet rs = ps.executeQuery()) {
-                 while(rs.next()) {
-                     m = new MetodoPagamentoBean();
-                     m.setId_metodo(rs.getInt("id_metodo"));
-                     m.setId_utente(rs.getInt("id_utente"));
-                     m.setNome_intestatario(rs.getString("nome_intestatario"));
-                     m.setCognome_intestatario(rs.getString("cognome_intestatario"));
-                     m.setNumero_carta(rs.getString("numero_carta"));
-                     m.setScadenza_carta(rs.getString("scadenza_carta"));
-                 }
-             }
+            ps.setInt(1, id_metodo);
+            try(ResultSet rs = ps.executeQuery()) {
+                while(rs.next()) {
+                    m = new MetodoPagamentoBean();
+                    m.setId_metodo(rs.getInt("id_metodo"));
+                    m.setId_utente(rs.getInt("id_utente"));
+                    m.setNome_intestatario(rs.getString("nome_intestatario"));
+                    m.setCognome_intestatario(rs.getString("cognome_intestatario"));
+                    m.setNumero_carta(rs.getString("numero_carta"));
+                    m.setScadenza_carta(rs.getString("scadenza_carta"));
+                }
+            }
         }
         return m;
     }
@@ -114,7 +114,7 @@ public class PagamentoDAO {
     public DettagliPagamentoBean doRetrieveDettagliPagamentoById(int id_pagamento) throws SQLException{
         DettagliPagamentoBean d = null;
         try(Connection con = ConPool.getConnection();
-        PreparedStatement ps = con.prepareStatement("SELECT * FROM Pagamento WHERE id_pagamento = ?")){
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM Pagamento WHERE id_pagamento = ?")){
             ps.setInt(1, id_pagamento);
             try(ResultSet rs = ps.executeQuery()){
                 while (rs.next()){

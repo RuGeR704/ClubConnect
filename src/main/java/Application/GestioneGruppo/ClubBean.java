@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class ClubBean extends GruppoBean implements Serializable {
     private int id_gruppo;
     private double importo_retta;
-    private String frequenza;
+    private int frequenza;
 
     public int getId_gruppo() {
         return id_gruppo;
@@ -23,11 +23,11 @@ public class ClubBean extends GruppoBean implements Serializable {
         this.importo_retta = importo_retta;
     }
 
-    public String getFrequenza() {
+    public int getFrequenza() {
         return frequenza;
     }
 
-    public void setFrequenza(String frequenza) {
+    public void setFrequenza(int frequenza) {
         this.frequenza = frequenza;
     }
 
