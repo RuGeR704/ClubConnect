@@ -20,4 +20,5 @@ public class ClubBean extends GruppoBean implements Serializable {
     public void setFrequenza(int frequenza) {
         this.frequenza = frequenza;
     }
+
 }

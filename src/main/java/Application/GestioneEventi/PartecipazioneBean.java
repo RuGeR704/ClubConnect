@@ -41,4 +41,5 @@ public class PartecipazioneBean implements Serializable {
     public void setData_registrazione(LocalDateTime data_registrazione) {
         this.data_registrazione = data_registrazione;
     }
+
 }

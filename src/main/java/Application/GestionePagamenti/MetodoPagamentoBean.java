@@ -57,4 +57,5 @@ public class MetodoPagamentoBean implements Serializable {
     public void setScadenza_carta(String scadenza_carta) {
         this.scadenza_carta = scadenza_carta;
     }
+
 }

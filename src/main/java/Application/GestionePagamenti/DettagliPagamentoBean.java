@@ -49,4 +49,5 @@ public class DettagliPagamentoBean implements Serializable {
     public void setData_tansazione(LocalDate data_tansazione) {
         this.data_tansazione = data_tansazione;
     }
+
 }

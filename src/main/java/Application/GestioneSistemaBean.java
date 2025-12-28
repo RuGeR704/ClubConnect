@@ -12,4 +12,5 @@ public class GestioneSistemaBean implements Serializable{
     public void setManutenzione(boolean manutenzione) {
         this.manutenzione = manutenzione;
     }
+
 }

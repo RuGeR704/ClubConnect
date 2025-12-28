@@ -115,4 +115,5 @@ public class UtenteBean implements Serializable {
             throw new RuntimeException(e);
         }
     }
+
 }

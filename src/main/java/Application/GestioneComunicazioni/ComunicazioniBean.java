@@ -66,4 +66,5 @@ public class ComunicazioniBean implements Serializable {
     public void setIsglobal(boolean isglobal) {
         this.isglobal = isglobal;
     }
+
 }

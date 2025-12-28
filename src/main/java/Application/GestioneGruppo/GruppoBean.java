@@ -93,4 +93,5 @@ public abstract class GruppoBean implements Serializable {
     public void setTipoGruppo(boolean tipoGruppo) {
         this.tipoGruppo = tipoGruppo;
     }
+
 }

@@ -40,4 +40,5 @@ public class IscrizioneBean implements Serializable {
     public void setGestore(boolean gestore) {
         this.gestore = gestore;
     }
+
 }
