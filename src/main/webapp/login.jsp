@@ -9,7 +9,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/style-bootstrap.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/style.css">
 
     <style>
         /* Layout a due colonne full-height */
@@ -122,6 +122,18 @@
                             <a href="#" class="small text-secondary fw-semibold text-decoration-none">Password dimenticata?</a>
                         </div>
 
+                        <%
+                            String errore = (String) request.getAttribute("errore");
+                            if (errore != null) {
+                        %>
+                        <div class="alert alert-danger d-flex align-items-center p-2 mb-3" role="alert">
+                            <i class="fa-solid fa-circle-exclamation me-2"></i>
+                            <div class="small fw-bold">
+                                <%= errore %>
+                            </div>
+                        </div>
+                        <% } %>
+
                         <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-sm mb-3">
                             Accedi
                         </button>
@@ -150,7 +162,7 @@
                 <div class="mb-4">
                     <i class="fa-solid fa-users-viewfinder" style="font-size: 3rem; color: #26A9BC;"></i>
                 </div>
-                <h3 class="fw-bold mb-3">Gestisci la tua Community</h3>
+                <h3 class="fw-bold mb-3" style="color: white;">Gestisci la tua Community</h3>
                 <p class="text-white-50 mb-0">
                     "ClubConnect ha trasformato il modo in cui gestiamo le iscrizioni. Niente più fogli Excel, solo più tempo per lo sport."
                 </p>

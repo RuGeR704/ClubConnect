@@ -1,8 +1,6 @@
+<%@ page import="Application.GestioneAccount.UtenteBean" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%
-    String nomeUtente = (String) request.getAttribute("nome");
-    if (nomeUtente == null) nomeUtente = "Utente"; // Fallback se il nome non è passato
-%>
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -133,7 +131,7 @@
 
     <h1 class="fw-bold mb-2" style="color: #1E3A5F;">Benvenuto a bordo!</h1>
     <p class="text-muted mb-5 fs-5">
-        Ciao <strong><%= nomeUtente %></strong>, il tuo account è attivo.<br>
+        Ciao <strong>${utente.nome}</strong>, il tuo account è attivo.<br>
         Ecco cosa puoi fare con ClubConnect:
     </p>
 

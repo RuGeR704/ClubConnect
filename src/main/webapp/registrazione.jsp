@@ -9,7 +9,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/style-bootstrap.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/style.css">
 
     <style>
         /* FIX ALTEZZA: Assicuriamo che html e body siano alti 100% */
@@ -172,6 +172,18 @@
                             </label>
                         </div>
 
+                        <%
+                            String errore = (String) request.getAttribute("errore");
+                            if (errore != null) {
+                        %>
+                        <div class="alert alert-danger d-flex align-items-center p-2 mb-3" role="alert">
+                            <i class="fa-solid fa-circle-exclamation me-2"></i>
+                            <div class="small fw-bold">
+                                <%= errore %>
+                            </div>
+                        </div>
+                        <% } %>
+
                         <button type="submit" class="btn btn-custom-primary w-100 py-3 rounded-3 fw-bold shadow-sm mb-3">
                             Crea Account
                         </button>
@@ -192,12 +204,12 @@
                 <div style="position: absolute; bottom: 20%; right: 10%; width: 15px; height: 15px; background: #E65142; border-radius: 50%; opacity: 0.6;"></div>
 
                 <div class="glass-card">
-                    <h3 class="fw-bold mb-4">Perché iscriverti?</h3>
+                    <h3 class="fw-bold mb-4" style="color: white;">Perché iscriverti?</h3>
 
                     <div class="benefit-item">
                         <div class="benefit-icon"><i class="fa-solid fa-users"></i></div>
                         <div>
-                            <h6 class="mb-0 fw-bold">Community Unica</h6>
+                            <h6 class="mb-0 fw-bold" style="color: white;">Community Unica</h6>
                             <small class="text-white-50">Connettiti con persone che condividono le tue passioni.</small>
                         </div>
                     </div>
@@ -205,7 +217,7 @@
                     <div class="benefit-item">
                         <div class="benefit-icon"><i class="fa-solid fa-calendar-check"></i></div>
                         <div>
-                            <h6 class="mb-0 fw-bold">Eventi Esclusivi</h6>
+                            <h6 class="mb-0 fw-bold" style="color: white;">Eventi Esclusivi</h6>
                             <small class="text-white-50">Prenota il tuo posto agli eventi del club in un click.</small>
                         </div>
                     </div>
@@ -213,7 +225,7 @@
                     <div class="benefit-item mb-0">
                         <div class="benefit-icon"><i class="fa-solid fa-receipt"></i></div>
                         <div>
-                            <h6 class="mb-0 fw-bold">Pagamenti Smart</h6>
+                            <h6 class="mb-0 fw-bold" style="color: white;">Pagamenti Smart</h6>
                             <small class="text-white-50">Rinnova la tua quota e paga i corsi in sicurezza.</small>
                         </div>
                     </div>

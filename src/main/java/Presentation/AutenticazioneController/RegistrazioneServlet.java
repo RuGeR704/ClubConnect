@@ -39,17 +39,28 @@ public class RegistrazioneServlet extends HttpServlet {
         utente.setPassword(password);
         utente.setCellulare(telefono);
 
-        request.getSession().setAttribute("utente", utente);
 
         try {
             UtenteDAO utenteDAO = new UtenteDAO();
             utenteDAO.doSave(ConPool.getConnection(), utente);
+
+            request.getSession().setAttribute("utente", utente);
+            RequestDispatcher view = request.getRequestDispatcher("/WEB-INF/confermaRegistrazione.jsp");
+            view.forward(request,response);
         } catch (SQLException e) {
             e.printStackTrace();
+
+            String erroreMsg = "Errore tecnico durante la registrazione";
+
+            if (e.getMessage().contains("email") || e.getMessage().contains("username")) {
+                erroreMsg = e.getMessage();
+            }
+
+            request.setAttribute("errore", erroreMsg);
+
+            request.getRequestDispatcher("/registrazione.jsp").forward(request, response);
         }
 
-        RequestDispatcher view = request.getRequestDispatcher("/WEB-INF/confermaRegistrazione.jsp");
-        view.forward(request,response);
     }
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {

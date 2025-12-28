@@ -16,7 +16,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/style-bootstrap.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/style.css">
 
     <style>
         /* --- STILI GENERALI (Già presenti) --- */
@@ -180,50 +180,7 @@
             .dashboard-mockup { width: 450px; }
             .floating-notification { right: 20px; bottom: 20px; }
         }
-        /* 1. Sfondo Astratto (La "App" sfocata dietro) */
-        .abstract-ui-bg {
-            width: 320px;
-            height: 420px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            position: absolute;
-            transform: rotateY(10deg) rotateZ(-2deg);
-            backdrop-filter: blur(5px);
-            z-index: 1;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
 
-        /* 2. La Card Interattiva ("Iscrizione Rinnovata") */
-        .interactive-card {
-            background: white;
-            color: #1E3A5F;
-            padding: 1.5rem 2rem;
-            border-radius: 16px;
-            box-shadow:
-                    0 20px 25px -5px rgba(0, 0, 0, 0.2),
-                    0 10px 10px -5px rgba(0, 0, 0, 0.1);
-            position: relative;
-            z-index: 2;
-            width: 280px;
-
-            /* Stato Iniziale: Leggermente ruotato */
-            transform: rotate(-6deg) translateY(0);
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Effetto "rimbalzo" elastico */
-            cursor: pointer;
-
-            /* Animazione automatica "Galleggiamento" */
-            animation: float 6s ease-in-out infinite;
-        }
-
-        /* Stato Hover/Click: Si raddrizza e ingrandisce */
-        .interactive-card:hover,
-        .interactive-card:active {
-            transform: rotate(0deg) scale(1.05) translateY(-5px);
-            box-shadow:
-                    0 25px 50px -12px rgba(38, 169, 188, 0.4), /* Ombra Teal luminosa */
-                    0 0 0 4px rgba(255, 255, 255, 0.2); /* Bordo esterno */
-        }
 
         /* Animazione Galleggiamento */
         @keyframes float {
@@ -232,15 +189,6 @@
             100% { transform: rotate(-6deg) translateY(0px); }
         }
 
-        /* Decorazione checkmark animato */
-        .check-circle {
-            width: 40px; height: 40px;
-            background: #d1fae5; color: #059669;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem;
-            margin-right: 15px;
-        }
 
         /* --- MEDIA QUERIES --- */
         @media (max-width: 991px) {
