@@ -15,7 +15,7 @@ public class IscrizioneEventoServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        // 1. Controllo Login: Solo gli utenti loggati possono iscriversi
+        // Controllo Login: Solo gli utenti loggati possono iscriversi
         HttpSession session = request.getSession();
         UtenteBean utente = (UtenteBean) session.getAttribute("utente");
 
@@ -25,23 +25,23 @@ public class IscrizioneEventoServlet extends HttpServlet {
         }
 
         try {
-            // 2. Recupero Parametri
+            // Recupero Parametri
             int idEvento = Integer.parseInt(request.getParameter("idEvento"));
 
             // Se ci fosse un pagamento, recupereremmo qui i dati della carta
-            // String metodoPagamento = request.getParameter("metodoPagamento");
+            String metodoPagamento = request.getParameter("metodoPagamento");
 
-            // 3. CHIAMATA AL FACADE (Come da SDD)
+            // CHIAMATA AL FACADE (Come da SDD)
             // La servlet non sa nulla di DAO, pagamenti o email. Delega tutto.
-            IscrizioneFacade facade = new IscrizioneFacade();
 
+            IscrizioneFacade facade = new IscrizioneFacade();
             boolean successo = facade.iscriviUtente(utente, idEvento);
 
             if (successo) {
-                // 4a. Successo
+                // Successo
                 response.sendRedirect("visualizzaCalendario.jsp?msg=iscrizione_ok");
             } else {
-                // 4b. Fallimento (es. posti esauriti)
+                // Fallimento (es. posti esauriti)
                 request.setAttribute("errore", "Impossibile iscriversi: posti esauriti o errore generico.");
                 request.getRequestDispatcher("visualizzaEvento.jsp?id=" + idEvento).forward(request, response);
             }
@@ -52,7 +52,7 @@ public class IscrizioneEventoServlet extends HttpServlet {
         }
     }
 
-    // Gestisce anche le chiamate GET se l'iscrizione avviene tramite link diretto (meno sicuro ma comune)
+    // Gestisce le chiamate GET se l'iscrizione avviene tramite link diretto
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doPost(request, response);
     }
