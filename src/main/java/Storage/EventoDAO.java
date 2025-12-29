@@ -51,6 +51,35 @@ public class EventoDAO {
         return Eventi;
     }
 
+    public List<EventoBean> doRetrievebyGroup (Connection con, int id_utente) throws SQLException {
+        List<EventoBean> eventi = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT * FROM Evento E JOIN Iscrizione I ON E.id_gruppo = I.id_gruppo WHERE I.id_utente = ? ORDER BY E.data_ora")) {
+            ps.setInt(1, id_utente);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    EventoBean e = new EventoBean();
+                    e.setId_evento(rs.getInt("id_evento"));
+                    e.setId_gruppo(rs.getInt("id_gruppo"));
+                    e.setNome(rs.getString("nome"));
+                    e.setDescrizione(rs.getString("descrizione"));
+                    e.setFoto(rs.getString("foto"));
+                    e.setCosto(rs.getDouble("costo"));
+                    e.setPosti_disponibili(rs.getInt("posti_disponibili"));
+                    e.setCapienza_massima(rs.getInt("capienza_massima"));
+                    java.sql.Timestamp data_ora = rs.getTimestamp("data_ora");
+                    if(data_ora != null) {
+                        e.setData_ora(data_ora.toLocalDateTime());
+                    }else {
+                        e.setData_ora(null);
+                    }
+                    eventi.add(e);
+                }
+            }
+        }
+        return eventi;
+    }
+
     public EventoBean DoRetrieveEventoById(Connection con,int id_evento) throws SQLException {
             EventoBean e = null;
             try(PreparedStatement ps = con.prepareStatement("SELECT * FROM Evento WHERE id_evento= ?")) {
