@@ -12,6 +12,7 @@ public class ComunicazioniBean implements Serializable {
     private String foto;
     private Date dataPubblicazione;
     private boolean isglobal;
+    private String titolo;
 
     public int getId_comunicazione() {
         return id_comunicazione;
@@ -67,4 +68,11 @@ public class ComunicazioniBean implements Serializable {
         this.isglobal = isglobal;
     }
 
+    public String getTitolo() {
+        return titolo;
+    }
+
+    public void setTitolo(String titolo) {
+        this.titolo = titolo;
+    }
 }

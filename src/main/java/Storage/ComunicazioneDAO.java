@@ -26,6 +26,7 @@ public class ComunicazioneDAO {
                     c.setFoto(rs.getString("foto"));
                     c.setDataPubblicazione(rs.getDate("data_pubblicazione"));
                     c.setIsglobal(rs.getBoolean("isglobal"));
+                    c.setTitolo(rs.getString("titolo"));
                     comunicazioni.add(c);
                 }
             }
@@ -47,6 +48,7 @@ public class ComunicazioneDAO {
                     c.setFoto(rs.getString("foto"));
                     c.setDataPubblicazione(rs.getDate("data_pubblicazione"));
                     c.setIsglobal(rs.getBoolean("isglobal"));
+                    c.setTitolo(rs.getString("titolo"));
                 }
             }
         }
@@ -54,13 +56,14 @@ public class ComunicazioneDAO {
     }
 
     public void doUpdate (Connection con,ComunicazioniBean c) throws SQLException {
-        try (PreparedStatement ps = con.prepareStatement("UPDATE Comunicazione SET id_gruppo = ?, id_autore = ?, contenuto = ?, foto = ?, data_pubblicazione = ? WHERE id_comunicazione = ?")) {
+        try (PreparedStatement ps = con.prepareStatement("UPDATE Comunicazione SET id_gruppo = ?, id_autore = ?, contenuto = ?, foto = ?, data_pubblicazione = ?, titolo = ? WHERE id_comunicazione = ?")) {
             ps.setInt(1, c.getId_gruppo());
             ps.setInt(2, c.getId_autore());
             ps.setString(3, c.getContenuto());
             ps.setString(4, c.getFoto());
             ps.setDate(5, c.getDataPubblicazione());
             ps.setInt(6, c.getId_comunicazione());
+            ps.setString(7, c.getTitolo());
             ps.executeUpdate();
         }
     }
@@ -74,13 +77,14 @@ public class ComunicazioneDAO {
 
     public void doSave(Connection con,ComunicazioniBean c) throws SQLException {
         try (PreparedStatement ps = con.prepareStatement(
-                "INSERT INTO Comunicazione (id_gruppo, id_autore, contenuto, foto, data_pubblicazione, is_global) VALUES (?, ?, ?, ?, ?, ?)")){
+                "INSERT INTO Comunicazione (id_gruppo, id_autore, contenuto, foto, data_pubblicazione, is_global, titolo) VALUES (?, ?, ?, ?, ?, ?, ?)")){
             ps.setInt(1, c.getId_gruppo());
             ps.setInt(2, c.getId_autore());
             ps.setString(3, c.getContenuto());
             ps.setString(4, c.getFoto());
             ps.setDate(5, c.getDataPubblicazione());
             ps.setBoolean(6, c.isIsglobal());
+            ps.setString(7, c.getTitolo());
             ps.executeUpdate();
         }
     }
