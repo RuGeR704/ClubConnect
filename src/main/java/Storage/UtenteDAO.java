@@ -4,6 +4,7 @@ import Application.GestioneAccount.UtenteBean;
 import Application.GestioneGruppo.AssociazioneBean;
 import Application.GestioneGruppo.ClubBean;
 import Application.GestioneGruppo.GruppoBean;
+import Application.GestionePagamenti.MetodoPagamentoBean;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -137,7 +138,7 @@ public class UtenteDAO {
         }
         return c;
     }
-    public List<GruppoBean> doRetrieveGruppi( int id_utente) throws SQLException{
+    public List<GruppoBean> doRetrieveGruppiIscritto( int id_utente) throws SQLException{
         List<GruppoBean> gruppi = new ArrayList<>();
         try (Connection con = ConPool.getConnection();
              PreparedStatement ps = con.prepareStatement(
@@ -170,5 +171,27 @@ public class UtenteDAO {
             }
         }
         return gruppi;
+    }
+
+    public List<MetodoPagamentoBean> doRetrieveAllMetodiPagamento(int id_utente) throws SQLException{
+        List<MetodoPagamentoBean> metodi = new ArrayList<MetodoPagamentoBean>();
+        try(Connection con = ConPool.getConnection();
+            PreparedStatement ps = con.prepareStatement(
+                    "SELECT Metodo_Pagamento.* FROM Metodo_Pagamento JOIN Utente ON Metodo_Pagamento.id_utente=Utente.id_utente WHERE id_utente=?")) {
+            ps.setInt(1, id_utente);
+            try (ResultSet rs = ps.executeQuery()) {
+                while(rs.next()) {
+                    MetodoPagamentoBean m = new MetodoPagamentoBean();
+                    m.setId_metodo(rs.getInt("id_metodo"));
+                    m.setId_utente(rs.getInt("id_utente"));
+                    m.setNome_intestatario(rs.getString("nome_intestatario"));
+                    m.setCognome_intestatario(rs.getString("cognome_intestatario"));
+                    m.setNumero_carta(rs.getString("numero_carta"));
+                    m.setScadenza_carta(rs.getString("scadenza_carta"));
+                    metodi.add(m);
+                }
+            }
+        }
+        return metodi;
     }
 }
