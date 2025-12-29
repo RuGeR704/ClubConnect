@@ -15,14 +15,19 @@ public class VisualizzaIscrizioniGruppiServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
             HttpSession session = request.getSession(false);
-            UtenteBean utente = (UtenteBean) session.getAttribute("utente");
-            UtenteDAO dao = new UtenteDAO();
-            List<GruppoBean> iscrizioni = dao.doRetrieveGruppiIscritto(utente.getId_utente());
-            if(iscrizioni.size()>0){
-                request.setAttribute("iscrizioni", iscrizioni);
+            if (session == null || session.getAttribute("utente") == null) {
+                response.sendRedirect(request.getContextPath() + "/login.jsp");
+                return;
+            }else {
+                UtenteBean utente = (UtenteBean) session.getAttribute("utente");
+                UtenteDAO dao = new UtenteDAO();
+                List<GruppoBean> iscrizioni = dao.doRetrieveGruppiIscritto(utente.getId_utente());
+                if (iscrizioni.size() > 0) {
+                    request.setAttribute("iscrizioni", iscrizioni);
+                }
+                RequestDispatcher rd = request.getRequestDispatcher("/GruppiIscritto.jsp");
+                rd.forward(request, response);
             }
-            RequestDispatcher rd = request.getRequestDispatcher("/GruppiIscritto.jsp");
-            rd.forward(request, response);
         }catch(SQLException sql){
             sql.printStackTrace();
             request.setAttribute("errore", "errore dao"); // per vedere gli errori
