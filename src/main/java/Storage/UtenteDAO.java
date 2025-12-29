@@ -1,6 +1,9 @@
 package Storage;
 
 import Application.GestioneAccount.UtenteBean;
+import Application.GestioneGruppo.AssociazioneBean;
+import Application.GestioneGruppo.ClubBean;
+import Application.GestioneGruppo.GruppoBean;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -133,5 +136,39 @@ public class UtenteDAO {
             }
         }
         return c;
+    }
+    public List<GruppoBean> doRetrieveGruppi( int id_utente) throws SQLException{
+        List<GruppoBean> gruppi = new ArrayList<>();
+        try (Connection con = ConPool.getConnection();
+             PreparedStatement ps = con.prepareStatement(
+                     "SELECT Gruppo.*  FROM Iscrizione JOIN Gruppo ON Iscrizione.id_gruppo=Gruppo.id_gruppo WHERE id_utente=? ")) {
+            ps.setInt(1, id_utente);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    GruppoBean c;
+                    boolean tipo=rs.getBoolean("tipoGruppo");
+                    if(tipo){
+                        ClubBean club= new ClubBean();
+                        club.setImporto_retta(rs.getDouble("importo_retta"));
+                        club.setFrequenza(rs.getInt("frequenza"));
+                        c=club;
+                    }else{
+                        c = new AssociazioneBean();
+                    }
+                    c.setId_gruppo(rs.getInt("id_gruppo"));
+                    c.setNome(rs.getString("nome"));
+                    c.setDescrizione(rs.getString("descrizione"));
+                    c.setLogo(rs.getString("logo"));
+                    c.setSede(rs.getString("sede"));
+                    c.setSettore(rs.getString("settore"));
+                    c.setRegole(rs.getString("regole"));
+                    c.setSlogan(rs.getString("slogan"));
+                    c.setStato(rs.getBoolean("stato"));
+                    c.setTipoGruppo(tipo);
+                    gruppi.add(c);
+                }
+            }
+        }
+        return gruppi;
     }
 }
