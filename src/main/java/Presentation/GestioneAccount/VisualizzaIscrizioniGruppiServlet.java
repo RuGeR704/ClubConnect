@@ -1,4 +1,37 @@
 package Presentation.GestioneAccount;
+import Application.GestioneAccount.UtenteBean;
+import Application.GestioneGruppo.GruppoBean;
+import Storage.UtenteDAO;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
 
-public class VisualizzaIscrizioniGruppiServlet {
+@WebServlet(name = "VisualizzaIscrizioniGruppiServlet", value = "/VisualizzaIscrizioniGruppiServlet")
+public class VisualizzaIscrizioniGruppiServlet extends HttpServlet {
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            HttpSession session = request.getSession(false);
+            UtenteBean utente = (UtenteBean) session.getAttribute("utente");
+            UtenteDAO dao = new UtenteDAO();
+            List<GruppoBean> iscrizioni = dao.doRetrieveGruppiIscritto(utente.getId_utente());
+            if(iscrizioni.size()>0){
+                request.setAttribute("iscrizioni", iscrizioni);
+            }
+            RequestDispatcher rd = request.getRequestDispatcher("/GruppiIscritto.jsp");
+            rd.forward(request, response);
+        }catch(SQLException sql){
+            sql.printStackTrace();
+            request.setAttribute("errore", "errore dao"); // per vedere gli errori
+            RequestDispatcher rd = request.getRequestDispatcher("/index.jsp");
+            rd.forward(request, response);
+        }
+    }
+    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    }
 }
