@@ -194,4 +194,34 @@ public class UtenteDAO {
         }
         return metodi;
     }
+    public List<GruppoBean> doRetrieveClubIscritto( int id_utente) throws SQLException{
+        List<GruppoBean> gruppi = new ArrayList<>();
+        try (Connection con = ConPool.getConnection();
+             PreparedStatement ps = con.prepareStatement(
+                     "SELECT Gruppo.*  FROM Iscrizione JOIN Gruppo ON Iscrizione.id_gruppo=Gruppo.id_gruppo WHERE id_utente=? AND Gruppo.tipoGruppo=true ")) {
+            ps.setInt(1, id_utente);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    GruppoBean c;
+
+                        ClubBean club= new ClubBean();
+                        club.setImporto_retta(rs.getDouble("importo_retta"));
+                        club.setFrequenza(rs.getInt("frequenza"));
+                        c=club;
+                    c.setId_gruppo(rs.getInt("id_gruppo"));
+                    c.setNome(rs.getString("nome"));
+                    c.setDescrizione(rs.getString("descrizione"));
+                    c.setLogo(rs.getString("logo"));
+                    c.setSede(rs.getString("sede"));
+                    c.setSettore(rs.getString("settore"));
+                    c.setRegole(rs.getString("regole"));
+                    c.setSlogan(rs.getString("slogan"));
+                    c.setStato(rs.getBoolean("stato"));
+                    c.setTipoGruppo(rs.getBoolean("tipoGruppo"));
+                    gruppi.add(c);
+                }
+            }
+        }
+        return gruppi;
+    }
 }
