@@ -33,7 +33,6 @@ public class LoginServlet extends HttpServlet {
         try{
             UtenteDAO dao = new UtenteDAO();
              utente = dao.DoRetrieveEmailPassword(ConPool.getConnection(), email, password);
-             System.out.println(utente.getEmail());
         }catch(SQLException e){
             e.printStackTrace();
         }
