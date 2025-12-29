@@ -34,6 +34,29 @@ public class ComunicazioneDAO {
         return comunicazioni;
     }
 
+    public List<ComunicazioniBean> doRetrievebyGroup (Connection con, int id_utente) throws SQLException {
+        List<ComunicazioniBean> comunicazioni = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT * FROM Comunicazione C JOIN Iscrizione I ON C.id_gruppo = I.id_gruppo WHERE I.id_utente = ? ORDER BY C.data_pubblicazione DESC")) {
+            ps.setInt(1, id_utente);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ComunicazioniBean c = new ComunicazioniBean();
+                    c.setId_comunicazione(rs.getInt("id_comunicazione"));
+                    c.setId_gruppo(rs.getInt("id_gruppo"));
+                    c.setId_autore(rs.getInt("id_autore"));
+                    c.setContenuto(rs.getString("contenuto"));
+                    c.setFoto(rs.getString("foto"));
+                    c.setDataPubblicazione(rs.getDate("data_pubblicazione"));
+                    c.setIsglobal(rs.getBoolean("isglobal"));
+                    comunicazioni.add(c);
+                }
+            }
+        }
+        return comunicazioni;
+    }
+
+
     public ComunicazioniBean doRetrieveById(Connection con,int id) throws SQLException {
         ComunicazioniBean c = new ComunicazioniBean();
         try (PreparedStatement ps = con.prepareStatement("SELECT * FROM Comunicazioni WHERE id_comunicazione = ?")) {
@@ -88,4 +111,5 @@ public class ComunicazioneDAO {
             ps.executeUpdate();
         }
     }
+
 }

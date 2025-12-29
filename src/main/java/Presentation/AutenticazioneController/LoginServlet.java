@@ -40,7 +40,7 @@ public class LoginServlet extends HttpServlet {
         if(utente!=null) {
             HttpSession session = request.getSession();
                 session.setAttribute("utente", utente);
-                response.sendRedirect(request.getContextPath() + "/index.jsp");
+                response.sendRedirect(request.getContextPath() + "/feedServlet");
         }else{
             request.setAttribute("errore", "Email o password errati."); // per vedere gli errori
             RequestDispatcher rd = request.getRequestDispatcher("/login.jsp");
