@@ -58,8 +58,9 @@ public class ModificaDatiServlet extends HttpServlet {
                 try {
                     if (datanascitaStr != null && !datanascitaStr.isEmpty()) {
                         datanascita = LocalDate.parse(datanascitaStr);
-                    } else {
-                        errori.append("Data di nascita obbligatoria. ");
+                        if(datanascita.isAfter(LocalDate.now())){
+                            errori.append("Data di nascita obbligatoria. ");
+                        }
                     }
                 } catch (Exception e) {
                     errori.append("Formato data di nascita non valido. ");
@@ -90,10 +91,11 @@ public class ModificaDatiServlet extends HttpServlet {
                 ub.setCellulare(cellulare);
                 ub.setStato(utente.getStato());
                 ub.setIsadmin(utente.isAdmin());
-                session.setAttribute("utente", ub);
+
                 UtenteDAO dao = new UtenteDAO();
                 dao.doUpdate(con, ub);
                 con.commit();
+                session.setAttribute("utente", ub);
                 response.sendRedirect(request.getContextPath() + "/AccountServlet");
             }
         } catch (SQLException sql) {
