@@ -23,6 +23,7 @@ import java.util.List;
 @WebServlet("/feedServlet")
 public class FeedServlet extends HttpServlet {
 
+    @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         HttpSession session = request.getSession();
         UtenteBean utente = (UtenteBean) session.getAttribute("utente");
@@ -41,7 +42,7 @@ public class FeedServlet extends HttpServlet {
         boolean hasIscrizione = false;
 
         try{
-            List<GruppoBean> gruppi = utenteDAO.doRetrieveGruppi(utente.getId_utente());
+            List<GruppoBean> gruppi = utenteDAO.doRetrieveGruppiIscritto(utente.getId_utente());
 
             if (gruppi != null && !gruppi.isEmpty()) {
                 hasIscrizione = true;
@@ -77,6 +78,7 @@ public class FeedServlet extends HttpServlet {
         view.forward(request, response);
     }
 
+    @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         doGet(request, response);
     }
