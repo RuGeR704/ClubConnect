@@ -1,6 +1,7 @@
 package Application.GestioneEventi;
 
 import Application.GestioneAccount.UtenteBean;
+import Application.GestioneComunicazioni.GestioneComunicazioniBean; // MODIFICA
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
@@ -8,7 +9,7 @@ public class IscrizioneFacade {
 
     public boolean iscriviUtente(UtenteBean utente, int idEvento) {
         GestioneEventiBean eventiService = new GestioneEventiBean();
-
+        GestioneComunicazioniBean comunicazioniService = new GestioneComunicazioniBean(); // MODIFICA
         try {
             // RECUPERA L'EVENTO DAL DB
             // Qui sfruttiamo il metodo retrieveEvento
@@ -23,7 +24,7 @@ public class IscrizioneFacade {
                 return false; // Non ci sono posti, iscrizione fallita
             }
 
-            // PREPARA L'ISCRIZIONE
+            // PREPARA L'ISCRIZIONE (Sottosistema Eventi)
             PartecipazioneBean partecipazione = new PartecipazioneBean();
             partecipazione.setId_utente(utente.getId_utente());
             partecipazione.setId_evento(idEvento);
@@ -32,10 +33,13 @@ public class IscrizioneFacade {
             // SALVA E AGGIORNA
             eventiService.registraPartecipazione(partecipazione);
 
-            // Scala il posto (chiama il metodo appena creato)
+            // Scala il posto
             eventiService.diminuisciPosti(evento);
 
-            return true; // Tutto andato a buon fine
+            // INVIA CONFERMA (Sottosistema Comunicazioni) - MODIFICA
+            comunicazioniService.inviaConfermaIscrizione(utente, evento);
+
+            return true;
 
         } catch (SQLException e) {
             e.printStackTrace();
