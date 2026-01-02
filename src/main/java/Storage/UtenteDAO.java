@@ -4,6 +4,7 @@ import Application.GestioneAccount.UtenteBean;
 import Application.GestioneGruppo.AssociazioneBean;
 import Application.GestioneGruppo.ClubBean;
 import Application.GestioneGruppo.GruppoBean;
+import Application.GestionePagamenti.DettagliPagamentoBean;
 import Application.GestionePagamenti.MetodoPagamentoBean;
 
 import java.sql.Connection;
@@ -213,5 +214,31 @@ public class UtenteDAO {
             }
         }
         return gruppi;
+    }
+
+    public List<DettagliPagamentoBean> doRetrievePagamenti(int id_utente) throws SQLException{
+        List<DettagliPagamentoBean> DettagliPagamenti = new ArrayList<>();
+        try (Connection con = ConPool.getConnection();
+             PreparedStatement ps = con.prepareStatement(
+                     "SELECT Pagamento.*  FROM Metodo_Pagamento JOIN Pagamento ON Metodo_Pagamento.id_metodo=Pagamento.id_metodo WHERE Metodo_Pagamento.id_utente=?")) {
+            ps.setInt(1, id_utente);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    DettagliPagamentoBean c= new DettagliPagamentoBean();
+                    c.setId_pagamento(rs.getInt("id_pagamento"));
+                    c.setId_gruppo(rs.getInt("id_gruppo"));
+                    c.setId_metodo(rs.getInt("id_metodo"));
+                    c.setImporto(rs.getDouble("importo"));
+                    java.sql.Timestamp data_transazione = rs.getTimestamp("data_transazione");
+                    if (data_transazione != null) {
+                        c.setData_tansazione(data_transazione.toLocalDateTime());
+                    } else {
+                        c.setData_tansazione(null);
+                    }
+                    DettagliPagamenti.add(c);
+                }
+            }
+        }
+        return DettagliPagamenti;
     }
 }
