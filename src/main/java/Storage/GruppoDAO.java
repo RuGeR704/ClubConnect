@@ -109,8 +109,10 @@ public class GruppoDAO {
         }
     }
 
-    public void doSave(Connection con, GruppoBean gruppo) throws SQLException {
-        try(PreparedStatement ps = con.prepareStatement("INSERT INTO Gruppo(nome,descrizione,logo,sede,settore,regole,slogan,stato,tipoGruppo,importo_retta,frequenza) VALUES(?,?,?,?,?,?,?,?,?,?,?)")) {
+    public void doSave(Connection con, GruppoBean gruppo, int idUtente) throws SQLException {
+        String query = "INSERT INTO Gruppo(nome,descrizione,logo,sede,settore,regole,slogan,stato,tipoGruppo,importo_retta,frequenza) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
+
+        try(PreparedStatement ps = con.prepareStatement(query, java.sql.Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, gruppo.getNome());
                 ps.setString(2, gruppo.getDescrizione());
                 ps.setString(3, gruppo.getLogo());
@@ -130,6 +132,20 @@ public class GruppoDAO {
                 ps.setNull(11,java.sql.Types.INTEGER);
             }
             ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int idGenerato = rs.getInt(1);
+
+                    // Ora l'ID esiste (es. 5), quindi possiamo iscrivere l'utente!
+                    UtenteDAO utenteDAO = new UtenteDAO();
+                    utenteDAO.doSubscribeAdminGroup(con, idUtente, idGenerato);
+
+                    // Aggiorniamo il bean (opzionale, ma buona prassi)
+                    gruppo.setId_gruppo(idGenerato);
+
+                }
+            }
         }
 
     }

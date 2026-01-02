@@ -1,12 +1,14 @@
 package Presentation.GestioneAccount;
 import Application.GestioneAccount.UtenteBean;
 import Application.GestioneGruppo.GruppoBean;
+import Storage.ConPool;
 import Storage.UtenteDAO;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet(name = "VisualizzaIscrizioniGruppiServlet", value = "/VisualizzaIscrizioniGruppiServlet")
@@ -22,8 +24,12 @@ public class VisualizzaIscrizioniGruppiServlet extends HttpServlet {
                 UtenteBean utente = (UtenteBean) session.getAttribute("utente");
                 UtenteDAO dao = new UtenteDAO();
                 List<GruppoBean> iscrizioni = dao.doRetrieveGruppiIscritto(utente.getId_utente());
+                List<GruppoBean> gruppiAdmin = dao.doRetrieveGruppiAdmin(ConPool.getConnection(), utente.getId_utente());
                 if (iscrizioni.size() > 0) {
-                    request.setAttribute("iscrizioni", iscrizioni);
+                    request.setAttribute("gruppiIscritto", iscrizioni);
+                }
+                if (gruppiAdmin.size() > 0) {
+                    request.setAttribute("gruppiAdmin", gruppiAdmin);
                 }
                 RequestDispatcher rd = request.getRequestDispatcher("/GruppiIscritto.jsp");
                 rd.forward(request, response);

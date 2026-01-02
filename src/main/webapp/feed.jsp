@@ -32,7 +32,6 @@
     <title>Feed - ClubConnect</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/style-bootstrap.css">
 
     <style>
         body { background-color: #F4F6F9; }
@@ -64,7 +63,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-main py-2">
     <div class="container">
-        <a href="#" class="d-inline-flex align-items-center gap-2 text-decoration-none">
+        <a href="feedServlet" class="d-inline-flex align-items-center gap-2 text-decoration-none">
             <div class="brand-icon" style="width: 40px; height: 40px;">
                 <img src="./images/logo.png" alt="Logo" class="img-fluid">
             </div>
@@ -72,7 +71,7 @@
         </a>
         <div class="ms-auto d-flex align-items-center gap-3">
             <div class="dropdown">
-                <a href="feedServlet" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark fw-bold" data-bs-toggle="dropdown">
+                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark fw-bold" data-bs-toggle="dropdown">
                     <img src="https://ui-avatars.com/api/?name=<%= utente.getNome() %>+<%= utente.getCognome() %>&background=1E3A5F&color=fff" class="rounded-circle me-2" width="35" height="35">
                     <span class="d-none d-lg-inline"><%= utente.getNome() %> <%= utente.getCognome() %></span>
                 </a>
@@ -96,8 +95,9 @@
             </div>
             <div class="feed-card p-3">
                 <ul class="nav flex-column gap-2">
-                    <li class="nav-item"><a href="#" class="nav-link active d-flex align-items-center gap-3 text-primary fw-bold rounded bg-light p-2"><i class="fa-solid fa-house"></i> Home Feed</a></li>
-                    <li class="nav-item"><a href="miei_gruppi.jsp" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-solid fa-users"></i> I Miei Gruppi</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link active d-flex align-items-center gap-3 text-primary fw-bold rounded bg-light p-2"><i class="fa-solid fa-house"></i> Home</a></li>
+                    <li class="nav-item"><a href="VisualizzaIscrizioniGruppiServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-solid fa-users"></i> I Miei Gruppi</a></li>
+                    <li class="nav-item"><a href="EsploraGruppiServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-regular fa-compass me-2"></i> Esplora Gruppi</a></li>
                 </ul>
             </div>
             <a href="crea_gruppo.jsp" class="btn btn-club-teal w-100 py-3 rounded-4 shadow-sm fw-bold">
@@ -115,10 +115,14 @@
                     <%if (gruppiSuggeriti != null) { for(GruppoBean g : gruppiSuggeriti) {%>
                     <div class="card suggestion-card p-3 border rounded-4">
                         <div class="d-flex align-items-center justify-content-between">
-                            <% System.out.println(g.getId_gruppo()); %>
                             <a href="VisualizzaGruppoServlet?id=<%= g.getId_gruppo() %>" class="d-flex align-items-center gap-3 text-decoration-none text-dark" style="cursor: pointer;">
-                                <div class="group-avatar">
-                                    <%= g.getNome().substring(0,1) %>
+                                <div class="group-avatar overflow-hidden"> <% if (g.getLogo() != null && !g.getLogo().isEmpty()) { %>
+                                    <img src="<%= g.getLogo() %>"
+                                         alt="<%= g.getNome() %>"
+                                         style="width: 100%; height: 100%; object-fit: cover;">
+                                    <% } else { %>
+                                    <%= g.getNome().substring(0,1).toUpperCase() %>
+                                    <% } %>
                                 </div>
                                 <div>
                                     <h6 class="mb-0 fw-bold"><%= g.getNome() %></h6>
