@@ -59,7 +59,7 @@
 
 <nav class="navbar navbar-expand-lg bg-white shadow-sm py-3">
   <div class="container">
-    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4" href="#">
+    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4" href="feedServlet">
       <div class="brand-icon" style="width: 40px; height: 40px;">
         <img src="./images/logo.png" alt="Logo" class="img-fluid" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa-solid fa-users text-primary fs-2\'></i>'">
       </div>
@@ -73,6 +73,18 @@
     <h1 class="display-5 fw-bold">Crea la tua Community</h1>
     <p class="text-muted">Trasforma la tua associazione o il tuo club in una realtà digitale.</p>
   </div>
+
+  <%
+    String errore = (String) request.getAttribute("errore");
+    if (errore != null) {
+  %>
+  <div class="alert alert-danger d-flex align-items-center p-2 mb-3" role="alert">
+    <i class="fa-solid fa-circle-exclamation me-2"></i>
+    <div class="small fw-bold">
+      <%= errore %>
+    </div>
+  </div>
+  <% } %>
 
   <form action="CreazioneGruppoServlet" method="POST" enctype="multipart/form-data" class="card p-4 p-md-5 rounded-4 shadow-sm">
 
@@ -168,9 +180,9 @@
         <div class="col-md-6">
           <div class="form-floating mb-3">
             <select class="form-select" id="frequenza" name="frequenza">
-              <option value="Mensile" selected>Mensile</option>
-              <option value="Trimestrale">Trimestrale</option>
-              <option value="Annuale">Annuale</option>
+              <option value="1" selected>Mensile</option>
+              <option value="2">Trimestrale</option>
+              <option value="3">Annuale</option>
             </select>
             <label for="frequenza">Frequenza Pagamento</label>
           </div>
@@ -179,7 +191,7 @@
     </div>
 
     <div class="mt-5 d-flex gap-3">
-      <a href="feed.jsp" class="btn btn-outline-secondary w-50 py-3 fw-bold rounded-pill">Annulla</a>
+      <a href="feedServlet" class="btn btn-outline-secondary w-50 py-3 fw-bold rounded-pill">Annulla</a>
       <button type="submit" class="btn btn-primary w-50 py-3 fw-bold rounded-pill shadow">Crea Ora</button>
     </div>
 

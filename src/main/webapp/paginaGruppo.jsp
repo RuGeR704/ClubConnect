@@ -32,24 +32,27 @@
     <link rel="stylesheet" href="<%= request.getContextPath() %>/css/style-bootstrap.css">
 
     <style>
-        body { background-color: #F4F6F9; }
+        body {
+            background-color: transparent; /* Era #F4F6F9 */
+        }
 
-        /* HERO SECTION (Copertina + Avatar) */
         .group-header {
-            background-color: white;
+            background-color: transparent; /* Era white <--- QUESTO COPRIVA TUTTO */
             padding-bottom: 1rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            /* Rimuovi l'ombra qui perché l'header è trasparente, starebbe male */
+            /* box-shadow: 0 2px 10px rgba(0,0,0,0.05); */
             margin-bottom: 2rem;
         }
 
         .cover-image {
             height: 300px;
-            background-color: #1E3A5F;
-            /* Se c'è un'immagine di copertina reale, la mettiamo qui via inline-style */
-            background-image: linear-gradient(135deg, #1E3A5F, #0f2035);
-            background-size: cover;
-            background-position: center;
+            width: 100%;
+            /* background-color: #1E3A5F;  <-- RIMUOVI O COMMENTA QUESTA RIGA */
+            /* background-image: ...;       <-- RIMUOVI O COMMENTA QUESTA RIGA */
+
             position: relative;
+            /* Opzionale: un leggero gradiente per far risaltare il tasto modifica */
+            background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.3));
         }
 
         .edit-cover-btn {
@@ -103,29 +106,100 @@
 
         .btn-outline-admin { border: 2px solid #1E3A5F; color: #1E3A5F; border-radius: 30px; font-weight: bold; }
         .btn-outline-admin:hover { background: #1E3A5F; color: white; }
+
+        /* 1. Stile di base per le tab NON selezionate (Grigie) */
+        .nav-pills .nav-link {
+            color: #6c757d; /* Grigio scuro (corrisponde a text-secondary) */
+            background-color: transparent;
+            transition: all 0.3s ease; /* Transizione fluida */
+        }
+
+        /* 2. Stile per la tab ATTIVA (Quella selezionata) */
+        .nav-pills .nav-link.active {
+            background-color: #26A9BC; /* Il tuo colore "Club Teal" (o usa #1E3A5F per il blu scuro) */
+            color: white !important;   /* Testo bianco */
+            box-shadow: 0 4px 6px rgba(38, 169, 188, 0.3); /* Un po' di ombretta carina */
+        }
+
+        /* 3. Opzionale: Effetto quando passi il mouse sopra una tab non attiva */
+        .nav-pills .nav-link:hover:not(.active) {
+            background-color: rgba(38, 169, 188, 0.1); /* Sfondo azzurrino chiarissimo */
+            color: #26A9BC; /* Testo colorato */
+        }
+
+        /* SFONDO DINAMICO ADATTIVO */
+        .ambient-background {
+            position: fixed; /* Meglio di absolute, così resta fisso se scrolli */
+            top: 0; left: 0;
+            width: 100%; height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background-color: #f4f6f9;
+        }
+
+        .ambient-background::before {
+            content: "";
+            position: absolute;
+            top: -50px; left: -50px; right: -50px; bottom: -50px;
+            background-image: var(--bg-image); /* Variabile CSS dinamica */
+            background-size: cover;
+            background-position: center;
+
+            /* LA MAGIA: Sfocatura pesante e saturazione */
+            filter: blur(60px) saturate(150%) brightness(0.8);
+            opacity: 0.6; /* Trasparenza per non renderlo troppo forte */
+
+            /* Maschera per sfumare verso il basso e non avere un taglio netto */
+            mask-image: linear-gradient(to bottom, black, transparent);
+            mask-image: linear-gradient(to bottom, black, transparent);
+        }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
     <div class="container">
-        <a href="#" class="d-inline-flex align-items-center gap-2 text-decoration-none">
+        <a href="feedServlet" class="d-inline-flex align-items-center gap-2 text-decoration-none">
             <div class="brand-icon" style="width: 40px; height: 40px;">
                 <img src="./images/logo.png" alt="Logo" class="img-fluid">
             </div>
             <span class="fs-4 fw-bold" style="color: #1E3A5F;">Club<span style="color: #26A9BC;">Connect</span></span>
         </a>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark fw-bold" data-bs-toggle="dropdown">
+                    <img src="https://ui-avatars.com/api/?name=<%= utente.getNome() %>+<%= utente.getCognome() %>&background=1E3A5F&color=fff" class="rounded-circle me-2" width="35" height="35">
+                    <span class="d-none d-lg-inline"><%= utente.getNome() %> <%= utente.getCognome() %></span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                    <li><a class="dropdown-item" href="LogoutServlet">Esci</a></li>
+                </ul>
+            </div>
+        </div>
     </div>
 </nav>
 
-<div class="group-header">
-    <div class="cover-image" style="<%= (gruppo.getLogo() != null) ? "background-image: url('"+gruppo.getLogo()+"');" : "" %>">
+<%
+    String bgUrl = (gruppo.getLogo() != null && !gruppo.getLogo().isEmpty())
+            ? gruppo.getLogo()
+            : request.getContextPath() + "/images/default-pattern.jpg";
+%>
+
+<div class="ambient-background" style="--bg-image: url('<%= bgUrl %>');"></div>
+
+<div class="group-header position-relative">
+
+    <div class="cover-image d-flex align-items-end justify-content-end p-3" style="background: rgba(0,0,0,0.1);">
+
         <% if(isAdmin) { %>
-        <button class="edit-cover-btn" data-bs-toggle="modal" data-bs-target="#modalEditImages">
+        <button class="edit-cover-btn shadow-sm" data-bs-toggle="modal" data-bs-target="#modalEditImages">
             <i class="fa-solid fa-camera me-2"></i> Modifica Sfondo
         </button>
         <% } %>
+
     </div>
+
+</div>
 
     <div class="container">
         <div class="d-flex flex-column flex-md-row align-items-center align-items-md-end">
@@ -157,8 +231,13 @@
             <div class="mb-3 ms-md-auto gap-2 d-flex">
                 <% if (isAdmin) { %>
                 <button class="btn btn-outline-admin" data-bs-toggle="modal" data-bs-target="#modalEditInfo">
-                    <i class="fa-solid fa-gear me-2"></i> Gestisci
+                    <i class="fa-solid fa-pencil me-2"></i> Modifica Dettagli
                 </button>
+                <form action="dashboardServlet">
+                    <button type="submit" class="btn btn-outline-admin">
+                        <i class="fa-solid fa-gear me-2"></i> Gestisci
+                    </button>
+                </form>
                 <% } else { %>
                 <% if (isIscritto) { %>
                 <button class="btn btn-outline-secondary rounded-pill fw-bold">
@@ -168,9 +247,12 @@
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
                 <% } else { %>
-                <button class="btn btn-join shadow-sm">
-                    <i class="fa-solid fa-plus me-2"></i> Iscriviti
-                </button>
+                <form action="IscrizioneGruppoServlet" method="POST">
+                    <input type="hidden" name="idGruppo" value="<%= gruppo.getId_gruppo() %>">
+                    <button type="submit" class="btn btn-join shadow-sm">
+                        <i class="fa-solid fa-plus me-2"></i> Iscriviti
+                    </button>
+                </form>
                 <% } %>
                 <% } %>
             </div>
@@ -182,15 +264,17 @@
                     <a class="nav-link active rounded-pill fw-bold" id="home-tab" data-bs-toggle="tab" href="#home" role="tab">Bacheca</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link rounded-pill fw-bold text-secondary" id="about-tab" data-bs-toggle="tab" href="#about" role="tab">Informazioni</a>
+                    <a class="nav-link rounded-pill fw-bold" id="about-tab" data-bs-toggle="tab" href="#about" role="tab">Informazioni</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link rounded-pill fw-bold text-secondary" id="events-tab" data-bs-toggle="tab" href="#events" role="tab">Eventi</a>
+                    <a class="nav-link rounded-pill fw-bold" id="events-tab" data-bs-toggle="tab" href="#events" role="tab">Eventi</a>
                 </li>
             </ul>
         </div>
     </div>
 </div>
+
+<br>
 
 <div class="container">
     <div class="row g-4">
@@ -233,10 +317,19 @@
                     </div>
                     <div class="d-flex justify-content-between">
                         <span class="small fw-bold">Frequenza:</span>
-                        <span class="text-dark"><%= club.getFrequenza() %></span>
+                        <span class="text-dark">
+                        <%
+                            int f = club.getFrequenza();
+                            String freqLeggibile = "Sconosciuta";
+                            if(f == 1) freqLeggibile = "Settimanale";
+                            else if(f == 2) freqLeggibile = "Mensile";
+                            else if(f == 3) freqLeggibile = "Annuale";
+                        %>
+                        <%= freqLeggibile %>
+                        </span>
                     </div>
-                </div>
-                <% } %>
+                    </div>
+                    <% } %>
 
                 <div class="mt-3 pt-3 border-top">
                     <small class="text-muted d-block text-uppercase fw-bold mb-2" style="font-size: 0.7rem;">Regole</small>
@@ -388,6 +481,7 @@
         </div>
     </div>
 </div>
+
 <% } %>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
