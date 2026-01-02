@@ -72,7 +72,7 @@
         </a>
         <div class="ms-auto d-flex align-items-center gap-3">
             <div class="dropdown">
-                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark fw-bold" data-bs-toggle="dropdown">
+                <a href="feedServlet" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark fw-bold" data-bs-toggle="dropdown">
                     <img src="https://ui-avatars.com/api/?name=<%= utente.getNome() %>+<%= utente.getCognome() %>&background=1E3A5F&color=fff" class="rounded-circle me-2" width="35" height="35">
                     <span class="d-none d-lg-inline"><%= utente.getNome() %> <%= utente.getCognome() %></span>
                 </a>
@@ -115,14 +115,17 @@
                     <%if (gruppiSuggeriti != null) { for(GruppoBean g : gruppiSuggeriti) {%>
                     <div class="card suggestion-card p-3 border rounded-4">
                         <div class="d-flex align-items-center justify-content-between">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="group-avatar"><%= g.getNome().substring(0,1) %></div>
+                            <% System.out.println(g.getId_gruppo()); %>
+                            <a href="VisualizzaGruppoServlet?id=<%= g.getId_gruppo() %>" class="d-flex align-items-center gap-3 text-decoration-none text-dark" style="cursor: pointer;">
+                                <div class="group-avatar">
+                                    <%= g.getNome().substring(0,1) %>
+                                </div>
                                 <div>
-                                    <h6 class="mb-0 fw-bold text-dark"><%= g.getNome() %></h6>
+                                    <h6 class="mb-0 fw-bold"><%= g.getNome() %></h6>
                                     <span class="badge bg-light text-secondary border"><%= g.getSettore() %></span>
                                 </div>
-                            </div>
-                            <form action="IscrizioneServlet" method="POST">
+                            </a>
+                            <form action="IscrizioneGruppoServlet" method="POST">
                                 <input type="hidden" name="idGruppo" value="<%= g.getId_gruppo() %>">
                                 <button type="submit" class="btn btn-sm btn-club-primary rounded-pill px-3">Iscriviti</button>
                             </form>
