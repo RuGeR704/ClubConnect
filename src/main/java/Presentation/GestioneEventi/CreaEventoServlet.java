@@ -15,10 +15,10 @@ public class CreaEventoServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        // --- 1. PREPARAZIONE DELL'ENTITY (SCATOLA DATI) ---
+        // PREPARAZIONE DELL'ENTITY (SCATOLA DATI)
         EventoBean evento = new EventoBean();
 
-        // Recupero parametri e setto i valori usando i TUOI nomi esatti
+        // Recupero parametri e setto i valori usando i nomi esatti
         evento.setNome(request.getParameter("nome"));
         evento.setDescrizione(request.getParameter("descrizione"));
         evento.setFoto(request.getParameter("foto"));
@@ -36,7 +36,7 @@ public class CreaEventoServlet extends HttpServlet {
                 evento.setId_gruppo(Integer.parseInt(idGruppoStr));
             }
 
-            // Gestione Data (assumendo input type="datetime-local" che restituisce "yyyy-MM-ddTHH:mm")
+            // Gestione Data (input type="datetime-local" che restituisce "yyyy-MM-ddTHH:mm")
             String dataStr = request.getParameter("data_ora");
             if(dataStr != null && !dataStr.isEmpty()) {
                 evento.setData_ora(LocalDateTime.parse(dataStr));
@@ -48,7 +48,7 @@ public class CreaEventoServlet extends HttpServlet {
             return;
         }
 
-        // --- 2. CHIAMATA AL SERVICE (LOGICA) ---
+        // CHIAMATA AL SERVICE (LOGICA)
         GestioneEventiBean service = new GestioneEventiBean();
 
         try {

@@ -1,40 +1,41 @@
 package Application.GestioneEventi;
 
 import Application.GestioneAccount.UtenteBean;
-// Importa eventualmente GestionePagamentiService e GestioneComunicazioniService se esistono
-
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 public class IscrizioneFacade {
 
     public boolean iscriviUtente(UtenteBean utente, int idEvento) {
-        // 1. Inizializza i Service necessari
         GestioneEventiBean eventiService = new GestioneEventiBean();
 
-        // Esempi di altri service (se i colleghi li hanno fatti)
-        // GestioneEventiBean pagamentiService = new GestionePagamentiService();
-        // GestioneComunicazioniService comunicazioniService = new GestioneComunicazioniService();
-
         try {
-            // 2. Verifica disponibilità posti (Dovresti aggiungere questo metodo al Service)
-            // boolean postiDisponibili = eventiService.controllaPosti(idEvento);
-            // if (!postiDisponibili) return false;
+            // RECUPERA L'EVENTO DAL DB
+            // Qui sfruttiamo il metodo retrieveEvento
+            EventoBean evento = eventiService.retrieveEvento(idEvento);
 
-            // 3. Prepara l'oggetto Partecipazione
+            if (evento == null) {
+                return false; // L'evento non esiste
+            }
+
+            // CONTROLLA DISPONIBILITÀ
+            if (evento.getPosti_disponibili() <= 0) {
+                return false; // Non ci sono posti, iscrizione fallita
+            }
+
+            // PREPARA L'ISCRIZIONE
             PartecipazioneBean partecipazione = new PartecipazioneBean();
-            partecipazione.setId_utente(utente.getId_utente()); // Assumo getter getId()
+            partecipazione.setId_utente(utente.getId_utente());
             partecipazione.setId_evento(idEvento);
             partecipazione.setData_registrazione(LocalDateTime.now());
 
-            // 4. Salva la partecipazione tramite il Service
+            // SALVA E AGGIORNA
             eventiService.registraPartecipazione(partecipazione);
 
-            // 5. (Opzionale) Gestione Pagamento e Email
-            // pagamentiService.paga(...);
-            // comunicazioniService.inviaEmailConferma(utente.getEmail(), ...);
+            // Scala il posto (chiama il metodo appena creato)
+            eventiService.diminuisciPosti(evento);
 
-            return true;
+            return true; // Tutto andato a buon fine
 
         } catch (SQLException e) {
             e.printStackTrace();
