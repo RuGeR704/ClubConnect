@@ -233,7 +233,8 @@
                 <button class="btn btn-outline-admin" data-bs-toggle="modal" data-bs-target="#modalEditInfo">
                     <i class="fa-solid fa-pencil me-2"></i> Modifica Dettagli
                 </button>
-                <form action="dashboardServlet">
+                <form action="DashboardServlet">
+                    <input type="hidden" value="<%= gruppo.getId_gruppo()%>" name="idGruppo">
                     <button type="submit" class="btn btn-outline-admin">
                         <i class="fa-solid fa-gear me-2"></i> Gestisci
                     </button>
