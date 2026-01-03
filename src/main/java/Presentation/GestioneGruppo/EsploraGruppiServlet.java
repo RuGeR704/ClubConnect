@@ -1,9 +1,8 @@
-package Presentation.GestioneEventi;
+package Presentation.GestioneGruppo;
 
 import Application.GestioneAccount.UtenteBean;
 import Application.GestioneGruppo.GruppoBean;
 import Storage.ConPool;
-import Storage.GruppoDAO;
 import Storage.UtenteDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
