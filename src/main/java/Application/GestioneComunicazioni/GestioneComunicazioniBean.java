@@ -2,12 +2,17 @@ package Application.GestioneComunicazioni;
 
 import Application.GestioneAccount.UtenteBean;
 import Application.GestioneEventi.EventoBean;
+import Storage.ComunicazioneDAO;
+import Storage.ConPool;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-//è lo standard professionale per tracciare le operazioni in un server reale.
-/**
- * Qui gestiamo sia l'invio di notifiche (Email) sia la gestione delle News (ComunicazioniBean).
- */
+// è lo standard professionale per tracciare le operazioni in un server reale.
+
+// Qui gestiamo sia l'invio di notifiche (Email) sia la gestione delle News (ComunicazioniBean).
 public class GestioneComunicazioniBean {
 
     // Logger professionale per registrare le attività del server,
@@ -25,7 +30,7 @@ public class GestioneComunicazioniBean {
 
         // Validazione dati (difesa contro oggetti nulli)
         if (utente == null || evento == null) {
-            LOGGER.log(Level.WARNING, "Impossibile inviare conferma: Utente o Evento nulli.");
+            LOGGER.log(Level.WARNING, "Dati incompleti per invio conferma.");
             return;
         }
 
@@ -33,22 +38,14 @@ public class GestioneComunicazioniBean {
         String destinatario = utente.getEmail();
         String oggetto = "Conferma Iscrizione: " + evento.getNome();
 
-        StringBuilder corpoMessaggio = new StringBuilder();
-        corpoMessaggio.append("Gentile ").append(utente.getNome()).append(",\n\n");
-        corpoMessaggio.append("Siamo felici di confermare la tua iscrizione all'evento: ").append(evento.getNome()).append(".\n");
-        corpoMessaggio.append("Dettagli:\n");
-        corpoMessaggio.append("- Data: ").append(evento.getData_ora()).append("\n");
-        corpoMessaggio.append("- Luogo/Sede: ClubConnect Association\n\n");
-        corpoMessaggio.append("Cordiali saluti,\nIl team di ClubConnect");
+        String corpo = "Ciao " + utente.getNome() + ",\n" +
+                "La tua iscrizione all'evento '" + evento.getNome() + "' è confermata.\n" +
+                "Data: " + evento.getData_ora();
 
-        // Invio effettivo (Delegato a un metodo privato per pulizia)
-        sendEmail(destinatario, oggetto, corpoMessaggio.toString());
+        sendEmail(destinatario, oggetto, corpo);
     }
 
-    /**
-     * Metodo privato che gestisce l'invio tecnico dell'email.
-     * Attualmente simula l'invio tramite Logger, ma è predisposto per JavaMail.
-     */
+    // Metodo privato che gestisce l'invio tecnico dell'email.
     private void sendEmail(String to, String subject, String body) {
 
         try {
@@ -60,7 +57,7 @@ public class GestioneComunicazioniBean {
             LOGGER.info(" TO:      " + to);
             LOGGER.info(" SUBJECT: " + subject);
             LOGGER.info(" BODY:    \n" + body);
-            LOGGER.info(" [STATUS] Email inviata con successo al server SMTP.");
+            LOGGER.info(" [STATUS] Email inviata con successo.");
             LOGGER.info("--------------------------------------------------");
 
         } catch (Exception e) {
@@ -68,9 +65,35 @@ public class GestioneComunicazioniBean {
         }
     }
 
-    /* * --- SPAZIO PER I METODI FUTURI ---
-     * public void creaComunicazioneGruppo(ComunicazioniBean comunicazione) { ... }
-     * public List<ComunicazioniBean> recuperaComunicazioni() { ... }
-     * ...
-     */
+    // Crea una nuova comunicazione nel database.
+
+    public void creaComunicazione(ComunicazioniBean comunicazione) throws SQLException {
+        try (Connection con = ConPool.getConnection()) {
+            ComunicazioneDAO dao = new ComunicazioneDAO();
+            dao.doSave(con, comunicazione);
+        }
+    }
+    // Rimuove una comunicazione dal database dato il suo ID.
+    // Usato sia per le comunicazioni globali che per quelle di gruppo.
+
+    public void rimuoviComunicazione(int idComunicazione) throws SQLException {
+        try (Connection con = ConPool.getConnection()) {
+            ComunicazioneDAO dao = new ComunicazioneDAO();
+            // Il DAO vuole un oggetto Bean per fare la delete
+            ComunicazioniBean bean = new ComunicazioniBean();
+            bean.setId_comunicazione(idComunicazione);
+
+            dao.doDelete(con, bean);
+        }
+    }
+    // Recupera una comunicazione dal database dato il suo ID.
+    // Usato sia per le comunicazioni globali che per quelle di gruppo.
+
+    public ComunicazioniBean recuperaComunicazione(int id) throws SQLException {
+        try (Connection con = ConPool.getConnection()) {
+            ComunicazioneDAO dao = new ComunicazioneDAO();
+            return dao.doRetrieveById(con, id);
+        }
+    }
+
 }

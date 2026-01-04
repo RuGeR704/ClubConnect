@@ -85,8 +85,8 @@ public class ComunicazioneDAO {
             ps.setString(3, c.getContenuto());
             ps.setString(4, c.getFoto());
             ps.setDate(5, c.getDataPubblicazione());
-            ps.setInt(6, c.getId_comunicazione());
-            ps.setString(7, c.getTitolo());
+            ps.setString(6, c.getTitolo()); //Nella query titolo è il 6 punto interrogativo e id_comunicazione è il 7
+            ps.setInt(7, c.getId_comunicazione()); //Quindi li ho invertiti
             ps.executeUpdate();
         }
     }
