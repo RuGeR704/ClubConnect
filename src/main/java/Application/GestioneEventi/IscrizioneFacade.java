@@ -1,7 +1,7 @@
 package Application.GestioneEventi;
 
 import Application.GestioneAccount.UtenteBean;
-import Application.GestioneComunicazioni.GestioneComunicazioniBean; // MODIFICA
+import Application.GestioneComunicazioni.GestioneComunicazioniBean;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
@@ -9,7 +9,7 @@ public class IscrizioneFacade {
 
     public boolean iscriviUtente(UtenteBean utente, int idEvento) {
         GestioneEventiBean eventiService = new GestioneEventiBean();
-        GestioneComunicazioniBean comunicazioniService = new GestioneComunicazioniBean(); // MODIFICA
+        GestioneComunicazioniBean comunicazioniService = new GestioneComunicazioniBean();
         try {
             // RECUPERA L'EVENTO DAL DB
             // Qui sfruttiamo il metodo retrieveEvento
@@ -36,7 +36,7 @@ public class IscrizioneFacade {
             // Scala il posto
             eventiService.diminuisciPosti(evento);
 
-            // INVIA CONFERMA (Sottosistema Comunicazioni) - MODIFICA
+            // INVIA CONFERMA (Sottosistema Comunicazioni)
             comunicazioniService.inviaConfermaIscrizione(utente, evento);
 
             return true;
