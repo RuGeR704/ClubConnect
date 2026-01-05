@@ -24,7 +24,12 @@ public class ComunicazioneDAO {
                     c.setId_autore(rs.getInt("id_autore"));
                     c.setContenuto(rs.getString("contenuto"));
                     c.setFoto(rs.getString("foto"));
-                    c.setDataPubblicazione(rs.getDate("data_pubblicazione"));
+                    java.sql.Timestamp data_ora = rs.getTimestamp("data_pubblicazione");
+                    if(data_ora != null) {
+                        c.setDataPubblicazione(data_ora.toLocalDateTime());
+                    }else {
+                        c.setDataPubblicazione(null);
+                    }
                     c.setIsglobal(rs.getBoolean("isglobal"));
                     c.setTitolo(rs.getString("titolo"));
                     comunicazioni.add(c);
@@ -47,7 +52,12 @@ public class ComunicazioneDAO {
                     c.setId_autore(rs.getInt("id_autore"));
                     c.setContenuto(rs.getString("contenuto"));
                     c.setFoto(rs.getString("foto"));
-                    c.setDataPubblicazione(rs.getDate("data_pubblicazione"));
+                    java.sql.Timestamp data_ora = rs.getTimestamp("data_pubblicazione");
+                    if(data_ora != null) {
+                        c.setDataPubblicazione(data_ora.toLocalDateTime());
+                    }else {
+                        c.setDataPubblicazione(null);
+                    }
                     c.setIsglobal(rs.getBoolean("isglobal"));
                     comunicazioni.add(c);
                 }
@@ -69,7 +79,12 @@ public class ComunicazioneDAO {
                     c.setId_autore(rs.getInt("id_autore"));
                     c.setContenuto(rs.getString("contenuto"));
                     c.setFoto(rs.getString("foto"));
-                    c.setDataPubblicazione(rs.getDate("data_pubblicazione"));
+                    java.sql.Timestamp data_ora = rs.getTimestamp("data_pubblicazione");
+                    if(data_ora != null) {
+                        c.setDataPubblicazione(data_ora.toLocalDateTime());
+                    }else {
+                        c.setDataPubblicazione(null);
+                    }
                     c.setIsglobal(rs.getBoolean("isglobal"));
                     c.setTitolo(rs.getString("titolo"));
                 }
@@ -84,7 +99,11 @@ public class ComunicazioneDAO {
             ps.setInt(2, c.getId_autore());
             ps.setString(3, c.getContenuto());
             ps.setString(4, c.getFoto());
-            ps.setDate(5, c.getDataPubblicazione());
+            if (c.getDataPubblicazione() != null) {
+                ps.setTimestamp(8, java.sql.Timestamp.valueOf(c.getDataPubblicazione()));
+            } else {
+                ps.setNull(8, java.sql.Types.TIMESTAMP);
+            }
             ps.setInt(6, c.getId_comunicazione());
             ps.setString(7, c.getTitolo());
             ps.executeUpdate();
@@ -105,7 +124,11 @@ public class ComunicazioneDAO {
             ps.setInt(2, c.getId_autore());
             ps.setString(3, c.getContenuto());
             ps.setString(4, c.getFoto());
-            ps.setDate(5, c.getDataPubblicazione());
+            if (c.getDataPubblicazione() != null) {
+                ps.setTimestamp(8, java.sql.Timestamp.valueOf(c.getDataPubblicazione()));
+            } else {
+                ps.setNull(8, java.sql.Types.TIMESTAMP);
+            }
             ps.setBoolean(6, c.isIsglobal());
             ps.setString(7, c.getTitolo());
             ps.executeUpdate();

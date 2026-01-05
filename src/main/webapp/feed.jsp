@@ -7,6 +7,9 @@
 <%@ page import="Application.GestioneEventi.EventoBean" %>
 <%@ page import="java.time.LocalDate" %>
 <%@ page import="java.time.LocalDateTime" %>
+<%@ page import="java.time.format.DateTimeFormatter" %>
+<%@ page import="Storage.GruppoDAO" %>
+<%@ page import="Storage.ConPool" %>
 
 <%
     // Recupero Utente
@@ -57,6 +60,12 @@
         .btn-club-teal { background-color: #26A9BC; color: white; border: none; }
         .badge-event { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .badge-comm { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+
+        .sidebar-sticky {
+            position: sticky;
+            top: 100px; /* Distanza dal bordo superiore (Navbar + spazio) */
+            z-index: 100; /* Assicura che stia sopra altri elementi se necessario */
+        }
     </style>
 </head>
 <body>
@@ -87,6 +96,7 @@
     <div class="row g-4">
 
         <div class="col-lg-3 d-none d-lg-block">
+            <div class="sidebar-sticky">
             <div class="feed-card text-center pb-3">
                 <div class="profile-card-header"></div>
                 <img src="https://ui-avatars.com/api/?name=<%= utente.getNome() %>+<%= utente.getCognome() %>&background=random" class="profile-avatar shadow-sm">
@@ -103,6 +113,7 @@
             <a href="crea_gruppo.jsp" class="btn btn-club-teal w-100 py-3 rounded-4 shadow-sm fw-bold">
                 <i class="fa-solid fa-plus me-2"></i> Crea Nuovo Gruppo
             </a>
+            </div>
         </div>
 
         <div class="col-lg-6">
@@ -172,36 +183,140 @@
             %>
             <div class="feed-card p-4">
                 <div class="post-header">
+                    <%
+                        // 1. Istanzio il DAO fuori dal ciclo (se non c'è già)
+                        GruppoDAO gruppoDAO = new GruppoDAO();
+                    %>
+
+                    <%
+                        // 2. RECUPERO IL GRUPPO SPECIFICO DI QUESTO EVENTO
+                        GruppoBean gruppoDellEvento = gruppoDAO.doRetrieveByid(ConPool.getConnection(), ev.getId_gruppo());
+
+                        // Gestione Logo (se null, metti un default o l'iniziale)
+                        String logoUrl = (gruppoDellEvento.getLogo() != null && !gruppoDellEvento.getLogo().isEmpty())
+                                ? gruppoDellEvento.getLogo()
+                                : "images/logo.png"; // O un placeholder
+                    %>
+
                     <div class="d-flex align-items-center gap-3">
-                        <div class="group-avatar"><%= ev.getId_gruppo() %></div>
+                        <div class="group-avatar" style="width: 45px; height: 45px;"> <% if(gruppoDellEvento.getLogo() != null && !gruppoDellEvento.getLogo().isEmpty()) { %>
+                            <img src="<%= gruppoDellEvento.getLogo() %>" class="rounded-circle border"
+                                 style="width: 100%; height: 100%; object-fit: cover;"
+                                 alt="<%= gruppoDellEvento.getNome() %>">
+                            <% } else { %>
+                            <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center fw-bold text-primary"
+                                 style="width: 100%; height: 100%;">
+                                <%= gruppoDellEvento.getNome().substring(0,1).toUpperCase() %>
+                            </div>
+                            <% } %>
+                        </div>
+
                         <div>
-                            <h6 class="mb-0 fw-bold text-dark">Gruppo #<%= ev.getId_gruppo() %></h6>
+                            <h6 class="mb-0 fw-bold">
+                                <a href="VisualizzaGruppoServlet?id=<%= gruppoDellEvento.getId_gruppo() %>" class="text-dark text-decoration-none">
+                                    <%= gruppoDellEvento.getNome() %>
+                                </a>
+                            </h6>
+                            <small class="text-muted" style="font-size: 0.8rem;"><%= gruppoDellEvento.getSettore() %></small>
                         </div>
                     </div>
                     <span class="badge rounded-pill py-2 px-3 badge-event">
-                                                <i class="fa-solid fa-calendar-check me-1"></i> Evento
-                                            </span>
+                        <i class="fa-solid fa-calendar-check me-1"></i> Evento
+                    </span>
                 </div>
 
                 <h5 class="fw-bold mb-2"><%= ev.getNome() %></h5>
                 <p class="text-secondary mb-3"><%= ev.getDescrizione() %></p>
 
-                <div class="bg-light p-3 rounded-3 mb-3 border d-flex align-items-center gap-3">
-                    <div class="text-center px-2 border-end">
-                        <span class="d-block fw-bold text-danger text-uppercase"><%= monthFormat.format(dataEv) %></span>
-                        <span class="h4 fw-bold mb-0"><%= dayFormat.format(dataEv) %></span>
+
+                <% if (ev.getFoto() != null && !ev.getFoto().isEmpty()) { %>
+
+                <div class="mt-3 mb-3">
+                    <img src="<%= ev.getFoto() %>"
+                         class="img-fluid w-100 rounded-4 shadow-sm border"
+                         style="max-height: 400px; object-fit: cover; cursor: zoom-in;"
+                         alt="Locandina <%= ev.getNome() %>"
+                         data-bs-toggle="modal"
+                         data-bs-target="#imgModal<%= ev.getId_evento() %>"
+                         onerror="this.style.display='none'">
+                </div>
+
+                <div class="modal fade" id="imgModal<%= ev.getId_evento() %>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-xl"> <div class="modal-content bg-transparent border-0">
+
+                        <div class="position-absolute top-0 end-0 p-3" style="z-index: 1055;">
+                            <button type="button" class="btn-close btn-close-white bg-white rounded-circle p-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body p-0 text-center">
+                            <img src="<%= ev.getFoto() %>"
+                                 class="img-fluid rounded-3 shadow-lg"
+                                 style="max-height: 90vh; width: auto;"
+                                 alt="Full size <%= ev.getNome() %>">
+                        </div>
+
                     </div>
-                    <div>
-                        <div class="fw-bold text-dark">
-                            <i class="fa-solid fa-location-dot text-danger me-1"></i> <%= ev.getCapienza_massima() %>
-                        </div>
-                        <div class="small text-muted">
-                            Ore <%= sdf.format(dataEv).split(" ")[1] %>
-                        </div>
                     </div>
                 </div>
 
-                <button class="btn btn-club-teal w-100 text-white fw-bold"><i class="fa-solid fa-check"></i> Partecipa all'evento</button>
+                <% } %>
+
+                <div class="bg-light p-3 rounded-3 mb-3 border">
+                    <div class="row g-0 align-items-center">
+
+                        <div class="col-6 border-end pe-2">
+
+                            <div class="mb-2 text-dark fw-bold small">
+                                <i class="fa-regular fa-calendar-days me-2 text-primary"></i>
+                                <%= (ev.getData_ora() != null)
+                                        ? ev.getData_ora().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm"))
+                                        : "TBA" %>
+                            </div>
+
+                            <div class="fw-bold small">
+                                <i class="fa-solid fa-tag me-2 text-primary"></i>
+                                <% if (ev.getCosto() <= 0) { %>
+                                <span class="text-success text-uppercase">Gratis</span>
+                                <% } else { %>
+                                <span>€ <%= String.format("%.2f", ev.getCosto()) %></span>
+                                <% } %>
+                            </div>
+
+                        </div>
+
+                        <div class="col-6 ps-3">
+
+                            <div class="mb-2 text-muted small">
+                                <i class="fa-solid fa-people-roof me-2"></i>Capienza: <%= ev.getCapienza_massima() %>
+                            </div>
+
+                            <div class="fw-bold small <%= (ev.getCapienza_massima() > 0) ? "text-success" : "text-danger" %>">
+                                <% if (ev.getCapienza_massima() > 0) { %>
+                                <i class="fa-solid fa-ticket me-2"></i>Posti disponibili: <%= ev.getCapienza_massima() %>
+                                <% } else { %>
+                                <i class="fa-solid fa-circle-xmark me-2"></i>ESAURITO
+                                <% } %>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <form action="IscrizioneEventoServlet" method="POST">
+                    <input type="hidden" name="idEvento" value="<%= ev.getId_evento() %>">
+
+                    <% if (ev.getCapienza_massima() > 0) { %>
+                    <button type="submit" class="btn btn-club-teal w-100 text-green fw-bold">
+                        <i class="fa-solid fa-check me-2"></i> Partecipa all'evento
+                    </button>
+                    <% } else { %>
+                    <button type="button" class="btn btn-secondary w-100 fw-bold" disabled>
+                        <i class="fa-solid fa-ban me-2"></i> Posti Esauriti
+                    </button>
+                    <% } %>
+                </form>
+
             </div>
             <%
                     }
@@ -217,8 +332,10 @@
 
         <div class="col-lg-3 d-none d-lg-block">
             <div class="feed-card p-3">
-                <h6 class="fw-bold text-primary mb-3">Info</h6>
-                <p class="small text-muted">Le comunicazioni e gli eventi qui mostrati provengono dai gruppi a cui sei iscritto.</p>
+                <div class="sidebar-sticky">
+                <h6 class="fw-bold text-primary mb-3">Prossimi eventi</h6>
+                <p class="small text-muted">Non sei ancora iscritto a nessun evento! Controlla i gruppi a cui sei iscritto.</p>
+                </div>
             </div>
         </div>
 

@@ -39,7 +39,7 @@ public class VisualizzaEventoServlet extends HttpServlet {
             request.setAttribute("evento", evento);
 
             // Inoltro alla pagina di dettaglio
-            request.getRequestDispatcher("visualizzaEvento.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/visualizzaEvento.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID Evento non valido");
