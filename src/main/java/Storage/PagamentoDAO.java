@@ -54,12 +54,13 @@ public class PagamentoDAO {
     public void doUpdateMetodoPagamento(Connection con, MetodoPagamentoBean m) throws SQLException{
         String query =  "UPDATE Metodo_Pagamento SET id_utente = ?, nome_intestatario = ?, cognome_intestatario = ?, numero_carta = ?, scadenza_carta = ? WHERE id_metodo = ?";
         try (PreparedStatement ps = con.prepareStatement(query)){
-            ps.setInt(1, m.getId_metodo());
+// L'ordine dei ? è: 1:id_utente, 2:nome, 3:cognome, 4:numero, 5:scadenza, 6:WHERE id_metodo
+            ps.setInt(1, m.getId_utente()); // Prima era m.getId_metodo()
             ps.setString(2, m.getNome_intestatario());
             ps.setString(3, m.getCognome_intestatario());
-            ps.setString(4, m.getScadenza_carta());
-            ps.setString(5, m.getScadenza_carta());
-            ps.setInt(6, m.getId_utente());
+            ps.setString(4, m.getNumero_carta());
+            ps.setString(5, m.getScadenza_carta()); // Prima era ripetuto il 5 su indice 4
+            ps.setInt(6, m.getId_metodo()); // Prima era m.getId_utente()
             ps.executeUpdate();
         }
     }

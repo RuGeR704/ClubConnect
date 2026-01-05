@@ -1,6 +1,5 @@
 package Presentation.GestioneComunicazioni;
 
-import Application.GestioneAccount.UtenteBean;
 import Application.GestioneComunicazioni.ComunicazioniBean;
 import Application.GestioneComunicazioni.GestioneComunicazioniBean;
 import jakarta.servlet.ServletException;
@@ -12,7 +11,6 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

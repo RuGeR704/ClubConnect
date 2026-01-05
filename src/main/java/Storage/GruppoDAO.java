@@ -149,5 +149,69 @@ public class GruppoDAO {
         }
 
     }
+    /**
+     * Conta il numero di utenti iscritti a un determinato gruppo.
+     * @param con La connessione al database.
+     * @param idGruppo L'ID del gruppo di cui contare i membri.
+     * @return Il numero di iscritti.
+     * @throws SQLException In caso di errore SQL.
+     */
+    public int contaMembri(Connection con, int idGruppo) throws SQLException {
+        int count = 0;
+        String query = "SELECT COUNT(*) FROM Iscrizione WHERE id_gruppo = ?";
 
+        try (PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, idGruppo);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    count = rs.getInt(1);
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Conta il numero di eventi futuri (in programma) per un gruppo.
+     * @param con La connessione al database.
+     * @param idGruppo L'ID del gruppo.
+     * @return Il numero di eventi con data futura.
+     * @throws SQLException In caso di errore SQL.
+     */
+    public int contaEventiInProgramma(Connection con, int idGruppo) throws SQLException {
+        int count = 0;
+        // Utilizziamo NOW() per prendere solo quelli futuri
+        String query = "SELECT COUNT(*) FROM Evento WHERE id_gruppo = ? AND data_ora > NOW()";
+
+        try (PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, idGruppo);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    count = rs.getInt(1);
+                }
+            }
+        }
+        return count;
+    }
+    //Verifica sul DB se un utente è Gestore di un determinato gruppo.
+
+    public boolean isGestore(Connection con, int idUtente, int idGruppo) throws SQLException {
+        // Assumo che la tabella Iscrizione abbia una colonna 'Gestore' (booleana/tinyint)
+        String query = "SELECT Gestore FROM Iscrizione WHERE id_utente = ? AND id_gruppo = ?";
+
+        try (PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, idUtente);
+            ps.setInt(2, idGruppo);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    // Restituisce true se il campo Gestore è 1/true
+                    return rs.getBoolean("Gestore");
+                }
+            }
+        }
+        return false; // Se non c'è iscrizione o non è gestore
+    }
 }
