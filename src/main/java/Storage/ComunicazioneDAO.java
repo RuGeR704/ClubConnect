@@ -100,12 +100,12 @@ public class ComunicazioneDAO {
             ps.setString(3, c.getContenuto());
             ps.setString(4, c.getFoto());
             if (c.getDataPubblicazione() != null) {
-                ps.setTimestamp(8, java.sql.Timestamp.valueOf(c.getDataPubblicazione()));
+                ps.setTimestamp(5, java.sql.Timestamp.valueOf(c.getDataPubblicazione()));
             } else {
-                ps.setNull(8, java.sql.Types.TIMESTAMP);
+                ps.setNull(5, java.sql.Types.TIMESTAMP);
             }
-            ps.setInt(6, c.getId_comunicazione());
-            ps.setString(7, c.getTitolo());
+            ps.setString(6, c.getTitolo());
+            ps.setInt(7, c.getId_comunicazione());
             ps.executeUpdate();
         }
     }
@@ -125,9 +125,9 @@ public class ComunicazioneDAO {
             ps.setString(3, c.getContenuto());
             ps.setString(4, c.getFoto());
             if (c.getDataPubblicazione() != null) {
-                ps.setTimestamp(8, java.sql.Timestamp.valueOf(c.getDataPubblicazione()));
+                ps.setTimestamp(5, java.sql.Timestamp.valueOf(c.getDataPubblicazione()));
             } else {
-                ps.setNull(8, java.sql.Types.TIMESTAMP);
+                ps.setNull(5, java.sql.Types.TIMESTAMP);
             }
             ps.setBoolean(6, c.isIsglobal());
             ps.setString(7, c.getTitolo());
