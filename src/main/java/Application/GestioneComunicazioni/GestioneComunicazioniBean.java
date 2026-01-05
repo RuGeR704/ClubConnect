@@ -95,5 +95,21 @@ public class GestioneComunicazioniBean {
             return dao.doRetrieveById(con, id);
         }
     }
+    //Recupera tutte le comunicazioni presenti nel database.
+
+    public List<ComunicazioniBean> recuperaTutteLeComunicazioni() throws SQLException {
+        ComunicazioneDAO dao = new ComunicazioneDAO();
+        // Nota: il doRetrieveAll nel DAO apre già la connessione internamente
+        return dao.doRetrieveAll();
+    }
+
+    //Recupera le comunicazioni visibili a un utente specifico (basate sui gruppi a cui è iscritto).
+
+    public List<ComunicazioniBean> recuperaComunicazioniPerUtente(int idUtente) throws SQLException {
+        try (Connection con = ConPool.getConnection()) {
+            ComunicazioneDAO dao = new ComunicazioneDAO();
+            return dao.doRetrievebyGroup(con, idUtente);
+        }
+    }
 
 }

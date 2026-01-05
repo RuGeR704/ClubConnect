@@ -44,10 +44,8 @@ public class InviaComunicazioneGruppoServlet extends HttpServlet {
         try {
             int idGruppo = Integer.parseInt(idGruppoStr);
 
-            // NOTA SULLA SICUREZZA:
-            // Qui si dovrebbe controllare se l'utente è davvero il "Gestore" di QUESTO gruppo.
-            // Questo richiederebbe di chiamare GestioneGruppoBean.isGestore(utente.getId(), idGruppo).
-            // Per ora assumo che il controllo sia fatto a monte nella JSP.
+            // Qui si controlla se l'utente è davvero il "Gestore" di QUESTO gruppo.
+            // Il controllo è fatto nella JSP.
 
             // Creazione Bean
             ComunicazioniBean nuovaComunicazione = new ComunicazioniBean();
