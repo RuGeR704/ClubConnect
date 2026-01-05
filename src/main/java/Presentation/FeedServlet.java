@@ -48,7 +48,7 @@ public class FeedServlet extends HttpServlet {
                 hasIscrizione = true;
 
                 List<ComunicazioniBean> comunicazioni = comunicazioneDAO.doRetrievebyGroup(ConPool.getConnection(), utente.getId_utente());
-                List<EventoBean> eventi = eventoDAO.doRetrievebyGroup(ConPool.getConnection(), utente.getId_utente());
+                List<EventoBean> eventi = eventoDAO.doRetrievebyGruppiIscritti(ConPool.getConnection(), utente.getId_utente());
 
 
                 if(comunicazioni != null) {
