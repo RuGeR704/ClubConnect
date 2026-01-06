@@ -2,11 +2,15 @@ package Application.GestionePagamenti;
 
 import Application.GestioneGruppo.ClubBean;
 import Application.GestioneGruppo.GruppoBean;
+import Application.GestioneAccount.UtenteBean;
 import Storage.ConPool;
 import Storage.GruppoDAO;
-
+import Storage.PagamentoDAO;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GestionePagamentiBean {
     //Imposta o modifica i dati dell'abbonamento (Costo e Frequenza) per un Club.
@@ -56,5 +60,20 @@ public class GestionePagamentiBean {
             e.printStackTrace();
             return false;
         }
+    }
+    public Map<Integer, Boolean> getSituazionePagamenti(int idGruppo, List<UtenteBean> soci, int frequenzaGiorni) {
+        Map<Integer, Boolean> mappa = new HashMap<>();
+        PagamentoDAO daoPagamento = new PagamentoDAO();
+
+        try (Connection con = Storage.ConPool.getConnection()) {
+            for (UtenteBean socio : soci) {
+                // Controlla se l'ultimo pagamento di questo socio per questo gruppo è ancora valido
+                boolean inRegola = daoPagamento.isAbbonamentoValido(con, socio.getId_utente(), idGruppo, frequenzaGiorni);
+                mappa.put(socio.getId_utente(), inRegola);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return mappa;
     }
 }
