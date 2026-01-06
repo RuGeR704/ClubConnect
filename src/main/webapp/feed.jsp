@@ -10,6 +10,7 @@
 <%@ page import="java.time.format.DateTimeFormatter" %>
 <%@ page import="Storage.GruppoDAO" %>
 <%@ page import="Storage.ConPool" %>
+<%@ page import="Storage.EventoDAO" %>
 
 <%
     // Recupero Utente
@@ -107,7 +108,8 @@
                 <ul class="nav flex-column gap-2">
                     <li class="nav-item"><a href="#" class="nav-link active d-flex align-items-center gap-3 text-primary fw-bold rounded bg-light p-2"><i class="fa-solid fa-house"></i> Home</a></li>
                     <li class="nav-item"><a href="VisualizzaIscrizioniGruppiServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-solid fa-users"></i> I Miei Gruppi</a></li>
-                    <li class="nav-item"><a href="EsploraGruppiServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-regular fa-compass me-2"></i> Esplora Gruppi</a></li>
+                    <li class="nav-item"><a href="EsploraGruppiServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-regular fa-compass me-2"></i>Esplora Gruppi</a></li>
+                    <li class="nav-item"><a href="VisualizzaCalendarioEventiServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-solid fa-calendar-days"></i> Calendario Eventi</a></li>
                 </ul>
             </div>
             <a href="crea_gruppo.jsp" class="btn btn-club-teal w-100 py-3 rounded-4 shadow-sm fw-bold">
@@ -154,6 +156,14 @@
 
             <%
                 if (feedMisto != null && !feedMisto.isEmpty()) {
+
+                System.out.println("DEBUG JSP - Grandezza feedMisto: " + (feedMisto != null ? feedMisto.size() : "NULL"));
+                if (feedMisto != null) {
+                    for(Object obj : feedMisto) {
+                        System.out.println("DEBUG JSP - Oggetto trovato: " + obj.getClass().getName());
+                    }
+                }
+
                     for(Object item : feedMisto) {
 
                         // --- LOGICA DI VISUALIZZAZIONE DINAMICA ---
@@ -162,18 +172,79 @@
             %>
             <div class="feed-card p-4">
                 <div class="post-header">
+                    <%
+                        // 1. RECUPERO INFO GRUPPO (Necessario per avere Nome e Logo)
+                        GruppoDAO gruppoDAOCom = new GruppoDAO();
+                        GruppoBean gruppoDellaCom = gruppoDAOCom.doRetrieveByid(Storage.ConPool.getConnection(), com.getId_gruppo());
+                    %>
+
                     <div class="d-flex align-items-center gap-3">
-                        <div class="group-avatar"><%= com.getId_gruppo() %></div> <div>
-                        <h6 class="mb-0 fw-bold text-dark">Gruppo #<%= com.getId_gruppo() %></h6>
-                        <small class="text-muted"><%= sdf.format(com.getDataPubblicazione()) %></small>
+
+                        <div class="group-avatar" style="width: 45px; height: 45px;">
+                            <% if(gruppoDellaCom != null && gruppoDellaCom.getLogo() != null && !gruppoDellaCom.getLogo().isEmpty()) { %>
+                            <img src="<%= gruppoDellaCom.getLogo() %>" class="rounded-circle border"
+                                 style="width: 100%; height: 100%; object-fit: cover;"
+                                 alt="<%= gruppoDellaCom.getNome() %>">
+                            <% } else { %>
+                            <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center fw-bold text-primary"
+                                 style="width: 100%; height: 100%;">
+                                <%= (gruppoDellaCom != null) ? gruppoDellaCom.getNome().substring(0,1).toUpperCase() : "?" %>
+                            </div>
+                            <% } %>
+                        </div>
+
+                        <div>
+                            <h6 class="mb-0 fw-bold">
+                                <a href="VisualizzaGruppoServlet?id=<%= com.getId_gruppo() %>" class="text-dark text-decoration-none">
+                                    <%= (gruppoDellaCom != null) ? gruppoDellaCom.getNome() : "Gruppo sconosciuto" %>
+                                </a>
+                            </h6>
+                            <small class="text-muted">
+                                <%= (com.getDataPubblicazione() != null)
+                                        ? com.getDataPubblicazione().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+                                        : "" %>
+                            </small>
+                        </div>
                     </div>
-                    </div>
+
                     <span class="badge rounded-pill py-2 px-3 badge-comm">
-                                                <i class="fa-solid fa-bullhorn me-1"></i> Comunicazione
-                                            </span>
+        <i class="fa-solid fa-bullhorn me-1"></i> Comunicazione
+    </span>
                 </div>
-                <h5 class="fw-bold mb-2">Titolo</h5>
+                <h5 class="fw-bold mb-2"><%= com.getTitolo()%></h5>
                 <p class="text-secondary mb-3"><%= com.getContenuto() %></p>
+
+                <% if (com.getFoto() != null && !com.getFoto().trim().isEmpty()) { %>
+
+                <div class="mt-3 mb-3">
+                    <img src="<%= com.getFoto() %>"
+                         class="img-fluid w-100 rounded-4 shadow-sm border"
+                         style="max-height: 400px; object-fit: cover; cursor: zoom-in;"
+                         alt="Immagine post"
+                         data-bs-toggle="modal"
+                         data-bs-target="#imgModalCom<%= com.getId_comunicazione() %>"
+                         onerror="this.style.display='none'">
+                </div>
+
+                <div class="modal fade" id="imgModalCom<%= com.getId_comunicazione() %>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-xl">
+                        <div class="modal-content bg-transparent border-0 pointer-event-none">
+
+                            <div class="position-absolute top-0 end-0 p-3" style="z-index: 1055;">
+                                <button type="button" class="btn-close btn-close-white bg-white rounded-circle p-2" data-bs-dismiss="modal" aria-label="Close" style="pointer-events: auto;"></button>
+                            </div>
+
+                            <div class="modal-body p-0 text-center d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+                                <img src="<%= com.getFoto() %>"
+                                     class="img-fluid rounded-3 shadow-lg"
+                                     style="max-height: 90vh; width: auto; pointer-events: auto;"
+                                     alt="Full size">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <% } %>
             </div>
 
             <%          } else if (item instanceof EventoBean) {
@@ -292,7 +363,7 @@
 
                             <div class="fw-bold small <%= (ev.getCapienza_massima() > 0) ? "text-success" : "text-danger" %>">
                                 <% if (ev.getCapienza_massima() > 0) { %>
-                                <i class="fa-solid fa-ticket me-2"></i>Posti disponibili: <%= ev.getCapienza_massima() %>
+                                <i class="fa-solid fa-ticket me-2"></i>Posti disponibili: <%= ev.getPosti_disponibili() %>
                                 <% } else { %>
                                 <i class="fa-solid fa-circle-xmark me-2"></i>ESAURITO
                                 <% } %>
@@ -303,18 +374,47 @@
                     </div>
                 </div>
 
-                <form action="IscrizioneEventoServlet" method="POST">
+                <%
+                    // 1. Controlliamo se l'utente è già iscritto
+                    EventoDAO eventoDAO = new EventoDAO();
+                    boolean isGiaIscritto = false;
+                    try {
+                        isGiaIscritto = eventoDAO.isUtentePartecipante(Storage.ConPool.getConnection(), utente.getId_utente(), ev.getId_evento());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                %>
+
+                <form action="IscrizioneEventoServlet" method="POST" onsubmit="<%= isGiaIscritto ? "return confirm('Vuoi cancellare la tua iscrizione?');" : "" %>">
+
                     <input type="hidden" name="idEvento" value="<%= ev.getId_evento() %>">
 
-                    <% if (ev.getCapienza_massima() > 0) { %>
-                    <button type="submit" class="btn btn-club-teal w-100 text-green fw-bold">
+                    <%-- CASO 1: L'UTENTE È GIÀ ISCRITTO --%>
+                    <% if (isGiaIscritto) { %>
+                    <input type="hidden" name="action" value="leave">
+
+                    <button type="submit" class="btn btn-outline-danger w-100 fw-bold">
+                        <i class="fa-solid fa-xmark me-2"></i> Annulla Iscrizione
+                    </button>
+
+                    <%-- CASO 2: NON ISCRITTO E C'È POSTO --%>
+                    <% } else if (ev.getPosti_disponibili() > 0) { %>
+
+                    <input type="hidden" name="action" value="join">
+
+                    <button type="submit" class="btn btn-club-teal w-100 text-white fw-bold">
                         <i class="fa-solid fa-check me-2"></i> Partecipa all'evento
                     </button>
+
+                    <%-- CASO 3: SOLD OUT --%>
                     <% } else { %>
+
                     <button type="button" class="btn btn-secondary w-100 fw-bold" disabled>
                         <i class="fa-solid fa-ban me-2"></i> Posti Esauriti
                     </button>
+
                     <% } %>
+
                 </form>
 
             </div>

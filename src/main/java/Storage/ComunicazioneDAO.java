@@ -23,6 +23,7 @@ public class ComunicazioneDAO {
                     c.setId_gruppo(rs.getInt("id_gruppo"));
                     c.setId_autore(rs.getInt("id_autore"));
                     c.setContenuto(rs.getString("contenuto"));
+                    c.setTitolo(rs.getString("titolo"));
                     c.setFoto(rs.getString("foto"));
                     java.sql.Timestamp data_ora = rs.getTimestamp("data_pubblicazione");
                     if(data_ora != null) {
@@ -30,8 +31,36 @@ public class ComunicazioneDAO {
                     }else {
                         c.setDataPubblicazione(null);
                     }
-                    c.setIsglobal(rs.getBoolean("isglobal"));
+                    c.setIsglobal(rs.getBoolean("is_global"));
                     c.setTitolo(rs.getString("titolo"));
+                    comunicazioni.add(c);
+                }
+            }
+        }
+        return comunicazioni;
+    }
+
+    public List<ComunicazioniBean> doRetrievebyGruppo (Connection con, int id_gruppo) throws SQLException {
+        List<ComunicazioniBean> comunicazioni = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT * FROM Comunicazione C WHERE C.id_gruppo = ? ORDER BY C.data_pubblicazione DESC")) {
+            ps.setInt(1, id_gruppo);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ComunicazioniBean c = new ComunicazioniBean();
+                    c.setId_comunicazione(rs.getInt("id_comunicazione"));
+                    c.setId_gruppo(rs.getInt("id_gruppo"));
+                    c.setId_autore(rs.getInt("id_autore"));
+                    c.setContenuto(rs.getString("contenuto"));
+                    c.setTitolo(rs.getString("titolo"));
+                    c.setFoto(rs.getString("foto"));
+                    java.sql.Timestamp data_ora = rs.getTimestamp("data_pubblicazione");
+                    if(data_ora != null) {
+                        c.setDataPubblicazione(data_ora.toLocalDateTime());
+                    }else {
+                        c.setDataPubblicazione(null);
+                    }
+                    c.setIsglobal(rs.getBoolean("is_global"));
                     comunicazioni.add(c);
                 }
             }
@@ -51,6 +80,7 @@ public class ComunicazioneDAO {
                     c.setId_gruppo(rs.getInt("id_gruppo"));
                     c.setId_autore(rs.getInt("id_autore"));
                     c.setContenuto(rs.getString("contenuto"));
+                    c.setTitolo(rs.getString("titolo"));
                     c.setFoto(rs.getString("foto"));
                     java.sql.Timestamp data_ora = rs.getTimestamp("data_pubblicazione");
                     if(data_ora != null) {
@@ -58,7 +88,7 @@ public class ComunicazioneDAO {
                     }else {
                         c.setDataPubblicazione(null);
                     }
-                    c.setIsglobal(rs.getBoolean("isglobal"));
+                    c.setIsglobal(rs.getBoolean("is_global"));
                     comunicazioni.add(c);
                 }
             }
@@ -78,6 +108,7 @@ public class ComunicazioneDAO {
                     c.setId_gruppo(rs.getInt("id_gruppo"));
                     c.setId_autore(rs.getInt("id_autore"));
                     c.setContenuto(rs.getString("contenuto"));
+                    c.setTitolo(rs.getString("titolo"));
                     c.setFoto(rs.getString("foto"));
                     java.sql.Timestamp data_ora = rs.getTimestamp("data_pubblicazione");
                     if(data_ora != null) {
@@ -85,7 +116,7 @@ public class ComunicazioneDAO {
                     }else {
                         c.setDataPubblicazione(null);
                     }
-                    c.setIsglobal(rs.getBoolean("isglobal"));
+                    c.setIsglobal(rs.getBoolean("is_global"));
                     c.setTitolo(rs.getString("titolo"));
                 }
             }

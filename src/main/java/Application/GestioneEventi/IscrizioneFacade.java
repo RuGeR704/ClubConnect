@@ -46,4 +46,31 @@ public class IscrizioneFacade {
             return false;
         }
     }
+
+    public boolean disiscriviUtente(UtenteBean utente, int idEvento) {
+        GestioneEventiBean eventiService = new GestioneEventiBean();
+
+        try {
+            PartecipazioneBean partecipazione = eventiService.retrievePartecipazione(utente.getId_utente(), idEvento);
+            EventoBean evento = eventiService.retrieveEvento(partecipazione.getId_evento());
+
+            if (evento == null) {
+                return false;
+            }
+
+            boolean esito = eventiService.rimuoviPartecipazione(partecipazione);
+
+            if (!esito) {
+                return false;
+            }
+
+            eventiService.aumentaPosti(evento);
+            return true;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
 }

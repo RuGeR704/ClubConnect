@@ -1,6 +1,11 @@
 package Application.GestioneGruppo;
 
+import Storage.ConPool;
+import Storage.GruppoDAO;
+
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public abstract class GruppoBean implements Serializable {
     private int id_gruppo;
@@ -92,6 +97,16 @@ public abstract class GruppoBean implements Serializable {
 
     public void setTipoGruppo(boolean tipoGruppo) {
         this.tipoGruppo = tipoGruppo;
+    }
+
+    public boolean isUtenteGestore(int idUtente, int idGruppo) {
+        try (Connection con = ConPool.getConnection()) {
+            GruppoDAO dao = new GruppoDAO();
+            return dao.isGestore(con, idUtente, idGruppo);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }

@@ -32,10 +32,9 @@
     }
 
     // 3. RECUPERO DATI MANCANTI (Gruppo e Partecipazione)
-    // Dato che la servlet ci ha dato solo l'evento, qui recuperiamo il resto
-    GruppoBean gruppo = null;
-    boolean isPartecipante = false;
-    boolean isAdmin = false; // Se l'utente è admin del gruppo
+    GruppoBean gruppo = (GruppoBean) request.getAttribute("gruppo");
+    boolean isPartecipante = (boolean) request.getAttribute("isPartecipante");
+    boolean isAdmin = (boolean) request.getAttribute("isAdmin");
 
     try {
         // A. Recupero il Gruppo che organizza l'evento
@@ -272,7 +271,7 @@
 
                 <% if(isAdmin) { %>
                 <div class="mt-4 pt-3 border-top text-center">
-                    <form action="EliminaEventoServlet" method="POST" onsubmit="return confirm('ATTENZIONE: Questa azione è irreversibile. Vuoi eliminare l\'evento?');">
+                    <form action="RimuoviEventoServlet" method="POST" onsubmit="return confirm('ATTENZIONE: Questa azione è irreversibile. Vuoi eliminare l\'evento?');">
                         <input type="hidden" name="idEvento" value="<%= evento.getId_evento() %>">
                         <input type="hidden" name="idGruppo" value="<%= gruppo.getId_gruppo() %>">
                         <button type="submit" class="btn btn-link text-danger text-decoration-none small">
