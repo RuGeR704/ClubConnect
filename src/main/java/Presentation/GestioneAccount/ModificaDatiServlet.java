@@ -32,7 +32,7 @@ public class ModificaDatiServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/ModificaDatiForm.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/ModificaDati.jsp");
+            response.sendRedirect(request.getContextPath() + "/gestioneUtente.jsp");
         }
     }
 
@@ -104,7 +104,7 @@ public class ModificaDatiServlet extends HttpServlet {
 
             // Aggiorna sessione e redirect
             session.setAttribute("utente", ub);
-            response.sendRedirect(request.getContextPath() + "/AccountServlet");
+            response.sendRedirect(request.getContextPath() + "/gestioneUtente.jsp");
         } catch (SQLException sql) {
             sql.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/error.jsp");
