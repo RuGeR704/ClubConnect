@@ -111,9 +111,6 @@
         <li class="nav-item">
             <a href="#" class="nav-link"><i class="fa-solid fa-euro-sign me-2 w-25"></i> Contabilità</a>
         </li>
-        <li class="nav-item">
-            <a href="#" class="nav-link"><i class="fa-regular fa-calendar me-2 w-25"></i> Eventi</a>
-        </li>
         <li class="nav-item mt-3">
             <a href="VisualizzaGruppoServlet?id=<%= gruppo.getId_gruppo() %>" class="nav-link text-primary border border-primary text-center">
                 <i class="fa-solid fa-arrow-left me-2"></i> Torna al Gruppo
@@ -134,8 +131,13 @@
             <p class="text-muted mb-0">Benvenuto, ecco cosa sta succedendo nel tuo gruppo.</p>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-light border shadow-sm"><i class="fa-solid fa-download me-2"></i>Report PDF</button>
-            <button class="btn btn-club-primary text-white" style="background: var(--club-teal);"><i class="fa-solid fa-plus me-2"></i>Nuovo Socio</button>
+            <form action="generaReportServlet" method="GET" target="_blank">
+                <input type="hidden" name="idGruppo" value="<%= gruppo.getId_gruppo() %>">
+
+                <button type="submit" class="btn btn-light border shadow-sm fw-bold">
+                    <i class="fa-solid fa-download me-2 text-danger"></i>Report PDF
+                </button>
+            </form>
         </div>
     </div>
 
