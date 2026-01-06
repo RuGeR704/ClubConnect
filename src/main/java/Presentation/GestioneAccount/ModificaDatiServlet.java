@@ -23,7 +23,7 @@ public class ModificaDatiServlet extends HttpServlet {
                 return;
             }
             utente = (UtenteBean) session.getAttribute("utente");
-            request.getRequestDispatcher("/WEB-INF/ModificaDatiForm.jsp").forward(request, response); //TODO scegli nome jsp
+            request.getRequestDispatcher("gestioneUtente.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/ModificaDati.jsp");
@@ -96,7 +96,7 @@ public class ModificaDatiServlet extends HttpServlet {
                 dao.doUpdate(con, ub);
                 con.commit();
                 session.setAttribute("utente", ub);
-                response.sendRedirect(request.getContextPath() + "/AccountServlet");
+                response.sendRedirect(request.getContextPath() + "/gestioneUtente.jsp");
             }
         } catch (SQLException sql) {
             response.sendRedirect(request.getContextPath() + "/error.jsp");

@@ -19,6 +19,9 @@
 
     <style>
         body { background-color: #F4F6F9; }
+        /* Header & Navbar (Uniformati a feed.jsp) */
+        .navbar-main { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 1000; }
+
         .explore-card { transition: transform 0.2s; border: none; }
         .explore-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .group-cover-sm { height: 80px; background: linear-gradient(45deg, #1E3A5F, #26A9BC); border-radius: 12px 12px 0 0; }
@@ -31,13 +34,19 @@
         .btn-club-primary { background-color: #1E3A5F; color: white; border: none; }
         .btn-club-primary:hover { background-color: #152943; color: white; }
         .btn-club-teal { background-color: #26A9BC; color: white; border: none; }
+
+        .sidebar-sticky {
+            position: sticky;
+            top: 100px;
+            z-index: 100;
+        }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-main py-2">
     <div class="container">
-        <a href="#" class="d-inline-flex align-items-center gap-2 text-decoration-none">
+        <a href="feedServlet" class="d-inline-flex align-items-center gap-2 text-decoration-none">
             <div class="brand-icon" style="width: 40px; height: 40px;">
                 <img src="./images/logo.png" alt="Logo" class="img-fluid">
             </div>
@@ -45,12 +54,22 @@
         </a>
         <div class="ms-auto d-flex align-items-center gap-3">
             <div class="dropdown">
-                <a href="feedServlet" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark fw-bold" data-bs-toggle="dropdown">
+                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark fw-bold" data-bs-toggle="dropdown">
                     <img src="https://ui-avatars.com/api/?name=<%= utente.getNome() %>+<%= utente.getCognome() %>&background=1E3A5F&color=fff" class="rounded-circle me-2" width="35" height="35">
                     <span class="d-none d-lg-inline"><%= utente.getNome() %> <%= utente.getCognome() %></span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                    <li><a class="dropdown-item" href="LogoutServlet">Esci</a></li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="ModificaDatiServlet">
+                            <i class="fa-solid fa-user-circle text-primary"></i> Dati utente
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider opacity-25"></li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="LogoutServlet">
+                            <i class="fa-solid fa-right-from-bracket"></i> Esci
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -58,30 +77,29 @@
 </nav>
 
 <div class="container py-4">
+    <div class="row g-4">
 
-        <div class="row g-4">
-
-            <div class="col-lg-3 d-none d-lg-block">
-                <div class="sidebar-sticky">
-                    <div class="feed-card text-center pb-3">
-                        <div class="profile-card-header"></div>
-                        <img src="https://ui-avatars.com/api/?name=<%= utente.getNome() %>+<%= utente.getCognome() %>&background=random" class="profile-avatar shadow-sm">
-                        <h5 class="fw-bold mb-0 text-primary"><%= utente.getNome() %> <%= utente.getCognome() %></h5>
-                        <p class="text-muted small">@<%= utente.getUsername() %></p>
-                    </div>
-                    <div class="feed-card p-3">
-                        <ul class="nav flex-column gap-2">
-                            <li class="nav-item"><a href="feedServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-solid fa-house"></i> Home</a></li>
-                            <li class="nav-item"><a href="VisualizzaIscrizioniGruppiServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-solid fa-users"></i> I Miei Gruppi</a></li>
-                            <li class="nav-item"><a href="EsploraGruppiServlet" class="nav-link active d-flex align-items-center gap-3 text-primary fw-bold rounded bg-light p-2"><i class="fa-regular fa-compass me-2"></i>Esplora Gruppi</a></li>
-                            <li class="nav-item"><a href="VisualizzaCalendarioEventiServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-solid fa-calendar-days"></i> Calendario Eventi</a></li>
-                        </ul>
-                    </div>
-                    <a href="crea_gruppo.jsp" class="btn btn-club-teal w-100 py-3 rounded-4 shadow-sm fw-bold">
-                        <i class="fa-solid fa-plus me-2"></i> Crea Nuovo Gruppo
-                    </a>
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="sidebar-sticky">
+                <div class="feed-card text-center pb-3">
+                    <div class="profile-card-header"></div>
+                    <img src="https://ui-avatars.com/api/?name=<%= utente.getNome() %>+<%= utente.getCognome() %>&background=random" class="profile-avatar shadow-sm">
+                    <h5 class="fw-bold mb-0 text-primary"><%= utente.getNome() %> <%= utente.getCognome() %></h5>
+                    <p class="text-muted small">@<%= utente.getUsername() %></p>
                 </div>
+                <div class="feed-card p-3">
+                    <ul class="nav flex-column gap-2">
+                        <li class="nav-item"><a href="feedServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-solid fa-house"></i> Home</a></li>
+                        <li class="nav-item"><a href="VisualizzaIscrizioniGruppiServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-solid fa-users"></i> I Miei Gruppi</a></li>
+                        <li class="nav-item"><a href="EsploraGruppiServlet" class="nav-link active d-flex align-items-center gap-3 text-primary fw-bold rounded bg-light p-2"><i class="fa-regular fa-compass me-2"></i>Esplora Gruppi</a></li>
+                        <li class="nav-item"><a href="VisualizzaCalendarioEventiServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-solid fa-calendar-days"></i> Calendario Eventi</a></li>
+                    </ul>
+                </div>
+                <a href="crea_gruppo.jsp" class="btn btn-club-teal w-100 py-3 rounded-4 shadow-sm fw-bold">
+                    <i class="fa-solid fa-plus me-2"></i> Crea Nuovo Gruppo
+                </a>
             </div>
+        </div>
 
         <div class="col-lg-9">
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -90,7 +108,7 @@
 
             <div class="row g-3">
                 <% if (gruppi == null || gruppi.isEmpty()) { %>
-                <div class="col-12 text-center py-5">
+                <div class="col-12 text-center py-5 bg-white rounded-4 shadow-sm">
                     <i class="fa-solid fa-check-circle fs-1 text-success mb-3"></i>
                     <h5>Wow! Sei iscritto a tutto!</h5>
                     <p class="text-muted">Al momento non ci sono nuovi gruppi disponibili.</p>
@@ -104,10 +122,10 @@
                         <div class="card-body text-center pt-0">
                             <div class="d-flex justify-content-center">
                                 <% if(g.getLogo()!=null && !g.getLogo().isEmpty()) { %>
-                                <img src="<%= g.getLogo() %>" class="group-avatar-sm rounded-circle">
+                                <img src="<%= g.getLogo() %>" class="group-avatar-sm rounded-circle shadow-sm">
                                 <% } else { %>
-                                <div class="group-avatar-sm rounded-circle d-flex align-items-center justify-content-center fw-bold text-primary fs-5">
-                                    <%= g.getNome().substring(0,1) %>
+                                <div class="group-avatar-sm rounded-circle d-flex align-items-center justify-content-center fw-bold text-primary fs-5 shadow-sm">
+                                    <%= g.getNome().substring(0,1).toUpperCase() %>
                                 </div>
                                 <% } %>
                             </div>
@@ -131,5 +149,8 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

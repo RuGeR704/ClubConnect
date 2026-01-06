@@ -125,7 +125,7 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+<nav class="navbar navbar-expand-lg navbar-main py-2">
     <div class="container">
         <a href="feedServlet" class="d-inline-flex align-items-center gap-2 text-decoration-none">
             <div class="brand-icon" style="width: 40px; height: 40px;">
@@ -140,7 +140,17 @@
                     <span class="d-none d-lg-inline"><%= utente.getNome() %> <%= utente.getCognome() %></span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                    <li><a class="dropdown-item" href="LogoutServlet">Esci</a></li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="ModificaDatiServlet">
+                            <i class="fa-solid fa-user-circle text-primary"></i> Dati utente
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider opacity-25"></li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="LogoutServlet">
+                            <i class="fa-solid fa-right-from-bracket"></i> Esci
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
