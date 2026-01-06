@@ -88,12 +88,22 @@
         </a>
         <div class="ms-auto d-flex align-items-center gap-3">
             <div class="dropdown">
-                <a href="feedServlet" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark fw-bold" data-bs-toggle="dropdown">
+                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark fw-bold" data-bs-toggle="dropdown">
                     <img src="https://ui-avatars.com/api/?name=<%= utente.getNome() %>+<%= utente.getCognome() %>&background=1E3A5F&color=fff" class="rounded-circle me-2" width="35" height="35">
                     <span class="d-none d-lg-inline"><%= utente.getNome() %> <%= utente.getCognome() %></span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
-                    <li><a class="dropdown-item" href="LogoutServlet">Esci</a></li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="ModificaDatiServlet">
+                            <i class="fa-solid fa-user-circle text-primary"></i> Dati utente
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider opacity-25"></li>
+                    <li>
+                        <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="LogoutServlet">
+                            <i class="fa-solid fa-right-from-bracket"></i> Esci
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
