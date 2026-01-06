@@ -131,6 +131,29 @@
         <div class="col-lg-6">
 
             <% if (!hasIscrizioni) { %>
+
+            <div class="col-lg-6"> <%
+                String msgSuccesso = (String) session.getAttribute("successo");
+
+                if (msgSuccesso != null) {
+            %>
+                <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 rounded-4 mb-4" role="alert">
+                    <div class="d-flex align-items-center">
+                        <div class="fs-4 me-3 text-success">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-success">Operazione riuscita!</h6>
+                            <small><%= msgSuccesso %></small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <%
+                        session.removeAttribute("successo");
+                    }
+                %>
+
             <div class="empty-state-hero mb-4">
                 <h2 class="fw-bold" style="color: #1E3A5F;">Benvenuto nel Club!</h2>
                 <p class="text-muted">Non segui ancora nessuno. Ecco alcune community:</p>
@@ -443,12 +466,60 @@
         <div class="col-lg-3 d-none d-lg-block">
             <div class="feed-card p-3">
                 <div class="sidebar-sticky">
-                <h6 class="fw-bold text-primary mb-3">Prossimi eventi</h6>
-                <p class="small text-muted">Non sei ancora iscritto a nessun evento! Controlla i gruppi a cui sei iscritto.</p>
+
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 class="fw-bold text-primary mb-0">Prossimi eventi</h6>
+                        <a href="VisualizzaCalendarioEventiServlet" class="small text-decoration-none">Vedi tutti</a>
+                    </div>
+
+                    <%
+                        // Recupero la lista passata dalla FeedServlet
+                        List<EventoBean> eventiPrenotati = (List<EventoBean>) request.getAttribute("eventiPrenotati");
+
+                        // Controllo se ci sono eventi
+                        if (eventiPrenotati != null && !eventiPrenotati.isEmpty()) {
+
+                            // Limito la visualizzazione a max 4 eventi per non allungare troppo la pagina
+                            int count = 0;
+                            for (EventoBean evSidebar : eventiPrenotati) {
+                                if (count >= 4) break; // Stop dopo 4 eventi
+                                count++;
+                    %>
+
+                    <a href="VisualizzaEventoServlet?id=<%= evSidebar.getId_evento() %>" class="text-decoration-none text-dark">
+                        <div class="d-flex align-items-center gap-3 mb-3 p-2 rounded-3 hover-effect" style="background: #f8f9fa;">
+
+                            <div class="text-center rounded-3 bg-white border shadow-sm" style="min-width: 50px; padding: 5px;">
+                        <span class="d-block xsmall fw-bold text-danger text-uppercase" style="font-size: 0.7rem;">
+                            <%= (evSidebar.getData_ora() != null) ? evSidebar.getData_ora().getMonth().toString().substring(0,3) : "ND" %>
+                        </span>
+                                <span class="d-block h5 fw-bold mb-0 text-dark">
+                            <%= (evSidebar.getData_ora() != null) ? evSidebar.getData_ora().getDayOfMonth() : "?" %>
+                        </span>
+                            </div>
+
+                            <div class="overflow-hidden">
+                                <h6 class="fw-bold mb-0 text-truncate" style="font-size: 0.9rem;"><%= evSidebar.getNome() %></h6>
+                            </div>
+                        </div>
+                    </a>
+
+                    <%      } // Fine For %>
+
+                    <% } else { %>
+
+                    <div class="text-center py-4 text-muted">
+                        <i class="fa-regular fa-calendar text-secondary mb-2 opacity-50"></i>
+                        <p class="small mb-0">Non sei ancora iscritto a nessun evento.</p>
+                        <a href="VisualizzaCalendarioEventiServlet" class="small fw-bold mt-2 d-block">Vai al calendario</a>
+                    </div>
+
+                    <% } %>
+
                 </div>
             </div>
         </div>
-
+        </div>
     </div>
 </div>
 

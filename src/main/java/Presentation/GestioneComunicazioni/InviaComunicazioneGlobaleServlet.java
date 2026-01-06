@@ -2,7 +2,7 @@ package Presentation.GestioneComunicazioni;
 
 import Application.GestioneAccount.UtenteBean;
 import Application.GestioneComunicazioni.ComunicazioniBean;
-import Application.GestioneComunicazioni.GestioneComunicazioniBean;
+import Application.GestioneComunicazioni.ComunicazioneService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -11,12 +11,19 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
 @WebServlet(name = "InviaComunicazioneGlobaleServlet", urlPatterns = {"/InviaComunicazioneGlobaleServlet"})
 public class InviaComunicazioneGlobaleServlet extends HttpServlet {
+
+    // 1. Service come campo di istanza
+    private ComunicazioneService service = new ComunicazioneService();
+
+    // 2. Setter per i Test (Dependency Injection)
+    public void setService(ComunicazioneService service) {
+        this.service = service;
+    }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
@@ -36,7 +43,6 @@ public class InviaComunicazioneGlobaleServlet extends HttpServlet {
         // Validazione minima
         if (titolo == null || titolo.trim().isEmpty() || contenuto == null || contenuto.trim().isEmpty()) {
             request.setAttribute("errore", "Titolo e contenuto sono obbligatori.");
-            // Qui si dovrebbe rimandare alla pagina JSP del form
             request.getRequestDispatcher("formComunicazioneGlobale.jsp").forward(request, response);
             return;
         }
@@ -58,12 +64,10 @@ public class InviaComunicazioneGlobaleServlet extends HttpServlet {
             // Impostiamo la data corrente
             nuovaComunicazione.setDataPubblicazione(LocalDateTime.now());
 
-            // Salvataggio tramite Service (Bean di Logica)
-            GestioneComunicazioniBean service = new GestioneComunicazioniBean();
+            // 3. Uso del service iniettato (invece di 'new')
             service.creaComunicazione(nuovaComunicazione);
 
             // Successo
-            // Reindirizza alla lista per vedere il messaggio appena creato
             response.sendRedirect("VisualizzaComunicazioniGlobaliServlet");
 
         } catch (SQLException e) {
@@ -74,7 +78,6 @@ public class InviaComunicazioneGlobaleServlet extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Se qualcuno prova ad accedere via GET, lo rimandiamo al form o alla home
         response.sendRedirect("index.jsp");
     }
 }

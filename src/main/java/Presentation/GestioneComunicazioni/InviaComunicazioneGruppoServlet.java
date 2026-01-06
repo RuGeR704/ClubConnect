@@ -2,7 +2,7 @@ package Presentation.GestioneComunicazioni;
 
 import Application.GestioneAccount.UtenteBean;
 import Application.GestioneComunicazioni.ComunicazioniBean;
-import Application.GestioneComunicazioni.GestioneComunicazioniBean;
+import Application.GestioneComunicazioni.ComunicazioneService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -10,9 +10,7 @@ import jakarta.servlet.http.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Date;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @WebServlet(name = "InviaComunicazioneGruppoServlet", urlPatterns = {"/InviaComunicazioneGruppoServlet"})
@@ -22,6 +20,14 @@ import java.time.LocalDateTime;
         maxRequestSize = 1024 * 1024 * 50    // 50MB
 )
 public class InviaComunicazioneGruppoServlet extends HttpServlet {
+
+    // 1. Service come campo di istanza
+    private ComunicazioneService service = new ComunicazioneService();
+
+    // 2. Setter per i Test
+    public void setService(ComunicazioneService service) {
+        this.service = service;
+    }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
@@ -37,12 +43,10 @@ public class InviaComunicazioneGruppoServlet extends HttpServlet {
         String idGruppoStr = request.getParameter("idGruppo");
         String titolo = request.getParameter("titolo");
         String contenuto = request.getParameter("contenuto");
-        String foto = request.getParameter("foto");
 
         // Validazione base
         if (idGruppoStr == null || idGruppoStr.isEmpty() || titolo == null || titolo.trim().isEmpty()) {
             request.setAttribute("errore", "Dati mancanti (ID Gruppo o Titolo).");
-            // In caso di errore, si torna alla pagina del gruppo
             response.sendRedirect("VisualizzaGruppoServlet?id=" + idGruppoStr);
             return;
         }
@@ -50,22 +54,17 @@ public class InviaComunicazioneGruppoServlet extends HttpServlet {
         try {
             int idGruppo = Integer.parseInt(idGruppoStr);
 
-            Part filePart = request.getPart("foto"); // Recupera il file
+            // Gestione caricamento file
+            Part filePart = request.getPart("foto");
             String nomeFoto = "";
 
             if (filePart != null && filePart.getSize() > 0) {
-                // Definizione cartella di salvataggio (es. /images/uploads/)
                 String uploadPath = getServletContext().getRealPath("") + File.separator + "images" + File.separator + "uploads";
                 File uploadDir = new File(uploadPath);
                 if (!uploadDir.exists()) uploadDir.mkdir();
 
-                // Genera nome file unico per evitare sovrascritture
                 String fileName = System.currentTimeMillis() + "_" + filePart.getSubmittedFileName();
-
-                // Salva il file
                 filePart.write(uploadPath + File.separator + fileName);
-
-                // Salva il percorso relativo per il DB
                 nomeFoto = "images/uploads/" + fileName;
             }
 
@@ -78,21 +77,19 @@ public class InviaComunicazioneGruppoServlet extends HttpServlet {
 
             // IMPOSTAZIONE PER GRUPPO
             nuovaComunicazione.setId_gruppo(idGruppo);
-            nuovaComunicazione.setIsglobal(false); // È una news privata del gruppo
+            nuovaComunicazione.setIsglobal(false);
 
             nuovaComunicazione.setDataPubblicazione(LocalDateTime.now());
 
-            // Salvataggio
-            GestioneComunicazioniBean service = new GestioneComunicazioniBean();
+            // 3. Uso del service iniettato
             service.creaComunicazione(nuovaComunicazione);
 
             // Redirect
-            // Torniamo alla pagina che visualizza le news di quel gruppo specifico
             response.sendRedirect("VisualizzaComunicazioniGruppoServlet?idGruppo=" + idGruppo);
 
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            response.sendRedirect("feedServlet"); // ID Gruppo non valido
+            response.sendRedirect("feedServlet");
         } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("errore", "Errore nel salvataggio della comunicazione.");

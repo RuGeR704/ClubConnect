@@ -214,4 +214,28 @@ public class GruppoDAO {
         }
         return false; // Se non c'è iscrizione o non è gestore
     }
+    // Recupera la lista completa degli utenti iscritti a un gruppo (Serve per la VisualizzaSociServlet)
+
+    public ArrayList<Application.GestioneAccount.UtenteBean> doRetrieveSoci(Connection con, int idGruppo) throws SQLException {
+        ArrayList<Application.GestioneAccount.UtenteBean> soci = new ArrayList<>();
+        // Esegue una JOIN tra Utente e Iscrizione per trovare chi è iscritto a quel gruppo
+        String query = "SELECT u.* FROM Utente u JOIN Iscrizione i ON u.id_utente = i.id_utente WHERE i.id_gruppo = ?";
+
+        try (PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, idGruppo);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Application.GestioneAccount.UtenteBean utente = new Application.GestioneAccount.UtenteBean();
+                    utente.setId_utente(rs.getInt("id_utente"));
+                    utente.setNome(rs.getString("nome"));
+                    utente.setCognome(rs.getString("cognome"));
+                    utente.setEmail(rs.getString("email"));
+                    utente.setCellulare(rs.getString("cellulare")); // Assumendo che ci sia nel DB
+                    // Aggiungi altri campi se necessario
+                    soci.add(utente);
+                }
+            }
+        }
+        return soci;
+    }
 }
