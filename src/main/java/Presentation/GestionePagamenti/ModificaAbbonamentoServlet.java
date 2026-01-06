@@ -44,7 +44,7 @@ public class ModificaAbbonamentoServlet extends HttpServlet {
 
             // Controllo Permessi: L'utente è il gestore?
             if (!service.isUtenteGestore(utente.getId_utente(), idGruppo)) {
-                response.sendRedirect("index.jsp"); // O pagina di errore "Non autorizzato"
+                response.sendRedirect("feedServlet"); // O pagina di errore "Non autorizzato"
                 return;
             }
 
@@ -57,16 +57,16 @@ public class ModificaAbbonamentoServlet extends HttpServlet {
                 response.sendRedirect("VisualizzaGruppoServlet?id=" + idGruppo + "&msg=ModificaOk");
             } else {
                 request.setAttribute("errore", "Errore durante la modifica (Il gruppo è un Club?)");
-                request.getRequestDispatcher("index.jsp").forward(request, response);
+                request.getRequestDispatcher("feedServlet").forward(request, response);
             }
 
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            response.sendRedirect("index.jsp"); // Errore formato numeri
+            response.sendRedirect("feedServlet"); // Errore formato numeri
         }
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.sendRedirect("index.jsp");
+        response.sendRedirect("feedServlet");
     }
 }

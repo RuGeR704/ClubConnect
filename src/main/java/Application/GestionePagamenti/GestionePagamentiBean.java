@@ -76,4 +76,29 @@ public class GestionePagamentiBean {
         }
         return mappa;
     }
+    /**
+     * Registra un nuovo pagamento per la retta di un club.
+     * @param idGruppo ID del club
+     * @param idMetodo ID del metodo di pagamento scelto dall'utente
+     * @param importo Somma da pagare
+     * @return true se il pagamento è registrato con successo
+     */
+    public boolean pagaRetta(int idGruppo, int idMetodo, double importo) {
+        try (Connection con = ConPool.getConnection()) {
+            PagamentoDAO dao = new PagamentoDAO();
+
+            DettagliPagamentoBean pagamento = new DettagliPagamentoBean();
+            pagamento.setId_gruppo(idGruppo);
+            pagamento.setId_metodo(idMetodo);
+            pagamento.setImporto(importo);
+            // Impostiamo la data della transazione al momento attuale
+            pagamento.setData_tansazione(java.time.LocalDateTime.now());
+
+            dao.doSaveDettagliPagamento(con, pagamento);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
