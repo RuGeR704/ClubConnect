@@ -46,7 +46,7 @@ class VisualizzaComunicazioniGruppoServletTest {
         lista.add(c2);
 
         when(serviceMock.recuperaTutteLeComunicazioni()).thenReturn(lista);
-        when(request.getRequestDispatcher("bachecaGruppo.jsp")).thenReturn(dispatcher);
+        when(request.getRequestDispatcher("paginaGruppo.jsp")).thenReturn(dispatcher);
 
         // WHEN
         servlet.doGet(request, response);
