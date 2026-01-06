@@ -1,7 +1,9 @@
 package Presentation.GestioneGruppo;
 
 import Application.GestioneAccount.UtenteBean;
+import Application.GestioneComunicazioni.ComunicazioniBean;
 import Application.GestioneGruppo.GruppoBean;
+import Storage.ComunicazioneDAO;
 import Storage.ConPool;
 import Storage.GruppoDAO;
 import Storage.UtenteDAO;
@@ -35,6 +37,7 @@ public class VisualizzaGruppoServlet extends HttpServlet {
         int idGruppo = Integer.parseInt(id);
         GruppoDAO dao = new GruppoDAO();
         UtenteDAO utenteDAO = new UtenteDAO();
+        ComunicazioneDAO comunicazioneDAO = new ComunicazioneDAO();
 
         try {
             GruppoBean gruppo = dao.doRetrieveByid(ConPool.getConnection(), idGruppo);
@@ -45,6 +48,7 @@ public class VisualizzaGruppoServlet extends HttpServlet {
 
                 List<GruppoBean> gruppiIscritti = utenteDAO.doRetrieveGruppiIscritto(utente.getId_utente());
                 List<GruppoBean> gruppiAdmin = utenteDAO.doRetrieveGruppiAdmin(ConPool.getConnection(), utente.getId_utente());
+                List<ComunicazioniBean> comunicazioni = comunicazioneDAO.doRetrievebyGruppo(ConPool.getConnection(), idGruppo);
 
                 for (GruppoBean g : gruppiIscritti) {
                     if (g.getId_gruppo() == gruppo.getId_gruppo()) {
@@ -63,6 +67,7 @@ public class VisualizzaGruppoServlet extends HttpServlet {
                 request.setAttribute("gruppo", gruppo);
                 request.setAttribute("isAdmin", isAdmin);
                 request.setAttribute("isIscritto", isIscritto);
+                request.setAttribute("comunicazioni", comunicazioni);
 
                 RequestDispatcher view = request.getRequestDispatcher("paginaGruppo.jsp");
                 view.forward(request, response);

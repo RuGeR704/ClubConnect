@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 @WebServlet(name = "InviaComunicazioneGlobaleServlet", urlPatterns = {"/InviaComunicazioneGlobaleServlet"})
 public class InviaComunicazioneGlobaleServlet extends HttpServlet {
@@ -60,8 +61,8 @@ public class InviaComunicazioneGlobaleServlet extends HttpServlet {
             nuovaComunicazione.setIsglobal(true);
             nuovaComunicazione.setId_gruppo(-1); // -1 indica "Nessun Gruppo specifico"
 
-            // Data corrente
-            nuovaComunicazione.setDataPubblicazione(new Date(System.currentTimeMillis()));
+            // Impostiamo la data corrente
+            nuovaComunicazione.setDataPubblicazione(LocalDateTime.now());
 
             // 3. Salvataggio tramite Service (non più DAO diretto)
             service.creaComunicazione(nuovaComunicazione);

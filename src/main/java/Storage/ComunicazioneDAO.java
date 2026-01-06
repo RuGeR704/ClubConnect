@@ -23,10 +23,44 @@ public class ComunicazioneDAO {
                     c.setId_gruppo(rs.getInt("id_gruppo"));
                     c.setId_autore(rs.getInt("id_autore"));
                     c.setContenuto(rs.getString("contenuto"));
-                    c.setFoto(rs.getString("foto"));
-                    c.setDataPubblicazione(rs.getDate("data_pubblicazione"));
-                    c.setIsglobal(rs.getBoolean("isglobal"));
                     c.setTitolo(rs.getString("titolo"));
+                    c.setFoto(rs.getString("foto"));
+                    java.sql.Timestamp data_ora = rs.getTimestamp("data_pubblicazione");
+                    if(data_ora != null) {
+                        c.setDataPubblicazione(data_ora.toLocalDateTime());
+                    }else {
+                        c.setDataPubblicazione(null);
+                    }
+                    c.setIsglobal(rs.getBoolean("is_global"));
+                    c.setTitolo(rs.getString("titolo"));
+                    comunicazioni.add(c);
+                }
+            }
+        }
+        return comunicazioni;
+    }
+
+    public List<ComunicazioniBean> doRetrievebyGruppo (Connection con, int id_gruppo) throws SQLException {
+        List<ComunicazioniBean> comunicazioni = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(
+                "SELECT * FROM Comunicazione C WHERE C.id_gruppo = ? ORDER BY C.data_pubblicazione DESC")) {
+            ps.setInt(1, id_gruppo);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ComunicazioniBean c = new ComunicazioniBean();
+                    c.setId_comunicazione(rs.getInt("id_comunicazione"));
+                    c.setId_gruppo(rs.getInt("id_gruppo"));
+                    c.setId_autore(rs.getInt("id_autore"));
+                    c.setContenuto(rs.getString("contenuto"));
+                    c.setTitolo(rs.getString("titolo"));
+                    c.setFoto(rs.getString("foto"));
+                    java.sql.Timestamp data_ora = rs.getTimestamp("data_pubblicazione");
+                    if(data_ora != null) {
+                        c.setDataPubblicazione(data_ora.toLocalDateTime());
+                    }else {
+                        c.setDataPubblicazione(null);
+                    }
+                    c.setIsglobal(rs.getBoolean("is_global"));
                     comunicazioni.add(c);
                 }
             }
@@ -46,9 +80,15 @@ public class ComunicazioneDAO {
                     c.setId_gruppo(rs.getInt("id_gruppo"));
                     c.setId_autore(rs.getInt("id_autore"));
                     c.setContenuto(rs.getString("contenuto"));
+                    c.setTitolo(rs.getString("titolo"));
                     c.setFoto(rs.getString("foto"));
-                    c.setDataPubblicazione(rs.getDate("data_pubblicazione"));
-                    c.setIsglobal(rs.getBoolean("isglobal"));
+                    java.sql.Timestamp data_ora = rs.getTimestamp("data_pubblicazione");
+                    if(data_ora != null) {
+                        c.setDataPubblicazione(data_ora.toLocalDateTime());
+                    }else {
+                        c.setDataPubblicazione(null);
+                    }
+                    c.setIsglobal(rs.getBoolean("is_global"));
                     comunicazioni.add(c);
                 }
             }
@@ -68,9 +108,15 @@ public class ComunicazioneDAO {
                     c.setId_gruppo(rs.getInt("id_gruppo"));
                     c.setId_autore(rs.getInt("id_autore"));
                     c.setContenuto(rs.getString("contenuto"));
+                    c.setTitolo(rs.getString("titolo"));
                     c.setFoto(rs.getString("foto"));
-                    c.setDataPubblicazione(rs.getDate("data_pubblicazione"));
-                    c.setIsglobal(rs.getBoolean("isglobal"));
+                    java.sql.Timestamp data_ora = rs.getTimestamp("data_pubblicazione");
+                    if(data_ora != null) {
+                        c.setDataPubblicazione(data_ora.toLocalDateTime());
+                    }else {
+                        c.setDataPubblicazione(null);
+                    }
+                    c.setIsglobal(rs.getBoolean("is_global"));
                     c.setTitolo(rs.getString("titolo"));
                 }
             }
@@ -84,9 +130,13 @@ public class ComunicazioneDAO {
             ps.setInt(2, c.getId_autore());
             ps.setString(3, c.getContenuto());
             ps.setString(4, c.getFoto());
-            ps.setDate(5, c.getDataPubblicazione());
-            ps.setString(6, c.getTitolo()); //Nella query titolo è il 6 punto interrogativo e id_comunicazione è il 7
-            ps.setInt(7, c.getId_comunicazione()); //Quindi li ho invertiti
+            if (c.getDataPubblicazione() != null) {
+                ps.setTimestamp(5, java.sql.Timestamp.valueOf(c.getDataPubblicazione()));
+            } else {
+                ps.setNull(5, java.sql.Types.TIMESTAMP);
+            }
+            ps.setString(6, c.getTitolo());
+            ps.setInt(7, c.getId_comunicazione());
             ps.executeUpdate();
         }
     }
@@ -105,7 +155,11 @@ public class ComunicazioneDAO {
             ps.setInt(2, c.getId_autore());
             ps.setString(3, c.getContenuto());
             ps.setString(4, c.getFoto());
-            ps.setDate(5, c.getDataPubblicazione());
+            if (c.getDataPubblicazione() != null) {
+                ps.setTimestamp(5, java.sql.Timestamp.valueOf(c.getDataPubblicazione()));
+            } else {
+                ps.setNull(5, java.sql.Types.TIMESTAMP);
+            }
             ps.setBoolean(6, c.isIsglobal());
             ps.setString(7, c.getTitolo());
             ps.executeUpdate();

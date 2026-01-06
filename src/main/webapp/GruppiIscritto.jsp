@@ -101,26 +101,32 @@
 </nav>
 
 <div class="container py-4">
+
     <div class="row g-4">
 
-        <div class="col-lg-3 d-none d-lg-block">
-            <div class="feed-card text-center pb-3">
-                <div class="profile-card-header"></div>
-                <img src="https://ui-avatars.com/api/?name=<%= utente.getNome() %>+<%= utente.getCognome() %>&background=random" class="profile-avatar shadow-sm">
-                <h5 class="fw-bold mb-0 text-primary"><%= utente.getNome() %> <%= utente.getCognome() %></h5>
-                <p class="text-muted small">@<%= utente.getUsername() %></p>
+        <div class="row g-4">
+
+            <div class="col-lg-3 d-none d-lg-block">
+                <div class="sidebar-sticky">
+                    <div class="feed-card text-center pb-3">
+                        <div class="profile-card-header"></div>
+                        <img src="https://ui-avatars.com/api/?name=<%= utente.getNome() %>+<%= utente.getCognome() %>&background=random" class="profile-avatar shadow-sm">
+                        <h5 class="fw-bold mb-0 text-primary"><%= utente.getNome() %> <%= utente.getCognome() %></h5>
+                        <p class="text-muted small">@<%= utente.getUsername() %></p>
+                        </div>
+                    <div class="feed-card p-3">
+                        <ul class="nav flex-column gap-2">
+                            <li class="nav-item"><a href="feedServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-solid fa-house"></i> Home</a></li>
+                            <li class="nav-item"><a href="VisualizzaIscrizioniGruppiServlet" class="nav-link active d-flex align-items-center gap-3 text-primary fw-bold rounded bg-light p-2"><i class="fa-solid fa-users"></i> I Miei Gruppi</a></li>
+                            <li class="nav-item"><a href="EsploraGruppiServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-regular fa-compass me-2"></i>Esplora Gruppi</a></li>
+                            <li class="nav-item"><a href="VisualizzaCalendarioEventiServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-solid fa-calendar-days"></i> Calendario Eventi</a></li>
+                        </ul>
+                    </div>
+                    <a href="crea_gruppo.jsp" class="btn btn-club-teal w-100 py-3 rounded-4 shadow-sm fw-bold">
+                        <i class="fa-solid fa-plus me-2"></i> Crea Nuovo Gruppo
+                    </a>
+                </div>
             </div>
-            <div class="feed-card p-3">
-                <ul class="nav flex-column gap-2">
-                    <li class="nav-item"><a href="feedServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-solid fa-house"></i> Home</a></li>
-                    <li class="nav-item"><a href="VisualizzaIscrizioniGruppiServlet" class="nav-link active d-flex align-items-center gap-3 text-primary fw-bold rounded bg-light p-2"><i class="fa-solid fa-users"></i> I Miei Gruppi</a></li>
-                    <li class="nav-item"><a href="EsploraGruppiServlet" class="nav-link d-flex align-items-center gap-3 text-secondary p-2"><i class="fa-regular fa-compass me-2"></i> Esplora Gruppi</a></li>
-                </ul>
-            </div>
-            <a href="crea_gruppo.jsp" class="btn btn-club-teal w-100 py-3 rounded-4 shadow-sm fw-bold">
-                <i class="fa-solid fa-plus me-2"></i> Crea Nuovo Gruppo
-            </a>
-        </div>
 
         <div class="col-lg-9">
 
@@ -213,7 +219,7 @@
                 </div>
                 <% }} %>
             </div>
-
+        </div>
         </div> </div> </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

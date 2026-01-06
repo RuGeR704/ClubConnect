@@ -149,4 +149,33 @@ public class PagamentoDAO {
             ps.executeUpdate();
         }
     }
+    /**
+     * Verifica se esiste un pagamento effettuato da un utente per un determinato gruppo
+     * la cui validità (basata sulla frequenza del club) non sia ancora scaduta.
+     */
+    public boolean isAbbonamentoValido(Connection con, int idUtente, int idGruppo, int giorniValidita) throws SQLException {
+        // Seleziona l'ultimo pagamento effettuato dall'utente per quel gruppo specifico
+        String query = "SELECT p.data_transazione FROM Pagamento p " +
+                "JOIN Metodo_Pagamento mp ON p.id_metodo = mp.id_metodo " +
+                "WHERE mp.id_utente = ? AND p.id_gruppo = ? " +
+                "ORDER BY p.data_transazione DESC LIMIT 1";
+
+        try (PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, idUtente);
+            ps.setInt(2, idGruppo);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    java.sql.Timestamp dataTransazione = rs.getTimestamp("data_transazione");
+                    if (dataTransazione != null) {
+                        // Calcola la scadenza: millisecondi della transazione + (giorni di validità in ms)
+                        long scadenzaMillis = dataTransazione.getTime() + ((long) giorniValidita * 24 * 60 * 60 * 1000);
+                        // L'abbonamento è valido se la scadenza è successiva all'istante attuale
+                        return scadenzaMillis > System.currentTimeMillis();
+                    }
+                }
+            }
+        }
+        return false; // Nessun pagamento trovato o abbonamento scaduto
+    }
 }
