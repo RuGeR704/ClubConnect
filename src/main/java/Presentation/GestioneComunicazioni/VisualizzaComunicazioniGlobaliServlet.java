@@ -35,7 +35,7 @@ public class VisualizzaComunicazioniGlobaliServlet extends HttpServlet {
             request.setAttribute("listaComunicazioni", globali);
             request.getRequestDispatcher("bachecaGlobale.jsp").forward(request, response);
         } catch (Exception e) {
-            response.sendRedirect("index.jsp");
+            response.sendRedirect("feedServlet");
         }
     }
 }

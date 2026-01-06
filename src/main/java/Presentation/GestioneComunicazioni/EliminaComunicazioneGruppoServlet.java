@@ -46,7 +46,7 @@ public class EliminaComunicazioneGruppoServlet extends HttpServlet {
                 e.printStackTrace();
             }
         }
-        response.sendRedirect("index.jsp");
+        response.sendRedirect("feedServlet");
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

@@ -34,7 +34,7 @@ public class ImpostaAbbonamentoServlet extends HttpServlet {
         if (idGruppoStr == null || importoStr == null || frequenzaStr == null) {
             request.setAttribute("errore", "Tutti i campi sono obbligatori.");
             // Rimandiamo indietro (o alla home se non sappiamo dove andare)
-            response.sendRedirect("index.jsp");
+            response.sendRedirect("feedServlet");
             return;
         }
 
@@ -69,19 +69,19 @@ public class ImpostaAbbonamentoServlet extends HttpServlet {
             } else {
                 // Errore Logico (es. l'ID gruppo non esiste o non è un Club)
                 request.setAttribute("errore", "Errore: Impossibile impostare l'abbonamento (Il gruppo è un Club?).");
-                request.getRequestDispatcher("index.jsp").forward(request, response);
+                request.getRequestDispatcher("feedServlet").forward(request, response);
             }
 
         } catch (NumberFormatException e) {
             // Gestione errore se importo o frequenza non sono numeri validi
             e.printStackTrace();
             request.setAttribute("errore", "Formato numeri non valido.");
-            request.getRequestDispatcher("index.jsp").forward(request, response);
+            request.getRequestDispatcher("feedServlet").forward(request, response);
         }
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // Impediamo l'accesso
-        response.sendRedirect("index.jsp");
+        response.sendRedirect("feedServlet");
     }
 }
