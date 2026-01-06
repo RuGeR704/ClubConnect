@@ -31,7 +31,7 @@ public class VisualizzaSociServlet extends HttpServlet {
 
         String idStr = request.getParameter("id");
         if (idStr == null || idStr.isEmpty()) {
-            response.sendRedirect("index.jsp");
+            response.sendRedirect("feedServlet");
             return;
         }
 
@@ -42,7 +42,7 @@ public class VisualizzaSociServlet extends HttpServlet {
             // Recupero il Gruppo
             GruppoBean gruppo = gruppoService.recuperaGruppo(idGruppo);
             if (gruppo == null) {
-                response.sendRedirect("index.jsp"); // Gruppo non trovato
+                response.sendRedirect("feedServlet"); // Gruppo non trovato
                 return;
             }
 
@@ -67,14 +67,14 @@ public class VisualizzaSociServlet extends HttpServlet {
             request.setAttribute("statoPagamenti", statoPagamenti); // Sarà vuota se non è un club, ma non null
 
             // Forward alla JSP
-            request.getRequestDispatcher("VisualizzaSoci.jsp").forward(request, response);
+            request.getRequestDispatcher("WEB-INF/VisualizzaSoci.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
-            response.sendRedirect("index.jsp");
+            response.sendRedirect("feedServlet");
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("errore", "Errore nel recupero dei soci.");
-            request.getRequestDispatcher("index.jsp").forward(request, response); // O pagina errore
+            request.getRequestDispatcher("feedServlet").forward(request, response); // O pagina errore
         }
     }
 
