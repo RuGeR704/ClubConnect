@@ -1,5 +1,6 @@
 package Presentation.GestioneGruppo;
 
+import Application.GestioneAccount.UtenteBean;
 import com.itextpdf.text.*;
 import com.itextpdf.text.Font;
 import com.itextpdf.text.pdf.PdfPCell;
@@ -47,6 +48,8 @@ public class GeneraReportServlet extends HttpServlet {
             EventoDAO eventoDAO = new EventoDAO();
             List<EventoBean> eventi = eventoDAO.doRetrievebyGroup(con, idGruppo);
 
+            List<UtenteBean> soci = gruppoDAO.doRetrieveSoci(ConPool.getConnection(), idGruppo);
+
             // 3. Impostazione Response per PDF
             response.setContentType("application/pdf");
             response.setHeader("Content-Disposition", "attachment; filename=Report_" + gruppo.getNome().replace(" ", "_") + ".pdf");
@@ -70,7 +73,7 @@ public class GeneraReportServlet extends HttpServlet {
             // --- INFO GRUPPO ---
             document.add(new Paragraph("Nome Gruppo: " + gruppo.getNome(), subTitleFont));
             document.add(new Paragraph("Settore: " + gruppo.getSettore(), normalFont));
-            document.add(new Paragraph(" "));
+            document.add(new Paragraph("Totale Soci: " + (soci != null ? soci.size() : 0), normalFont));
 
             document.add(new Paragraph("-----------------------------------------------------------------"));
             document.add(new Paragraph(" "));
@@ -101,6 +104,34 @@ public class GeneraReportServlet extends HttpServlet {
             }
 
             document.add(table);
+
+            document.add(new Paragraph(" "));
+            document.add(new Paragraph(" "));
+
+            document.add(new Paragraph("Lista Soci Iscritti", subTitleFont));
+            document.add(new Paragraph(" "));
+
+            PdfPTable tableSoci = new PdfPTable(3); // 3 Colonne: Nome, Cognome, Email
+            tableSoci.setWidthPercentage(100);
+
+            addTableHeader(tableSoci, "Nome");
+            addTableHeader(tableSoci, "Cognome");
+            addTableHeader(tableSoci, "Email");
+
+            if (soci != null && !soci.isEmpty()) {
+                for (UtenteBean socio : soci) {
+                    tableSoci.addCell(socio.getNome());
+                    tableSoci.addCell(socio.getCognome());
+                    tableSoci.addCell(socio.getEmail());
+                }
+            } else {
+                PdfPCell cell = new PdfPCell(new Phrase("Nessun socio iscritto", normalFont));
+                cell.setColspan(3); // Occupa 3 colonne
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setPadding(10);
+                tableSoci.addCell(cell);
+            }
+            document.add(tableSoci);
 
             // --- FOOTER ---
             document.add(new Paragraph(" "));

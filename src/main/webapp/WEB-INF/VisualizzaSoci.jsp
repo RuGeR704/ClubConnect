@@ -100,8 +100,8 @@
 
 <div class="dashboard-sidebar d-flex flex-column">
     <a href="feedServlet" class="d-flex align-items-center gap-2 mb-5 text-decoration-none">
-        <div style="width:35px; height:35px; background:var(--club-dark); border-radius:8px;"></div>
-        <span class="fs-5 fw-bold" style="color: var(--club-dark);">ClubConnect</span>
+        <img src="./images/logo.png" width="35" alt="Logo">
+        <span class="fs-4 fw-bold" style="color: #1E3A5F;">Club<span style="color: #26A9BC;">Connect</span></span>
     </a>
 
     <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-3 bg-light">
@@ -119,12 +119,6 @@
         </li>
         <li class="nav-item">
             <a href="#" class="nav-link active"><i class="fa-solid fa-users me-2 w-25"></i> Soci & Tessere</a>
-        </li>
-        <li class="nav-item">
-            <a href="#" class="nav-link"><i class="fa-solid fa-euro-sign me-2 w-25"></i> Contabilità</a>
-        </li>
-        <li class="nav-item">
-            <a href="#" class="nav-link"><i class="fa-regular fa-calendar me-2 w-25"></i> Eventi</a>
         </li>
         <li class="nav-item mt-3">
             <a href="VisualizzaGruppoServlet?id=<%= gruppo != null ? gruppo.getId_gruppo() : 0 %>" class="nav-link text-primary border border-primary text-center">
@@ -144,10 +138,6 @@
         <div>
             <h3 class="fw-bold text-dark">Gestione Soci</h3>
             <p class="text-muted mb-0">Visualizza e gestisci gli iscritti al <%= isClub ? "Club" : "Gruppo" %>.</p>
-        </div>
-        <div class="d-flex gap-2">
-            <button class="btn btn-light border shadow-sm"><i class="fa-solid fa-file-csv me-2"></i>Esporta CSV</button>
-            <button class="btn btn-club-primary shadow-sm"><i class="fa-solid fa-user-plus me-2"></i>Aggiungi Manualmente</button>
         </div>
     </div>
 
@@ -227,17 +217,7 @@
                     <% } %>
 
                     <td class="text-end pe-4">
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-link text-muted" type="button" data-bs-toggle="dropdown">
-                                <i class="fa-solid fa-ellipsis-vertical"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                <li><a class="dropdown-item" href="VisualizzaProfiloServlet?id=<%= socio.getId_utente() %>"><i class="fa-regular fa-eye me-2"></i> Vedi Profilo</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fa-solid fa-envelope me-2"></i> Invia Messaggio</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger" href="#"><i class="fa-solid fa-user-xmark me-2"></i> Espelli</a></li>
-                            </ul>
-                        </div>
+                        <a class="dropdown-item text-danger" href="#"><i class="fa-solid fa-user-xmark me-2"></i> Espelli</a></li>
                     </td>
                 </tr>
                 <% }
