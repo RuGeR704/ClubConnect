@@ -275,4 +275,42 @@ public class EventoDAO {
         }
     }
 
+    public PartecipazioneBean doRetrievePartecipazione(Connection con, int idUtente, int idEvento) throws SQLException {
+        String query = "SELECT * FROM Partecipazione WHERE id_utente = ? AND id_evento = ?";
+        PartecipazioneBean p = new PartecipazioneBean();
+
+        try(PreparedStatement ps = con.prepareStatement(query)){
+            ps.setInt(1, idUtente);
+            ps.setInt(2, idEvento);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    p.setId_partecipazione(rs.getInt("id_partecipazione"));
+                    p.setId_evento(rs.getInt("id_evento"));
+                    p.setId_utente(rs.getInt("id_utente"));
+                    java.sql.Timestamp ts = rs.getTimestamp("data_registrazione");
+                    if(ts != null) p.setData_registrazione(ts.toLocalDateTime());
+                }
+            }
+        }
+        return p;
+    }
+
+    public void doRemovePartecipazione(Connection con, PartecipazioneBean e) throws SQLException {
+        String query = "DELETE FROM Partecipazione WHERE id_evento = ?";
+        try (PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, e.getId_evento());
+            ps.executeUpdate();
+        }
+    }
+
+    public boolean isUtentePartecipante(Connection con, int idUtente, int idEvento) throws SQLException {
+        String query = "SELECT 1 FROM Partecipazione WHERE id_utente = ? AND id_evento = ?";
+        try (PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, idUtente);
+            ps.setInt(2, idEvento);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next(); // Torna TRUE se è già iscritto
+            }
+        }
+    }
 }

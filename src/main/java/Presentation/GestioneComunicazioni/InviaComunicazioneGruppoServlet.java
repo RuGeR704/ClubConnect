@@ -4,17 +4,23 @@ import Application.GestioneAccount.UtenteBean;
 import Application.GestioneComunicazioni.ComunicazioniBean;
 import Application.GestioneComunicazioni.GestioneComunicazioniBean;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @WebServlet(name = "InviaComunicazioneGruppoServlet", urlPatterns = {"/InviaComunicazioneGruppoServlet"})
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024 * 2, // 2MB
+        maxFileSize = 1024 * 1024 * 10,      // 10MB
+        maxRequestSize = 1024 * 1024 * 50    // 50MB
+)
 public class InviaComunicazioneGruppoServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -44,21 +50,37 @@ public class InviaComunicazioneGruppoServlet extends HttpServlet {
         try {
             int idGruppo = Integer.parseInt(idGruppoStr);
 
-            // Qui si controlla se l'utente è davvero il "Gestore" di QUESTO gruppo.
-            // Il controllo è fatto nella JSP.
+            Part filePart = request.getPart("foto"); // Recupera il file
+            String nomeFoto = "";
+
+            if (filePart != null && filePart.getSize() > 0) {
+                // Definizione cartella di salvataggio (es. /images/uploads/)
+                String uploadPath = getServletContext().getRealPath("") + File.separator + "images" + File.separator + "uploads";
+                File uploadDir = new File(uploadPath);
+                if (!uploadDir.exists()) uploadDir.mkdir();
+
+                // Genera nome file unico per evitare sovrascritture
+                String fileName = System.currentTimeMillis() + "_" + filePart.getSubmittedFileName();
+
+                // Salva il file
+                filePart.write(uploadPath + File.separator + fileName);
+
+                // Salva il percorso relativo per il DB
+                nomeFoto = "images/uploads/" + fileName;
+            }
 
             // Creazione Bean
             ComunicazioniBean nuovaComunicazione = new ComunicazioniBean();
             nuovaComunicazione.setTitolo(titolo);
             nuovaComunicazione.setContenuto(contenuto);
-            nuovaComunicazione.setFoto(foto);
+            nuovaComunicazione.setFoto(nomeFoto);
             nuovaComunicazione.setId_autore(utente.getId_utente());
 
             // IMPOSTAZIONE PER GRUPPO
             nuovaComunicazione.setId_gruppo(idGruppo);
             nuovaComunicazione.setIsglobal(false); // È una news privata del gruppo
 
-            nuovaComunicazione.setDataPubblicazione(new Date(System.currentTimeMillis()));
+            nuovaComunicazione.setDataPubblicazione(LocalDateTime.now());
 
             // Salvataggio
             GestioneComunicazioniBean service = new GestioneComunicazioniBean();
@@ -70,7 +92,7 @@ public class InviaComunicazioneGruppoServlet extends HttpServlet {
 
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            response.sendRedirect("index.jsp"); // ID Gruppo non valido
+            response.sendRedirect("feedServlet"); // ID Gruppo non valido
         } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("errore", "Errore nel salvataggio della comunicazione.");
@@ -78,6 +100,6 @@ public class InviaComunicazioneGruppoServlet extends HttpServlet {
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.sendRedirect("index.jsp");
+        response.sendRedirect("feedServlet");
     }
 }

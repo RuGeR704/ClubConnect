@@ -231,7 +231,7 @@
                 <a class="nav-link active rounded-pill fw-bold" id="home-tab" data-bs-toggle="tab" href="#home" role="tab">Bacheca</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link rounded-pill fw-bold" id="about-tab" data-bs-toggle="tab" href="#about" role="tab">Informazioni</a>
+                <a class="nav-link rounded-pill fw-bold" id="about-tab" data-bs-toggle="tab" href="#about" role="tab">Comunicazioni</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link rounded-pill fw-bold" id="events-tab" data-bs-toggle="tab" href="#events" role="tab">Eventi</a>
@@ -406,7 +406,7 @@
                         List<EventoBean> eventi = eventoDAO.doRetrievebyGroup(ConPool.getConnection(), gruppo.getId_gruppo());
 
                         ComunicazioneDAO postDAO = new ComunicazioneDAO();
-                        List<ComunicazioniBean> posts = postDAO.doRetrievebyGroup(ConPool.getConnection(), gruppo.getId_gruppo());
+                        List<ComunicazioniBean> posts = postDAO.doRetrievebyGruppo(ConPool.getConnection(), gruppo.getId_gruppo());
 
                         List<Object> feedItems = new ArrayList<>();
                         if(eventi != null) feedItems.addAll(eventi);
@@ -422,6 +422,7 @@
                                 return d2.compareTo(d1);
                             }
                         });
+
                     %>
 
                     <% if (feedItems.isEmpty()) { %>
@@ -519,7 +520,7 @@
                                         </div>
                                         <div class="fw-bold small <%= (ev.getCapienza_massima() > 0) ? "text-success" : "text-danger" %>">
                                             <% if (ev.getCapienza_massima() > 0) { %>
-                                            <i class="fa-solid fa-ticket me-2"></i>Posti disponibili: <%= ev.getCapienza_massima() %>
+                                            <i class="fa-solid fa-ticket me-2"></i>Posti disponibili: <%= ev.getPosti_disponibili() %>
                                             <% } else { %>
                                             <i class="fa-solid fa-circle-xmark me-2"></i>ESAURITO
                                             <% } %>
@@ -529,18 +530,46 @@
                                 </div>
                             </div>
 
-                            <form action="IscrizioneEventoServlet" method="POST">
+                            <%
+                                // 1. Controlliamo se l'utente è già iscritto
+                                boolean isGiaIscritto = false;
+                                try {
+                                    isGiaIscritto = eventoDAO.isUtentePartecipante(Storage.ConPool.getConnection(), utente.getId_utente(), ev.getId_evento());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            %>
+
+                            <form action="IscrizioneEventoServlet" method="POST" onsubmit="<%= isGiaIscritto ? "return confirm('Vuoi cancellare la tua iscrizione?');" : "" %>">
+
                                 <input type="hidden" name="idEvento" value="<%= ev.getId_evento() %>">
 
-                                <% if (ev.getCapienza_massima() > 0) { %>
-                                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm">
+                                <%-- CASO 1: L'UTENTE È GIÀ ISCRITTO --%>
+                                <% if (isGiaIscritto) { %>
+                                <input type="hidden" name="action" value="leave">
+
+                                <button type="submit" class="btn btn-outline-danger w-100 fw-bold">
+                                    <i class="fa-solid fa-xmark me-2"></i> Annulla Iscrizione
+                                </button>
+
+                                <%-- CASO 2: NON ISCRITTO E C'È POSTO --%>
+                                <% } else if (ev.getPosti_disponibili() > 0) { %>
+
+                                <input type="hidden" name="action" value="join">
+
+                                <button type="submit" class="btn btn-club-teal w-100 text-green fw-bold">
                                     <i class="fa-solid fa-check me-2"></i> Partecipa all'evento
                                 </button>
+
+                                <%-- CASO 3: SOLD OUT --%>
                                 <% } else { %>
-                                <button type="button" class="btn btn-secondary w-100 rounded-pill fw-bold py-2" disabled>
+
+                                <button type="button" class="btn btn-secondary w-100 fw-bold" disabled>
                                     <i class="fa-solid fa-ban me-2"></i> Posti Esauriti
                                 </button>
+
                                 <% } %>
+
                             </form>
 
                         </div>
@@ -552,8 +581,12 @@
                         ComunicazioniBean post = (ComunicazioniBean) item; %>
                     <div class="info-card mb-4 border-start border-4 border-info">
                         <div class="d-flex align-items-center gap-2 mb-3">
-                            <span class="badge bg-info bg-opacity-10 text-info rounded-pill">Avviso</span>
-                            <small class="text-muted"><%= (post.getDataPubblicazione() != null) ? post.getDataPubblicazione().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "" %></small>
+                            <span class="badge bg-info bg-opacity-10 text-info rounded-pill">Comunicazione</span>
+                            <small class="text-muted">
+                                <%= (post.getDataPubblicazione() != null)
+                                        ? post.getDataPubblicazione().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+                                        : "" %>
+                            </small>
                         </div>
                         <h5 class="fw-bold"><%= post.getTitolo() %></h5>
                         <p style="white-space: pre-line;"><%= post.getContenuto() %></p>
@@ -574,12 +607,87 @@
 
                     <% } %>
                     <% } %>
-                </div> <div class="tab-pane fade" id="about" role="tabpanel">
-                <div class="info-card">
-                    <h4>Storia del gruppo</h4>
-                    <p>Qui potresti mettere una descrizione più lunga...</p>
+
                 </div>
-            </div>
+
+                <div class="tab-pane fade" id="about" role="tabpanel">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold mb-0 text-dark">
+                            <i class="fa-solid fa-bullhorn me-2 text-info"></i>Bacheca Comunicazioni
+                        </h4>
+                    </div>
+
+                    <%
+                        // 1. Recupero la lista specifica delle comunicazioni dal request
+                        // (Assicurati che la Servlet faccia request.setAttribute("comunicazioni", ...))
+                        java.util.List<Application.GestioneComunicazioni.ComunicazioniBean> listaCom =
+                                (java.util.List<Application.GestioneComunicazioni.ComunicazioniBean>) request.getAttribute("comunicazioni");
+
+                        if (listaCom != null && !listaCom.isEmpty()) {
+                            for (Application.GestioneComunicazioni.ComunicazioniBean post : listaCom) {
+                    %>
+
+                    <div class="info-card mb-4 border-start border-4 border-info bg-white shadow-sm p-4 rounded-3">
+
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2">
+                    <i class="fa-solid fa-newspaper me-1"></i> News
+                </span>
+                            </div>
+                            <small class="text-muted fw-bold">
+                                <i class="fa-regular fa-clock me-1"></i>
+                                <%= (post.getDataPubblicazione() != null)
+                                        ? post.getDataPubblicazione().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+                                        : "--/--/----" %>
+                            </small>
+                        </div>
+
+                        <h5 class="fw-bold text-dark mb-3"><%= post.getTitolo() %></h5>
+
+                        <p class="text-secondary lh-lg mb-3" style="white-space: pre-line;"><%= post.getContenuto() %></p>
+
+                        <% if (post.getFoto() != null && !post.getFoto().isEmpty()) { %>
+                        <div class="mt-3">
+                            <img src="<%= post.getFoto() %>"
+                                 class="img-fluid rounded-4 w-100 border"
+                                 style="max-height: 350px; object-fit: cover; cursor: zoom-in;"
+                                 alt="Allegato"
+                                 data-bs-toggle="modal"
+                                 data-bs-target="#modalCom<%= post.getId_comunicazione() %>">
+                        </div>
+
+                        <div class="modal fade" id="modalCom<%= post.getId_comunicazione() %>" tabindex="-1">
+                            <div class="modal-dialog modal-xl modal-dialog-centered">
+                                <div class="modal-content bg-transparent border-0 text-center">
+                                    <div class="position-absolute top-0 end-0 m-3" style="z-index: 1055;">
+                                        <button type="button" class="btn-close btn-close-white bg-white rounded-circle p-2" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <img src="<%= post.getFoto() %>" class="img-fluid rounded shadow-lg" style="max-height: 90vh;">
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+
+                    </div>
+
+                    <%
+                        } // Fine For
+                    } else {
+                    %>
+
+                    <div class="text-center py-5 border rounded-4 bg-light">
+                        <div class="mb-3 text-muted opacity-50">
+                            <i class="fa-regular fa-comments fa-3x"></i>
+                        </div>
+                        <h6 class="fw-bold text-muted">Nessuna comunicazione</h6>
+                        <p class="small text-muted mb-0">Non ci sono ancora avvisi in questa bacheca.</p>
+                    </div>
+
+                    <% } %>
+
+                </div>
 
                 <div class="tab-pane fade" id="events" role="tabpanel">
                     <div class="info-card">

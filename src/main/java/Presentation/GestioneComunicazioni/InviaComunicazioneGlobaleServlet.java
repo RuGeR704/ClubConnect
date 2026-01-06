@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 
 @WebServlet(name = "InviaComunicazioneGlobaleServlet", urlPatterns = {"/InviaComunicazioneGlobaleServlet"})
 public class InviaComunicazioneGlobaleServlet extends HttpServlet {
@@ -55,8 +56,7 @@ public class InviaComunicazioneGlobaleServlet extends HttpServlet {
             nuovaComunicazione.setId_gruppo(-1); // -1 indica "Nessun Gruppo specifico" (Globale)
 
             // Impostiamo la data corrente
-            long millis = System.currentTimeMillis();
-            nuovaComunicazione.setDataPubblicazione(new Date(millis));
+            nuovaComunicazione.setDataPubblicazione(LocalDateTime.now());
 
             // Salvataggio tramite Service (Bean di Logica)
             GestioneComunicazioniBean service = new GestioneComunicazioniBean();

@@ -22,6 +22,27 @@ public class GestioneEventiBean {
             dao.DoSavePartecipazioni(con, partecipazione);
         }
     }
+
+    //per trovare la partecipazione
+    public PartecipazioneBean retrievePartecipazione(int idUtente, int idEvento) throws SQLException {
+        try (Connection con = ConPool.getConnection()) {
+            EventoDAO dao = new EventoDAO();
+            return dao.doRetrievePartecipazione(ConPool.getConnection(), idUtente, idEvento);
+        }
+    }
+
+    //per rimuovere una partecipazione
+    public boolean rimuoviPartecipazione(PartecipazioneBean partecipazione) throws SQLException {
+        try (Connection con = ConPool.getConnection()) {
+            EventoDAO dao = new EventoDAO();
+            dao.doRemovePartecipazione(ConPool.getConnection(), partecipazione);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     //per modificare un evento
     public void modificaEvento(EventoBean evento) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
@@ -46,6 +67,22 @@ public class GestioneEventiBean {
             dao.DoUpdate(con, evento); // Questo salva il nuovo numero nel DB
         }
     }
+
+    //aumentare i posti disponibili
+    public void aumentaPosti(EventoBean evento) throws SQLException {
+        // 1. Usiamo il metodo getPosti_disponibili()
+        int postiAttuali = evento.getPosti_disponibili();
+
+        // 2. Scaliamo di 1
+        evento.setPosti_disponibili(postiAttuali + 1);
+
+        // 3. Aggiorniamo il database usando il DAO
+        try (Connection con = ConPool.getConnection()) {
+            EventoDAO dao = new EventoDAO();
+            dao.DoUpdate(con, evento); // Questo salva il nuovo numero nel DB
+        }
+    }
+
     //per eliminare un evento
     public void rimuoviEvento(int idEvento) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
@@ -65,6 +102,11 @@ public class GestioneEventiBean {
     public List<EventoBean> retrieveAllEventi() throws SQLException {
         EventoDAO dao = new EventoDAO();
         return dao.DoRetrieveAll();
+    }
+
+    public List<EventoBean> retrieveEventiUtente (int idUtente) throws SQLException {
+        EventoDAO dao = new EventoDAO();
+        return dao.doRetrieveEventiByUtente(ConPool.getConnection(), idUtente);
     }
 
     /**

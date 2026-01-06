@@ -23,7 +23,7 @@ public class VisualizzaComunicazioniGruppoServlet extends HttpServlet {
 
         if (idGruppoStr == null || idGruppoStr.isEmpty()) {
             // Se non c'è l'ID, non so cosa mostrare -> torno indietro o home
-            response.sendRedirect("index.jsp");
+            response.sendRedirect("feedServlet");
             return;
         }
 
@@ -41,18 +41,18 @@ public class VisualizzaComunicazioniGruppoServlet extends HttpServlet {
 
             // Passo i dati alla JSP
             request.setAttribute("listaComunicazioniGruppo", comunicazioniDelGruppo);
-            request.setAttribute("idGruppoCorrente", idGruppo); // Utile per link "Torna al gruppo" o per i form di invio
+            request.setAttribute("idGruppo", idGruppo); // Utile per link "Torna al gruppo" o per i form di invio
 
             // Visualizzazione
-            jakarta.servlet.RequestDispatcher dispatcher = request.getRequestDispatcher("bachecaGruppo.jsp");
+            jakarta.servlet.RequestDispatcher dispatcher = request.getRequestDispatcher("paginaGruppo.jsp");
             dispatcher.forward(request, response);
 
         } catch (NumberFormatException e) {
-            response.sendRedirect("index.jsp"); // ID non valido
+            response.sendRedirect("feedServlet"); // ID non valido
         } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("errore", "Impossibile recuperare le notizie del gruppo.");
-            request.getRequestDispatcher("index.jsp").forward(request, response);
+            request.getRequestDispatcher("feedServlet").forward(request, response);
         }
     }
 

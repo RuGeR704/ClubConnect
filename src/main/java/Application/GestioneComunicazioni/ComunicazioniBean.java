@@ -2,6 +2,7 @@ package Application.GestioneComunicazioni;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class ComunicazioniBean implements Serializable {
@@ -56,9 +57,7 @@ public class ComunicazioniBean implements Serializable {
 
     public LocalDateTime getDataPubblicazione() { return dataPubblicazione; }
 
-    public void setDataPubblicazione(LocalDateTime dataPubblicazione) {
-        this.dataPubblicazione = dataPubblicazione;
-    }
+    public void setDataPubblicazione(LocalDateTime dataPubblicazione) {this.dataPubblicazione = dataPubblicazione;}
 
     public boolean isIsglobal() {
         return isglobal;

@@ -18,6 +18,7 @@ public class IscrizioneEventoServlet extends HttpServlet {
         // Controllo Login: Solo gli utenti loggati possono iscriversi
         HttpSession session = request.getSession();
         UtenteBean utente = (UtenteBean) session.getAttribute("utente");
+        String action = request.getParameter("action");
 
         if (utente == null) {
             response.sendRedirect("login.jsp");
@@ -35,11 +36,17 @@ public class IscrizioneEventoServlet extends HttpServlet {
             // La servlet non sa nulla di DAO, pagamenti o email. Delega tutto.
 
             IscrizioneFacade facade = new IscrizioneFacade();
-            boolean successo = facade.iscriviUtente(utente, idEvento);
+            boolean successo = false;
+
+            if (action.equals("join"))
+                successo = facade.iscriviUtente(utente, idEvento);
+
+            if (action.equals("leave"))
+                successo = facade.disiscriviUtente(utente, idEvento);
 
             if (successo) {
                 // Successo
-                response.sendRedirect("visualizzaCalendario.jsp?msg=iscrizione_ok");
+                response.sendRedirect("VisualizzaCalendarioEventiServlet");
             } else {
                 // Fallimento (es. posti esauriti)
                 request.setAttribute("errore", "Impossibile iscriversi: posti esauriti o errore generico.");
