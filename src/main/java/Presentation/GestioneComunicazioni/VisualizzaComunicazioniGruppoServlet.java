@@ -1,7 +1,7 @@
 package Presentation.GestioneComunicazioni;
 
 import Application.GestioneComunicazioni.ComunicazioniBean;
-import Application.GestioneComunicazioni.ComunicazioneService;
+import Application.GestioneComunicazioni.GestioneComunicazioniBean;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,54 +16,46 @@ import java.util.stream.Collectors;
 @WebServlet(name = "VisualizzaComunicazioniGruppoServlet", urlPatterns = {"/VisualizzaComunicazioniGruppoServlet"})
 public class VisualizzaComunicazioniGruppoServlet extends HttpServlet {
 
-    // 1. Iniezione del Service
-    private ComunicazioneService service = new ComunicazioneService();
-
-    // 2. Setter per i Test
-    public void setService(ComunicazioneService service) {
-        this.service = service;
-    }
-
-    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        // Recupero l'ID del gruppo
+        // Recupero l'ID del gruppo di cui voglio vedere le news
         String idGruppoStr = request.getParameter("idGruppo");
 
         if (idGruppoStr == null || idGruppoStr.isEmpty()) {
-            response.sendRedirect("index.jsp");
+            // Se non c'è l'ID, non so cosa mostrare -> torno indietro o home
+            response.sendRedirect("feedServlet");
             return;
         }
 
         try {
             int idGruppo = Integer.parseInt(idGruppoStr);
+            GestioneComunicazioniBean service = new GestioneComunicazioniBean();
 
-            // Recupero tutte le comunicazioni tramite il SERVICE iniettato
+            // Recupero tutte le comunicazioni
             List<ComunicazioniBean> tutteLeComunicazioni = service.recuperaTutteLeComunicazioni();
 
-            // FILTRO: Tengo solo le comunicazioni di quel gruppo specifico
+            // FILTRO: Tengo solo le comunicazioni che hanno id_gruppo uguale a quello richiesto
             List<ComunicazioniBean> comunicazioniDelGruppo = tutteLeComunicazioni.stream()
                     .filter(c -> c.getId_gruppo() == idGruppo)
                     .collect(Collectors.toList());
 
             // Passo i dati alla JSP
             request.setAttribute("listaComunicazioniGruppo", comunicazioniDelGruppo);
-            request.setAttribute("idGruppoCorrente", idGruppo);
+            request.setAttribute("idGruppo", idGruppo); // Utile per link "Torna al gruppo" o per i form di invio
 
             // Visualizzazione
-            request.getRequestDispatcher("bachecaGruppo.jsp").forward(request, response);
+            jakarta.servlet.RequestDispatcher dispatcher = request.getRequestDispatcher("paginaGruppo.jsp");
+            dispatcher.forward(request, response);
 
         } catch (NumberFormatException e) {
-            // ID non valido (es. "abc")
-            response.sendRedirect("index.jsp");
+            response.sendRedirect("feedServlet"); // ID non valido
         } catch (SQLException e) {
             e.printStackTrace();
             request.setAttribute("errore", "Impossibile recuperare le notizie del gruppo.");
-            request.getRequestDispatcher("index.jsp").forward(request, response);
+            request.getRequestDispatcher("feedServlet").forward(request, response);
         }
     }
 
-    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doGet(request, response);
     }

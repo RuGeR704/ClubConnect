@@ -43,12 +43,13 @@ public class FeedServlet extends HttpServlet {
 
         try{
             List<GruppoBean> gruppi = utenteDAO.doRetrieveGruppiIscritto(utente.getId_utente());
+            List<EventoBean> iscrizioniEventi = eventoDAO.doRetrieveEventiByUtente(ConPool.getConnection(), utente.getId_utente());
 
             if (gruppi != null && !gruppi.isEmpty()) {
                 hasIscrizione = true;
 
                 List<ComunicazioniBean> comunicazioni = comunicazioneDAO.doRetrievebyGroup(ConPool.getConnection(), utente.getId_utente());
-                List<EventoBean> eventi = eventoDAO.doRetrievebyGroup(ConPool.getConnection(), utente.getId_utente());
+                List<EventoBean> eventi = eventoDAO.doRetrievebyGruppiIscritti(ConPool.getConnection(), utente.getId_utente());
 
 
                 if(comunicazioni != null) {
@@ -69,6 +70,7 @@ public class FeedServlet extends HttpServlet {
             request.setAttribute("hasIscrizioni", hasIscrizione);
             request.setAttribute("feedMisto", feedMisto);
             request.setAttribute("gruppiSuggeriti", gruppiSuggeriti);
+            request.setAttribute("eventiPrenotati", iscrizioniEventi);
 
         } catch (SQLException e) {
             e.printStackTrace();
