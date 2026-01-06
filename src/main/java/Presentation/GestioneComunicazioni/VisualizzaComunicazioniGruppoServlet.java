@@ -1,7 +1,7 @@
 package Presentation.GestioneComunicazioni;
 
 import Application.GestioneComunicazioni.ComunicazioniBean;
-import Application.GestioneComunicazioni.GestioneComunicazioniBean;
+import Application.GestioneComunicazioni.ComunicazioneService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,9 +16,18 @@ import java.util.stream.Collectors;
 @WebServlet(name = "VisualizzaComunicazioniGruppoServlet", urlPatterns = {"/VisualizzaComunicazioniGruppoServlet"})
 public class VisualizzaComunicazioniGruppoServlet extends HttpServlet {
 
+    // 1. Iniezione del Service
+    private ComunicazioneService service = new ComunicazioneService();
+
+    // 2. Setter per i Test
+    public void setService(ComunicazioneService service) {
+        this.service = service;
+    }
+
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        // Recupero l'ID del gruppo di cui voglio vedere le news
+        // Recupero l'ID del gruppo
         String idGruppoStr = request.getParameter("idGruppo");
 
         if (idGruppoStr == null || idGruppoStr.isEmpty()) {
@@ -29,12 +38,11 @@ public class VisualizzaComunicazioniGruppoServlet extends HttpServlet {
 
         try {
             int idGruppo = Integer.parseInt(idGruppoStr);
-            GestioneComunicazioniBean service = new GestioneComunicazioniBean();
 
-            // Recupero tutte le comunicazioni
+            // Recupero tutte le comunicazioni tramite il SERVICE iniettato
             List<ComunicazioniBean> tutteLeComunicazioni = service.recuperaTutteLeComunicazioni();
 
-            // FILTRO: Tengo solo le comunicazioni che hanno id_gruppo uguale a quello richiesto
+            // FILTRO: Tengo solo le comunicazioni di quel gruppo specifico
             List<ComunicazioniBean> comunicazioniDelGruppo = tutteLeComunicazioni.stream()
                     .filter(c -> c.getId_gruppo() == idGruppo)
                     .collect(Collectors.toList());
@@ -56,6 +64,7 @@ public class VisualizzaComunicazioniGruppoServlet extends HttpServlet {
         }
     }
 
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doGet(request, response);
     }

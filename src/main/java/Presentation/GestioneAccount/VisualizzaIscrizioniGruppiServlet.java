@@ -1,18 +1,26 @@
 package Presentation.GestioneAccount;
+
+import Application.GestioneAccount.AccountService;
 import Application.GestioneAccount.UtenteBean;
 import Application.GestioneGruppo.GruppoBean;
-import Storage.ConPool;
-import Storage.UtenteDAO;
-import jakarta.servlet.*;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
+
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 @WebServlet(name = "VisualizzaIscrizioniGruppiServlet", value = "/VisualizzaIscrizioniGruppiServlet")
 public class VisualizzaIscrizioniGruppiServlet extends HttpServlet {
+
+    private AccountService accountService = new AccountService();
+
+    public void setAccountService(AccountService accountService) {
+        this.accountService = accountService;
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
@@ -20,29 +28,33 @@ public class VisualizzaIscrizioniGruppiServlet extends HttpServlet {
             if (session == null || session.getAttribute("utente") == null) {
                 response.sendRedirect(request.getContextPath() + "/login.jsp");
                 return;
-            }else {
-                UtenteBean utente = (UtenteBean) session.getAttribute("utente");
-                UtenteDAO dao = new UtenteDAO();
-                List<GruppoBean> iscrizioni = dao.doRetrieveGruppiIscritto(utente.getId_utente());
-                List<GruppoBean> gruppiAdmin = dao.doRetrieveGruppiAdmin(ConPool.getConnection(), utente.getId_utente());
-                if (iscrizioni.size() > 0) {
-                    request.setAttribute("gruppiIscritto", iscrizioni);
-                }
-                if (gruppiAdmin.size() > 0) {
-                    request.setAttribute("gruppiAdmin", gruppiAdmin);
-                }
-                RequestDispatcher rd = request.getRequestDispatcher("/GruppiIscritto.jsp");
-                rd.forward(request, response);
             }
-        }catch(SQLException sql){
-            sql.printStackTrace();
-            request.setAttribute("errore", "errore dao"); // per vedere gli errori
-            RequestDispatcher rd = request.getRequestDispatcher("/index.jsp");
+
+            UtenteBean utente = (UtenteBean) session.getAttribute("utente");
+
+            // Uso del Service per entrambe le liste
+            List<GruppoBean> iscrizioni = accountService.getGruppiIscritto(utente.getId_utente());
+            List<GruppoBean> gruppiAdmin = accountService.getGruppiAdmin(utente.getId_utente());
+
+            if (iscrizioni != null && !iscrizioni.isEmpty()) {
+                request.setAttribute("gruppiIscritto", iscrizioni);
+            }
+            if (gruppiAdmin != null && !gruppiAdmin.isEmpty()) {
+                request.setAttribute("gruppiAdmin", gruppiAdmin);
+            }
+
+            RequestDispatcher rd = request.getRequestDispatcher("/GruppiIscritto.jsp");
             rd.forward(request, response);
+
+        } catch(SQLException sql){
+            sql.printStackTrace();
+            request.setAttribute("errore", "Errore nel recupero gruppi");
+            request.getRequestDispatcher("/index.jsp").forward(request, response);
         }
     }
-    
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        doGet(request, response);
     }
 }
