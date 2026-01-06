@@ -46,7 +46,9 @@ public class IscrizioneEventoServlet extends HttpServlet {
 
             if (successo) {
                 // Successo
-                response.sendRedirect("VisualizzaCalendarioEventiServlet");
+                String msgSuccesso = "Operazione sull'evento effettuata con successo!";
+                session.setAttribute("successo", msgSuccesso);
+                response.sendRedirect("feedServlet");
             } else {
                 // Fallimento (es. posti esauriti)
                 request.setAttribute("errore", "Impossibile iscriversi: posti esauriti o errore generico.");
