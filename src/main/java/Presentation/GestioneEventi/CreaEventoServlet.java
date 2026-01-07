@@ -51,7 +51,6 @@ public class CreaEventoServlet extends HttpServlet {
             int capienza = (capienzaStr != null && !capienzaStr.isEmpty()) ? Integer.parseInt(capienzaStr) : 0;
 
             evento.setCapienza_massima(capienza);
-            // FIX: All'inizio i posti disponibili sono uguali alla capienza totale!
             evento.setPosti_disponibili(capienza);
 
             // Upload Gestito
