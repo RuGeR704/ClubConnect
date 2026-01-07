@@ -29,4 +29,35 @@ public class GestioneGruppoBean {
             return new java.util.ArrayList<>();
         }
     }
+    public void iscriviUtenteAlGruppo(int idUtente, int idGruppo) {
+        try (Connection con = ConPool.getConnection()) {
+            GruppoDAO dao = new GruppoDAO();
+            dao.doIscrizione(con, idUtente, idGruppo);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+    }
+    public boolean espelliUtente(int idGruppo, int idUtenteDaEspellere, int idRichiedente) {
+        try (Connection con = ConPool.getConnection()) {
+            GruppoDAO dao = new GruppoDAO();
+
+            boolean isGestore = dao.isGestore(con, idRichiedente, idGruppo);
+
+            if (!isGestore) {
+                System.out.println("Tentativo di espulsione non autorizzato: Utente " + idRichiedente + " non è gestore.");
+                return false;
+            }
+            if (idRichiedente == idUtenteDaEspellere) {
+                return false;
+            }
+
+
+            return dao.doRimuoviMembro(con, idGruppo, idUtenteDaEspellere);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

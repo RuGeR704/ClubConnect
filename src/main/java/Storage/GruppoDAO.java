@@ -238,4 +238,26 @@ public class GruppoDAO {
         }
         return soci;
     }
+    public void doIscrizione(Connection con, int idUtente, int idGruppo) throws SQLException {
+
+        String query = "INSERT INTO Iscrizione (id_utente, id_gruppo, data_iscrizione) VALUES (?, ?, NOW())";
+
+        try (PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, idUtente);
+            ps.setInt(2, idGruppo);
+
+            int result = ps.executeUpdate();
+        }
+    }
+    public boolean doRimuoviMembro(Connection con, int idGruppo, int idUtente) throws SQLException {
+        String query = "DELETE FROM Iscrizione WHERE id_gruppo = ? AND id_utente = ?";
+
+        try (PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, idGruppo);
+            ps.setInt(2, idUtente);
+
+            int result = ps.executeUpdate();
+            return result > 0; // Restituisce true se ha cancellato la riga
+        }
+    }
 }
