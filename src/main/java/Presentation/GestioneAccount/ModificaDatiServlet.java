@@ -29,7 +29,7 @@ public class ModificaDatiServlet extends HttpServlet {
                 return;
             }
             // UtenteBean utente = (UtenteBean) session.getAttribute("utente"); // Non serve riassegnarlo se fai solo forward
-            request.getRequestDispatcher("/WEB-INF/ModificaDatiForm.jsp").forward(request, response);
+            request.getRequestDispatcher("gestioneUtente.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/gestioneUtente.jsp");

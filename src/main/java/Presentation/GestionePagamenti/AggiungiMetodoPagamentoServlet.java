@@ -25,7 +25,7 @@ public class AggiungiMetodoPagamentoServlet extends HttpServlet {
                 return;
             }
             utente = (UtenteBean) session.getAttribute("utente");
-            request.getRequestDispatcher("/WEB-INF/AggiungiMetodoPagamentoForm.jsp").forward(request, response); //TODO scegli nome jsp
+            request.getRequestDispatcher("/VisualizzaMetodidiPagamentoServlet").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/VisualizzaProfiloServlet");
@@ -54,18 +54,27 @@ public class AggiungiMetodoPagamentoServlet extends HttpServlet {
 
                 if (nome_intestatario == null || nome_intestatario.trim().isEmpty()) errori.append("nome intestatario obbligatorio. ");
 
-                LocalDate scadenza_carta = null;
-                try {
-                    if (scadenza_cartastr != null && !scadenza_cartastr.isEmpty()) {
-                        scadenza_carta = LocalDate.parse(scadenza_cartastr);
-                        if(scadenza_carta.isBefore(oggi)||scadenza_carta.isAfter(oggi.plusYears(10))) {
-                            errori.append("data di scadena non valida.");
+                if (scadenza_cartastr != null && scadenza_cartastr.matches("(0[1-9]|1[0-2])\\/20[2-9][0-9]")) {
+                    try {
+                        // Estraiamo i dati per la validazione temporale
+                        String[] parts = scadenza_cartastr.split("/");
+                        int mese = Integer.parseInt(parts[0]);
+                        int anno = Integer.parseInt(parts[1]);
+
+                        // Creiamo un riferimento per il confronto (primo giorno del mese indicato)
+                        LocalDate scadenzaData = LocalDate.of(anno, mese, 1);
+                        LocalDate oggiMese = LocalDate.now().withDayOfMonth(1);
+
+                        if (scadenzaData.isBefore(oggiMese)) {
+                            errori.append("La carta è già scaduta. ");
+                        } else if (scadenzaData.isAfter(LocalDate.now().plusYears(15))) {
+                            errori.append("Data di scadenza troppo lontana nel futuro. ");
                         }
-                    }else{
-                        errori.append("data di scadena non valida.");
+                    } catch (Exception e) {
+                        errori.append("Errore nel formato della data. ");
                     }
-                } catch (Exception e) {
-                    errori.append("Formato data di nascita non valido. ");
+                } else {
+                    errori.append("Formato scadenza non valido (richiesto MM/YYYY). ");
                 }
 
                 if (cognome_intestatario == null || cognome_intestatario.trim().isEmpty()) errori.append("cognome intestatario obbligatoria. ");
@@ -88,9 +97,10 @@ public class AggiungiMetodoPagamentoServlet extends HttpServlet {
                 PagamentoDAO dao = new PagamentoDAO();
                 dao.doSaveMetodoPagamento(con, metodo);
                 con.commit();
-                response.sendRedirect(request.getContextPath() + "/VisualizzaProfiloServlet");
+                response.sendRedirect(request.getContextPath() + "/VisualizzaMetodidiPagamentoServlet");
             }
         } catch (SQLException sql) {
+            sql.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/error.jsp");
         }
     }
