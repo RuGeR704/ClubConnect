@@ -33,7 +33,6 @@ class CreaEventoServletTest {
 
     @BeforeEach
     void setUp() {
-        // Sovrascriviamo getServletContext per evitare IllegalStateException durante l'upload
         servlet = new CreaEventoServlet() {
             @Override
             public ServletContext getServletContext() {
@@ -51,44 +50,41 @@ class CreaEventoServletTest {
         when(request.getParameter("descrizione")).thenReturn("Live Music");
         when(request.getParameter("dataOraEvento")).thenReturn("2025-12-31T22:00");
         when(request.getParameter("costo")).thenReturn("15.50");
-        when(request.getParameter("capienza")).thenReturn("500");
+        when(request.getParameter("capienza")).thenReturn("500"); // Capienza 500
 
         // Simulazione Upload
         when(request.getPart("foto")).thenReturn(filePart);
-        when(filePart.getSize()).thenReturn(1024L); // File presente
+        when(filePart.getSize()).thenReturn(1024L);
         when(filePart.getSubmittedFileName()).thenReturn("poster.jpg");
-
-        // Simuliamo il path temporaneo del sistema
         when(context.getRealPath("")).thenReturn(System.getProperty("java.io.tmpdir"));
 
         // WHEN
         servlet.doPost(request, response);
 
         // THEN
-        // 1. Verifichiamo che il service sia stato chiamato
         ArgumentCaptor<EventoBean> captor = ArgumentCaptor.forClass(EventoBean.class);
         verify(serviceMock).creaEvento(captor.capture());
 
         EventoBean evento = captor.getValue();
         assertEquals("Concerto Rock", evento.getNome());
         assertEquals(5, evento.getId_gruppo());
-        // Verifichiamo che il path della foto sia stato impostato
+        assertEquals(500, evento.getCapienza_massima());
+
+        // VERIFICA AGGIUNTA: I posti disponibili devono essere uguali alla capienza!
+        assertEquals(500, evento.getPosti_disponibili());
+
         assertTrue(evento.getFoto().contains("poster.jpg"));
 
-        // 2. Verifichiamo il redirect finale
         verify(response).sendRedirect(contains("VisualizzaGruppoServlet?id=5"));
     }
 
     @Test
     void testDoPost_ErroreDatiMancanti() throws Exception {
-        // GIVEN
         when(request.getParameter("idGruppo")).thenReturn("5");
-        when(request.getParameter("nomeEvento")).thenReturn(null); // Nome mancante -> Errore
+        when(request.getParameter("nomeEvento")).thenReturn(null);
 
-        // WHEN
         servlet.doPost(request, response);
 
-        // THEN
         verify(serviceMock, never()).creaEvento(any());
         verify(response).sendRedirect(contains("errore="));
     }

@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class CreaEventoServlet extends HttpServlet {
 
     private static final String UPLOAD_DIR = "images" + File.separator + "eventi";
-    private EventoService service = new EventoService(); // Injection point
+    private EventoService service = new EventoService();
 
     public void setService(EventoService service) {
         this.service = service;
@@ -46,10 +46,15 @@ public class CreaEventoServlet extends HttpServlet {
             String costoStr = request.getParameter("costo");
             evento.setCosto((costoStr != null && !costoStr.isEmpty()) ? Double.parseDouble(costoStr) : 0.0);
 
+            // GESTIONE CAPIENZA E POSTI
             String capienzaStr = request.getParameter("capienza");
-            evento.setCapienza_massima((capienzaStr != null && !capienzaStr.isEmpty()) ? Integer.parseInt(capienzaStr) : 0);
+            int capienza = (capienzaStr != null && !capienzaStr.isEmpty()) ? Integer.parseInt(capienzaStr) : 0;
 
-            // Upload Gestito (Testabile)
+            evento.setCapienza_massima(capienza);
+            // FIX: All'inizio i posti disponibili sono uguali alla capienza totale!
+            evento.setPosti_disponibili(capienza);
+
+            // Upload Gestito
             String fotoPath = null;
             Part part = request.getPart("foto");
             if (part != null && part.getSize() > 0) {
