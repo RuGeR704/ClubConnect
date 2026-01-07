@@ -13,12 +13,15 @@ import java.io.IOException;
 @WebServlet("/IscrizioneEventoServlet")
 public class IscrizioneEventoServlet extends HttpServlet {
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    private IscrizioneFacade facade = new IscrizioneFacade();
 
-        // Controllo Login: Solo gli utenti loggati possono iscriversi
+    public void setFacade(IscrizioneFacade facade) {
+        this.facade = facade;
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         UtenteBean utente = (UtenteBean) session.getAttribute("utente");
-        String action = request.getParameter("action");
 
         if (utente == null) {
             response.sendRedirect("login.jsp");
@@ -26,42 +29,28 @@ public class IscrizioneEventoServlet extends HttpServlet {
         }
 
         try {
-            // Recupero Parametri
             int idEvento = Integer.parseInt(request.getParameter("idEvento"));
-
-            // Se ci fosse un pagamento, recupereremmo qui i dati della carta
-            String metodoPagamento = request.getParameter("metodoPagamento");
-
-            // CHIAMATA AL FACADE (Come da SDD)
-            // La servlet non sa nulla di DAO, pagamenti o email. Delega tutto.
-
-            IscrizioneFacade facade = new IscrizioneFacade();
+            String action = request.getParameter("action");
             boolean successo = false;
 
-            if (action.equals("join"))
+            if ("join".equals(action))
                 successo = facade.iscriviUtente(utente, idEvento);
-
-            if (action.equals("leave"))
+            else if ("leave".equals(action))
                 successo = facade.disiscriviUtente(utente, idEvento);
 
             if (successo) {
-                // Successo
-                String msgSuccesso = "Operazione sull'evento effettuata con successo!";
-                session.setAttribute("successo", msgSuccesso);
+                session.setAttribute("successo", "Operazione effettuata con successo!");
                 response.sendRedirect("feedServlet");
             } else {
-                // Fallimento (es. posti esauriti)
-                request.setAttribute("errore", "Impossibile iscriversi: posti esauriti o errore generico.");
+                request.setAttribute("errore", "Impossibile completare l'operazione.");
                 request.getRequestDispatcher("visualizzaEvento.jsp?id=" + idEvento).forward(request, response);
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Errore durante l'iscrizione");
         }
     }
 
-    // Gestisce le chiamate GET se l'iscrizione avviene tramite link diretto
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doPost(request, response);
     }

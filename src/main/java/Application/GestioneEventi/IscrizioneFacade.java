@@ -7,36 +7,43 @@ import java.time.LocalDateTime;
 
 public class IscrizioneFacade {
 
+    // Dipendenze
+    private EventoService eventiService;
+    private ComunicazioneService comunicazioniService;
+
+    // Costruttore standard (usato dalle Servlet)
+    public IscrizioneFacade() {
+        this.eventiService = new EventoService();
+        this.comunicazioniService = new ComunicazioneService();
+    }
+
+    // Costruttore/Setter per i TEST (Dependency Injection)
+    public void setServices(EventoService es, ComunicazioneService cs) {
+        this.eventiService = es;
+        this.comunicazioniService = cs;
+    }
+
     public boolean iscriviUtente(UtenteBean utente, int idEvento) {
-        GestioneEventiBean eventiService = new GestioneEventiBean();
-        ComunicazioneService comunicazioniService = new ComunicazioneService();
         try {
-            // RECUPERA L'EVENTO DAL DB
-            // Qui sfruttiamo il metodo retrieveEvento
+            // 1. Recupera evento
             EventoBean evento = eventiService.retrieveEvento(idEvento);
 
-            if (evento == null) {
-                return false; // L'evento non esiste
-            }
+            if (evento == null) return false;
 
-            // CONTROLLA DISPONIBILITÀ
-            if (evento.getPosti_disponibili() <= 0) {
-                return false; // Non ci sono posti, iscrizione fallita
-            }
+            // 2. Controlla posti
+            if (evento.getPosti_disponibili() <= 0) return false;
 
-            // PREPARA L'ISCRIZIONE (Sottosistema Eventi)
+            // 3. Prepara iscrizione
             PartecipazioneBean partecipazione = new PartecipazioneBean();
             partecipazione.setId_utente(utente.getId_utente());
             partecipazione.setId_evento(idEvento);
             partecipazione.setData_registrazione(LocalDateTime.now());
 
-            // SALVA E AGGIORNA
+            // 4. Salva e aggiorna
             eventiService.registraPartecipazione(partecipazione);
-
-            // Scala il posto
             eventiService.diminuisciPosti(evento);
 
-            // INVIA CONFERMA (Sottosistema Comunicazioni)
+            // 5. Invia conferma
             comunicazioniService.inviaConfermaIscrizione(utente, evento);
 
             return true;
@@ -48,21 +55,16 @@ public class IscrizioneFacade {
     }
 
     public boolean disiscriviUtente(UtenteBean utente, int idEvento) {
-        GestioneEventiBean eventiService = new GestioneEventiBean();
-
         try {
             PartecipazioneBean partecipazione = eventiService.retrievePartecipazione(utente.getId_utente(), idEvento);
-            EventoBean evento = eventiService.retrieveEvento(partecipazione.getId_evento());
+            if (partecipazione == null) return false; // Utente non iscritto
 
-            if (evento == null) {
-                return false;
-            }
+            EventoBean evento = eventiService.retrieveEvento(partecipazione.getId_evento());
+            if (evento == null) return false;
 
             boolean esito = eventiService.rimuoviPartecipazione(partecipazione);
 
-            if (!esito) {
-                return false;
-            }
+            if (!esito) return false;
 
             eventiService.aumentaPosti(evento);
             return true;
@@ -71,6 +73,5 @@ public class IscrizioneFacade {
             e.printStackTrace();
             return false;
         }
-
     }
 }

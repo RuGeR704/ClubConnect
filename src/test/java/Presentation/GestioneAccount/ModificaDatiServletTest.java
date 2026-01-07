@@ -64,7 +64,7 @@ class ModificaDatiServletTest {
         verify(session).setAttribute(eq("utente"), any(UtenteBean.class));
 
         // 3. Verifichiamo il redirect alla pagina del profilo
-        verify(response).sendRedirect(contains("/AccountServlet"));
+        verify(response).sendRedirect(contains("/gestioneUtente"));
     }
 
     @Test
