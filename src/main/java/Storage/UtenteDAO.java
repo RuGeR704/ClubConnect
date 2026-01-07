@@ -8,7 +8,7 @@ import Application.GestionePagamenti.DettagliPagamentoBean;
 import Application.GestionePagamenti.MetodoPagamentoBean;
 
 import java.sql.*;
-import java.util.ArrayList;
+        import java.util.ArrayList;
 import java.util.List;
 
 public class UtenteDAO {
@@ -115,7 +115,7 @@ public class UtenteDAO {
     public UtenteBean DoRetrieveEmailPassword(Connection con, String email,String password) throws SQLException{
         UtenteBean c = null;
         try (PreparedStatement ps = con.prepareStatement(
-                     "SELECT * FROM Utente WHERE email = ? AND passwordhash = SHA1(?)")) {
+                "SELECT * FROM Utente WHERE email = ? AND passwordhash = SHA1(?)")) {
             ps.setString(1, email);
             ps.setString(2, password);
             try (ResultSet rs = ps.executeQuery()) {
@@ -201,11 +201,11 @@ public class UtenteDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ClubBean c;
-                        ClubBean club= new ClubBean();
-                        club.setImporto_retta(rs.getDouble("importo_retta"));
-                        club.setFrequenza(rs.getInt("frequenza"));
-                        club.setId_gruppo(rs.getInt("id_gruppo"));
-                        c=club;
+                    ClubBean club= new ClubBean();
+                    club.setImporto_retta(rs.getDouble("importo_retta"));
+                    club.setFrequenza(rs.getInt("frequenza"));
+                    club.setId_gruppo(rs.getInt("id_gruppo"));
+                    c=club;
                     gruppi.add(c);
                 }
             }
@@ -364,5 +364,16 @@ public class UtenteDAO {
             }
         }
         return gruppi;
+    }
+    //per bannare/sbannare senza rompere le password
+    //aggiorna solo lo stato dell'utente (es. attivo/bannato).
+    //evita il problema del ricalcolo dell'hash della password.
+
+    public void doUpdateStato(Connection con, int idUtente, int nuovoStato) throws SQLException {
+        try (PreparedStatement ps = con.prepareStatement("UPDATE Utente SET stato = ? WHERE id_utente = ?")) {
+            ps.setInt(1, nuovoStato);
+            ps.setInt(2, idUtente);
+            ps.executeUpdate();
+        }
     }
 }
