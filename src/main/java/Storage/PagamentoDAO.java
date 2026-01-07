@@ -66,9 +66,10 @@ public class PagamentoDAO {
     }
 
     public void doDeleteMetodoPagamento(Connection con, int id_metodo, int id_utente) throws SQLException{
-        String query = "DELETE FROM Metodo_pagamento WHERE id_metodo = ? AND id_utente=?";
+        String query = "DELETE FROM Metodo_Pagamento WHERE id_metodo = ? AND id_utente=?";
         try (PreparedStatement ps = con.prepareStatement(query)){
             ps.setInt(1, id_metodo);
+            ps.setInt(2, id_utente);
             ps.executeUpdate();
         }
     }

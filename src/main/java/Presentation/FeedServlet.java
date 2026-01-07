@@ -41,30 +41,28 @@ public class FeedServlet extends HttpServlet {
         Collection<GruppoBean> gruppiSuggeriti = new ArrayList<>();
         boolean hasIscrizione = false;
 
-        try{
+        // APRIAMO UNA SOLA CONNESSIONE PER TUTTA LA DURATA DELLA RICHIESTA
+        try (java.sql.Connection con = ConPool.getConnection()) {
+
+            // Passiamo la stessa connessione 'con' a tutti i metodi del DAO
             List<GruppoBean> gruppi = utenteDAO.doRetrieveGruppiIscritto(utente.getId_utente());
-            List<EventoBean> iscrizioniEventi = eventoDAO.doRetrieveEventiByUtente(ConPool.getConnection(), utente.getId_utente());
+            // Nota: Se utenteDAO non accetta 'con', dovresti aggiornare il metodo o usare la connessione per gli altri
+
+            List<EventoBean> iscrizioniEventi = eventoDAO.doRetrieveEventiByUtente(con, utente.getId_utente());
 
             if (gruppi != null && !gruppi.isEmpty()) {
                 hasIscrizione = true;
 
-                List<ComunicazioniBean> comunicazioni = comunicazioneDAO.doRetrievebyGroup(ConPool.getConnection(), utente.getId_utente());
-                List<EventoBean> eventi = eventoDAO.doRetrievebyGruppiIscritti(ConPool.getConnection(), utente.getId_utente());
+                List<ComunicazioniBean> comunicazioni = comunicazioneDAO.doRetrievebyGroup(con, utente.getId_utente());
+                List<EventoBean> eventi = eventoDAO.doRetrievebyGruppiIscritti(con, utente.getId_utente());
 
-
-                if(comunicazioni != null) {
-                    feedMisto.addAll(comunicazioni);
-                }
-                if(eventi != null) {
-                    feedMisto.addAll(eventi);
-                }
+                if(comunicazioni != null) feedMisto.addAll(comunicazioni);
+                if(eventi != null) feedMisto.addAll(eventi);
 
                 Collections.shuffle(feedMisto);
-
-                request.setAttribute("feedMisto", feedMisto);
             } else {
                 hasIscrizione = false;
-                gruppiSuggeriti =  gruppoDAO.doRetrieveAll(ConPool.getConnection());
+                gruppiSuggeriti = gruppoDAO.doRetrieveAll(con);
             }
 
             request.setAttribute("hasIscrizioni", hasIscrizione);
@@ -74,6 +72,7 @@ public class FeedServlet extends HttpServlet {
 
         } catch (SQLException e) {
             e.printStackTrace();
+            // Opzionale: rimanda a una pagina di errore se la connessione fallisce
         }
 
         RequestDispatcher view = request.getRequestDispatcher("feed.jsp");

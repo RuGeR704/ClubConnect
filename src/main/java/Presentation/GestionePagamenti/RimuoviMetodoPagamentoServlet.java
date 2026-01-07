@@ -24,16 +24,16 @@ public class RimuoviMetodoPagamentoServlet extends HttpServlet {
             int id_utente=utente.getId_utente();
             String idParam = request.getParameter("id_metodo_pagamento");
             if(idParam == null || idParam.isEmpty()) {
-                response.sendRedirect(request.getContextPath() + "/VisualizzaMetodiPagamentoServlet?error=missingId");
+                response.sendRedirect(request.getContextPath() + "/VisualizzaMetodidiPagamentoServlet?error=missingId");
                 return;
             }
             int id_metodo_pagamento = Integer.parseInt(idParam);
             PagamentoDAO dao = new PagamentoDAO();
             dao.doDeleteMetodoPagamento(con,id_metodo_pagamento,id_utente);
-            response.sendRedirect(request.getContextPath() + "/VisualizzaMetodiPagamentoServlet");
+            response.sendRedirect(request.getContextPath() + "/VisualizzaMetodidiPagamentoServlet");
         } catch (SQLException e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/VisualizzaMetodiPagamentoServlet");
+            response.sendRedirect(request.getContextPath() + "/VisualizzaMetodidiPagamentoServlet");
         }
     }
 }

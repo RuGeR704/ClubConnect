@@ -175,7 +175,7 @@ public class UtenteDAO {
         List<MetodoPagamentoBean> metodi = new ArrayList<MetodoPagamentoBean>();
         try(Connection con = ConPool.getConnection();
             PreparedStatement ps = con.prepareStatement(
-                    "SELECT Metodo_Pagamento.* FROM Metodo_Pagamento JOIN Utente ON Metodo_Pagamento.id_utente=Utente.id_utente WHERE id_utente=?")) {
+                    "SELECT Metodo_Pagamento.* FROM Metodo_Pagamento JOIN Utente ON Metodo_Pagamento.id_utente=Utente.id_utente WHERE Utente.id_utente=?")) {
             ps.setInt(1, id_utente);
             try (ResultSet rs = ps.executeQuery()) {
                 while(rs.next()) {

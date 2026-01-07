@@ -132,7 +132,7 @@
 
             <% if (!hasIscrizioni) { %>
 
-            <div class="col-lg-6"> <%
+            <%
                 String msgSuccesso = (String) session.getAttribute("successo");
 
                 if (msgSuccesso != null) {
