@@ -23,7 +23,6 @@ public class VisualizzaSociServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
 
-        // Controllo login opzionale (se la pagina è riservata)
         if (session.getAttribute("utente") == null) {
             response.sendRedirect("login.jsp");
             return;
@@ -39,46 +38,48 @@ public class VisualizzaSociServlet extends HttpServlet {
             int idGruppo = Integer.parseInt(idStr);
             GestioneGruppoBean gruppoService = new GestioneGruppoBean();
 
-            // Recupero il Gruppo
             GruppoBean gruppo = gruppoService.recuperaGruppo(idGruppo);
             if (gruppo == null) {
-                response.sendRedirect("feedServlet"); // Gruppo non trovato
+                response.sendRedirect("feedServlet");
                 return;
             }
 
-            // Recupero la Lista dei Soci
-            // (Nota: Devi aggiungere questo metodo nel tuo GestioneGruppoBean, vedi sotto)
+            // 1. Recupero la lista dei soci e la mappa dei ruoli
             List<UtenteBean> listaSoci = gruppoService.recuperaSociDelGruppo(idGruppo);
+            Map<Integer, Boolean> mappaGestori = gruppoService.recuperaMappaRuoli(idGruppo);
 
-            // Se è un CLUB, calcolo lo stato dei pagamenti
+            // 2. LOGICA DI ORDINAMENTO: Mettiamo i gestori in cima
+            if (listaSoci != null && mappaGestori != null) {
+                listaSoci.sort((u1, u2) -> {
+                    boolean g1 = mappaGestori.getOrDefault(u1.getId_utente(), false);
+                    boolean g2 = mappaGestori.getOrDefault(u2.getId_utente(), false);
+
+                    // Ordine decrescente (i true prima dei false)
+                    return Boolean.compare(g2, g1);
+                });
+            }
+
+            // 3. Calcolo pagamenti (rimane uguale)
             Map<Integer, Boolean> statoPagamenti = new HashMap<>();
-
             if (gruppo instanceof ClubBean) {
                 ClubBean club = (ClubBean) gruppo;
                 GestionePagamentiBean pagamentiService = new GestionePagamentiBean();
-
-
                 statoPagamenti = pagamentiService.getSituazionePagamenti(club.getId_gruppo(), listaSoci, club.getFrequenza());
             }
 
-            // Imposto gli attributi per la JSP
+            // Imposto gli attributi
             request.setAttribute("gruppo", gruppo);
-            request.setAttribute("listaSoci", listaSoci);
-            request.setAttribute("statoPagamenti", statoPagamenti); // Sarà vuota se non è un club, ma non null
+            request.setAttribute("listaSoci", listaSoci); // Ora è ordinata!
+            request.setAttribute("statoPagamenti", statoPagamenti);
+            request.setAttribute("mappaGestori", mappaGestori);
 
-            // Forward alla JSP
             request.getRequestDispatcher("WEB-INF/VisualizzaSoci.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
             response.sendRedirect("feedServlet");
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("errore", "Errore nel recupero dei soci.");
-            request.getRequestDispatcher("feedServlet").forward(request, response); // O pagina errore
+            response.sendRedirect("error.jsp");
         }
-    }
-
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        doGet(request, response);
     }
 }

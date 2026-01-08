@@ -17,7 +17,6 @@ public class KickUtenteServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        // 1. Controllo Sessione
         HttpSession session = request.getSession(false);
         UtenteBean gestoreRichiedente = (session != null) ? (UtenteBean) session.getAttribute("utente") : null;
 
@@ -26,9 +25,9 @@ public class KickUtenteServlet extends HttpServlet {
             return;
         }
 
-        // 2. Recupero Parametri
+        // Recupero Parametri (ora allineati ai nomi 'idGruppo' e 'idUtente' della JSP)
         String idGruppoStr = request.getParameter("idGruppo");
-        String idUtenteTargetStr = request.getParameter("idUtenteDaEspellere");
+        String idUtenteTargetStr = request.getParameter("idUtente");
 
         if (idGruppoStr == null || idUtenteTargetStr == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Parametri mancanti");
@@ -42,17 +41,15 @@ public class KickUtenteServlet extends HttpServlet {
 
             GestioneGruppoBean service = new GestioneGruppoBean();
 
-            // 3. Chiamata al Service
+            // Chiamata al Service
             boolean successo = service.espelliUtente(idGruppo, idUtenteDaEspellere, idGestore);
 
             if (successo) {
-                // Successo: Ricarica la pagina visualizzazione gruppo
-                response.sendRedirect("VisualizzaGruppoServlet?id=" + idGruppo + "&msg=kickOk");
+                // REDIRECT alla lista soci aggiornata invece che alla pagina gruppo
+                response.sendRedirect("VisualizzaSociServlet?id=" + idGruppo + "&success=kickOk");
             } else {
-                // Errore: Permessi negati o errore SQL
-                request.setAttribute("errore", "Impossibile rimuovere l'utente. Verifica i permessi.");
-                // Puoi decidere di rimandare alla pagina del gruppo con un errore o a una pagina di errore generica
-                request.getRequestDispatcher("errorPage.jsp").forward(request, response);
+                // In caso di errore, torniamo alla lista soci mostrando un messaggio
+                response.sendRedirect("VisualizzaSociServlet?id=" + idGruppo + "&error=kickFail");
             }
 
         } catch (NumberFormatException e) {

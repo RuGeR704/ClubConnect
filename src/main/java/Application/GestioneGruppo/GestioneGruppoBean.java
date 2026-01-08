@@ -5,7 +5,9 @@ import Storage.ConPool;
 import Storage.GruppoDAO;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GestioneGruppoBean {
 
@@ -58,6 +60,18 @@ public class GestioneGruppoBean {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public Map<Integer, Boolean> recuperaMappaRuoli(int idGruppo) {
+        // Il Bean gestisce la risorsa (connessione)
+        try (Connection con = ConPool.getConnection()) {
+            GruppoDAO dao = new GruppoDAO();
+            // Richiama il DAO per i dati
+            return dao.getRuoliIscritti(con, idGruppo);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new HashMap<>(); // Ritorna mappa vuota in caso di errore
         }
     }
 }

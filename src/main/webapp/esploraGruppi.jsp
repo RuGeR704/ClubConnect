@@ -137,7 +137,7 @@
                             <div class="d-grid gap-2">
                                 <a href="VisualizzaGruppoServlet?id=<%= g.getId_gruppo() %>" class="btn btn-outline-dark btn-sm rounded-pill">Dettagli</a>
                                 <form action="IscrizioneGruppoServlet" method="POST">
-                                    <input type="hidden" name="idGruppo" value="<%= g.getId_gruppo() %>">
+                                    <input type="hidden" name="id_gruppo" value="<%= g.getId_gruppo() %>">
                                     <button type="submit" class="btn btn-club-primary btn-sm w-100 rounded-pill">Iscriviti</button>
                                 </form>
                             </div>

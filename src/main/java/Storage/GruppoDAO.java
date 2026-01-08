@@ -10,6 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GruppoDAO {
     public Collection<GruppoBean> doRetrieveAll(Connection con) throws SQLException {
@@ -259,5 +261,20 @@ public class GruppoDAO {
             int result = ps.executeUpdate();
             return result > 0; // Restituisce true se ha cancellato la riga
         }
+    }
+
+    public Map<Integer, Boolean> getRuoliIscritti(Connection con, int idGruppo) throws SQLException {
+        Map<Integer, Boolean> mappaRuoli = new HashMap<>();
+        String query = "SELECT id_utente, gestore FROM Iscrizione WHERE id_gruppo = ?";
+
+        try (PreparedStatement ps = con.prepareStatement(query)) {
+            ps.setInt(1, idGruppo);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    mappaRuoli.put(rs.getInt("id_utente"), rs.getBoolean("gestore"));
+                }
+            }
+        }
+        return mappaRuoli;
     }
 }
