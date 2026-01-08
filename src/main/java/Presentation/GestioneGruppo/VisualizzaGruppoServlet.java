@@ -19,11 +19,11 @@ import java.util.List;
 @WebServlet("/VisualizzaGruppoServlet")
 public class VisualizzaGruppoServlet extends HttpServlet {
 
-    // 1. Dependency Injection
+    // Dependency Injection
     private GruppoService gruppoService = new GruppoService();
     private ComunicazioneService comService = new ComunicazioneService();
 
-    // 2. Setters per i Test
+    // Setters per i Test
     public void setGruppoService(GruppoService gs) { this.gruppoService = gs; }
     public void setComunicazioneService(ComunicazioneService cs) { this.comService = cs; }
 
@@ -41,7 +41,7 @@ public class VisualizzaGruppoServlet extends HttpServlet {
         try {
             int idGruppo = Integer.parseInt(idStr);
 
-            // 3. Uso del Service
+            // Uso del Service
             GruppoBean gruppo = gruppoService.recuperaGruppo(idGruppo);
 
             if (gruppo != null) {
@@ -52,6 +52,15 @@ public class VisualizzaGruppoServlet extends HttpServlet {
                 boolean isIscritto = gruppoService.isUtenteIscritto(idGruppo, utente.getId_utente());
                 boolean isAdmin = gruppoService.isUtenteGestore(idGruppo, utente.getId_utente());
 
+                // Chiedo al Service quanti membri ci sono
+                int numeroMembri = gruppoService.getNumeroMembri(idGruppo);
+
+                // Chiedo al Service quanti eventi futuri ci sono
+                int numeroEventi = gruppoService.getNumeroEventiProgrammati(idGruppo);
+
+                // Salvo questi numeri nella request per mandarli alla JSP
+                request.setAttribute("numeroMembri", numeroMembri);
+                request.setAttribute("numeroEventi", numeroEventi);
                 request.setAttribute("gruppo", gruppo);
                 request.setAttribute("isAdmin", isAdmin);
                 request.setAttribute("isIscritto", isIscritto);

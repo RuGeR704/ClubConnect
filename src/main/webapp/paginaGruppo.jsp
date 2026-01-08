@@ -259,10 +259,10 @@
         <div class="col-lg-4">
             <div class="info-card d-flex justify-content-around py-3">
                 <div class="stat-box">
-                    <h5 class="fw-bold mb-0 text-primary">125</h5> <small class="text-muted">Membri</small>
+                    <h5 class="fw-bold mb-0 text-primary"><%= request.getAttribute("numeroMembri") %></h5> <small class="text-muted">Membri</small>
                 </div>
                 <div class="stat-box">
-                    <h5 class="fw-bold mb-0 text-primary">12</h5> <small class="text-muted">Eventi</small>
+                    <h5 class="fw-bold mb-0 text-primary"><%= request.getAttribute("numeroEventi") %></h5> <small class="text-muted">Eventi</small>
                 </div>
             </div>
 

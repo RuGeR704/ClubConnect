@@ -92,16 +92,29 @@ public class GruppoService {
         return gruppoDAO.getRuoliIscritti(con, idGruppo);
     }
 
-    // --- METODI AGGIUNTI/RECUPERATI DOPO MERGE ---
-
+    // Alias per la Servlet (chiama il metodo sotto) affinché la Servlet lo trovi
+    public int getNumeroMembri(int idGruppo) {
+        return contaMembri(idGruppo);
+    }
+    // Metodo Principale (gestisce la connessione)
     public int contaMembri(int idGruppo) {
         try (Connection con = ConPool.getConnection()) {
             return contaMembri(con, idGruppo);
         } catch (SQLException e) { return 0; }
     }
-    // Overload testabile (Mancava nel tuo codice)
+    // Overload (riceve la connessione)
     public int contaMembri(Connection con, int idGruppo) throws SQLException {
         return gruppoDAO.contaMembri(con, idGruppo);
+    }
+
+    // Per sfruttare il metodo che c'è già in GruppoDAO (contaEventiInProgramma)
+    public int getNumeroEventiProgrammati(int idGruppo) {
+        try (Connection con = ConPool.getConnection()) {
+
+            return gruppoDAO.contaEventiInProgramma(con, idGruppo);
+        } catch (SQLException e) {
+            return 0;
+        }
     }
 
     public void creaGruppo(GruppoBean g, int idUtente) throws SQLException {
