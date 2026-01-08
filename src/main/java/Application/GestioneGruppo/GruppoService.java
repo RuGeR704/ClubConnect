@@ -3,32 +3,27 @@ package Application.GestioneGruppo;
 import Application.GestioneAccount.UtenteBean;
 import Storage.ConPool;
 import Storage.GruppoDAO;
-import Storage.UtenteDAO; // Assicurati di avere questo import
+import Storage.UtenteDAO;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GruppoService {
 
     private GruppoDAO gruppoDAO;
-    private UtenteDAO utenteDAO; // CORRETTO: Tipo UtenteDAO
+    private UtenteDAO utenteDAO;
 
-    // Costruttore unico che inizializza entrambi
     public GruppoService() {
         this.gruppoDAO = new GruppoDAO();
-        this.utenteDAO = new UtenteDAO(); // CORRETTO: Inizializzazione aggiunta
+        this.utenteDAO = new UtenteDAO();
     }
 
-    // Per i Test (GruppoDAO)
-    public void setGruppoDAO(GruppoDAO dao) {
-        this.gruppoDAO = dao;
-    }
-
-    // Per i Test (UtenteDAO) - AGGIUNTO
-    public void setUtenteDAO(UtenteDAO dao) {
-        this.utenteDAO = dao;
-    }
+    // Setters per i Test
+    public void setGruppoDAO(GruppoDAO dao) { this.gruppoDAO = dao; }
+    public void setUtenteDAO(UtenteDAO dao) { this.utenteDAO = dao; }
 
     // --- METODI ---
 
@@ -40,34 +35,19 @@ public class GruppoService {
             return null;
         }
     }
-    // Overload testabile
+    // Overload per Test
     public GruppoBean recuperaGruppo(Connection con, int idGruppo) throws SQLException {
         return gruppoDAO.doRetrieveByid(con, idGruppo);
     }
 
-    public int contaMembri(int idGruppo) {
-        try (Connection con = ConPool.getConnection()) {
-            return gruppoDAO.contaMembri(con, idGruppo);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
-    // Serve per test (overload con Connection)
-    public int contaMembri(Connection con, int idGruppo) throws SQLException {
-        return gruppoDAO.contaMembri(con, idGruppo);
-    }
-
     public List<UtenteBean> recuperaSociDelGruppo(int idGruppo) {
         try (Connection con = ConPool.getConnection()) {
-            return gruppoDAO.doRetrieveSoci(con, idGruppo);
+            return recuperaSociDelGruppo(con, idGruppo);
         } catch (SQLException e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
     }
-    // Overload testabile
     public List<UtenteBean> recuperaSociDelGruppo(Connection con, int idGruppo) throws SQLException {
         return gruppoDAO.doRetrieveSoci(con, idGruppo);
     }
@@ -79,19 +59,8 @@ public class GruppoService {
             e.printStackTrace();
         }
     }
-    // Overload testabile
     public void iscriviUtenteAlGruppo(Connection con, int idUtente, int idGruppo) throws SQLException {
         gruppoDAO.doIscrizione(con, idUtente, idGruppo);
-    }
-
-    public void creaGruppo(GruppoBean gruppo, int idUtente) throws SQLException {
-        try (Connection con = ConPool.getConnection()) {
-            creaGruppo(con, gruppo, idUtente);
-        }
-    }
-    // Overload testabile
-    public void creaGruppo(Connection con, GruppoBean gruppo, int idUtente) throws SQLException {
-        gruppoDAO.doSave(con, gruppo, idUtente);
     }
 
     public boolean espelliUtente(int idGruppo, int idUtenteDaEspellere, int idRichiedente) {
@@ -102,41 +71,37 @@ public class GruppoService {
             return false;
         }
     }
-    // Overload testabile
     public boolean espelliUtente(Connection con, int idGruppo, int idUtenteDaEspellere, int idRichiedente) throws SQLException {
         boolean isGestore = gruppoDAO.isGestore(con, idRichiedente, idGruppo);
 
-        if (!isGestore) {
-            return false;
-        }
-        if (idRichiedente == idUtenteDaEspellere) {
-            return false;
-        }
+        if (!isGestore) return false;
+        if (idRichiedente == idUtenteDaEspellere) return false;
 
         return gruppoDAO.doRimuoviMembro(con, idGruppo, idUtenteDaEspellere);
     }
 
-    public List<GruppoBean> recuperaGruppiNonIscritto(int idUtente) throws SQLException {
+    public Map<Integer, Boolean> recuperaMappaRuoli(int idGruppo) {
         try (Connection con = ConPool.getConnection()) {
-            // Ora utenteDAO è inizializzato e non darà NullPointerException
-            return utenteDAO.doRetrieveGruppiNonIscritto(con, idUtente);
+            return recuperaMappaRuoli(con, idGruppo);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new HashMap<>();
         }
     }
-
-    public boolean isUtenteIscritto(int idGruppo, int idUtente) throws SQLException {
-        try (Connection con = ConPool.getConnection()) {
-            // Se UtenteDAO non ha un metodo isIscritto diretto, usiamo le liste
-            List<GruppoBean> iscritti = utenteDAO.doRetrieveGruppiIscritto(idUtente);
-            for (GruppoBean g : iscritti) {
-                if (g.getId_gruppo() == idGruppo) return true;
-            }
-            return false;
-        }
+    public Map<Integer, Boolean> recuperaMappaRuoli(Connection con, int idGruppo) throws SQLException {
+        return gruppoDAO.getRuoliIscritti(con, idGruppo);
     }
 
-    public boolean isUtenteGestore(int idGruppo, int idUtente) throws SQLException {
+    // Metodi aggiuntivi se servono (es. per Dashboard)
+    public int contaMembri(int idGruppo) {
         try (Connection con = ConPool.getConnection()) {
-            return gruppoDAO.isGestore(con, idUtente, idGruppo);
+            return gruppoDAO.contaMembri(con, idGruppo);
+        } catch (SQLException e) { return 0; }
+    }
+
+    public void creaGruppo(GruppoBean g, int idUtente) throws SQLException {
+        try(Connection con = ConPool.getConnection()){
+            gruppoDAO.doSave(con, g, idUtente);
         }
     }
 }

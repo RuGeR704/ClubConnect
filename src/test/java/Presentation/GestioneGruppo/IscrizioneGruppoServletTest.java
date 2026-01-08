@@ -32,15 +32,19 @@ class IscrizioneGruppoServletTest {
     }
 
     @Test
-    void testDoGet_Iscrizione() throws Exception {
+    void testDoPost_Iscrizione() throws Exception {
+        // GIVEN
         when(request.getSession(false)).thenReturn(session);
-        UtenteBean u = new UtenteBean(); u.setId_utente(3);
+        UtenteBean u = new UtenteBean(); u.setId_utente(5);
         when(session.getAttribute("utente")).thenReturn(u);
-        when(request.getParameter("id_gruppo")).thenReturn("5");
 
-        servlet.doGet(request, response);
+        when(request.getParameter("id_gruppo")).thenReturn("100");
 
-        verify(serviceMock).iscriviUtenteAlGruppo(3, 5);
-        verify(response).sendRedirect(contains("id=5"));
+        // WHEN
+        servlet.doPost(request, response);
+
+        // THEN
+        verify(serviceMock).iscriviUtenteAlGruppo(5, 100);
+        verify(response).sendRedirect(contains("VisualizzaGruppoServlet?id=100"));
     }
 }
