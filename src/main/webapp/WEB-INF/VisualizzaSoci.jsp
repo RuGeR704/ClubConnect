@@ -8,6 +8,7 @@
     // RECUPERO DATI DAL CONTROLLER (SERVLET)
     GruppoBean gruppo = (GruppoBean) request.getAttribute("gruppo");
     List<UtenteBean> listaSoci = (List<UtenteBean>) request.getAttribute("listaSoci");
+    Map<Integer, Boolean> mappaGestori = (Map<Integer, Boolean>) request.getAttribute("mappaGestori");
 
     // Mappa per sapere lo stato pagamenti (Solo per Club): Key=IdUtente, Value=Boolean (True=Pagato/Regolare)
     // La servlet deve passare questa mappa se è un club
@@ -169,7 +170,6 @@
                 </tr>
                 </thead>
                 <tbody>
-
                 <% if (listaSoci.isEmpty()) { %>
                 <tr>
                     <td colspan="<%= isClub ? 5 : 4 %>" class="text-center py-5 text-muted">
@@ -179,11 +179,15 @@
                 </tr>
                 <% } else {
                     for (UtenteBean socio : listaSoci) {
+                        boolean isGestore = false;
+                        if(mappaGestori != null && mappaGestori.containsKey(socio.getId_utente())) {
+                            isGestore = mappaGestori.get(socio.getId_utente());
+                        }
                 %>
                 <tr>
                     <td class="ps-4">
                         <div class="d-flex align-items-center gap-3">
-                            <img src="https://ui-avatars.com/api/?name=<%= socio.getNome() %>+<%= socio.getCognome() %>&background=random"
+                            <img src="https://ui-avatars.com/api/?name=<%= socio.getNome() %>+<%= socio.getCognome() %>&background=<%= isGestore ? "1E3A5F&color=fff" : "random" %>"
                                  class="avatar-initials shadow-sm" alt="<%= socio.getNome() %>">
                             <div>
                                 <div class="fw-bold text-dark"><%= socio.getNome() %> <%= socio.getCognome() %></div>
@@ -196,33 +200,42 @@
                         <div class="small text-muted"><i class="fa-solid fa-phone me-1"></i> <%= socio.getCellulare() != null ? socio.getCellulare() : "--" %></div>
                     </td>
                     <td>
+                        <% if (isGestore) { %>
+                        <span class="badge bg-primary text-white border-0" style="background-color: var(--club-dark) !important;">Gestore</span>
+                        <% } else { %>
                         <span class="badge bg-light text-dark border">Membro</span>
+                        <% } %>
                     </td>
 
-                    <%-- LOGICA STATO PAGAMENTO (SOLO CLUB) --%>
-                    <% if (isClub) {
-                        // Recupero lo stato dalla mappa passata dalla Servlet
-                        boolean isPagato = false;
-                        if(statoPagamenti != null && statoPagamenti.containsKey(socio.getId_utente())) {
-                            isPagato = statoPagamenti.get(socio.getId_utente());
-                        }
-                    %>
+                    <% if (isClub) { %>
                     <td class="text-center">
-                        <% if (isPagato) { %>
-                        <span class="status-badge status-active"><i class="fa-solid fa-check-circle me-1"></i> Regolare</span>
-                        <% } else { %>
-                        <span class="status-badge status-expired"><i class="fa-solid fa-triangle-exclamation me-1"></i> Scaduto</span>
+                        <% if (!isGestore) {
+                            boolean isPagato = (statoPagamenti != null && statoPagamenti.getOrDefault(socio.getId_utente(), false));
+                        %>
+                        <span class="status-badge <%= isPagato ? "status-active" : "status-expired" %>">
+                    <i class="fa-solid <%= isPagato ? "fa-check-circle" : "fa-triangle-exclamation" %> me-1"></i>
+                    <%= isPagato ? "Regolare" : "Scaduto" %>
+                </span>
                         <% } %>
                     </td>
                     <% } %>
 
                     <td class="text-end pe-4">
-                        <a class="dropdown-item text-danger" href="#"><i class="fa-solid fa-user-xmark me-2"></i> Espelli</a></li>
+                        <% if (!isGestore) { %>
+                        <form action="KickUtenteServlet" method="POST" style="display:inline;"
+                              onsubmit="return confirm('Sei sicuro di voler espellere questo socio?');">
+                            <input type="hidden" name="idUtente" value="<%= socio.getId_utente() %>">
+                            <input type="hidden" name="idGruppo" value="<%= gruppo.getId_gruppo() %>">
+                            <button type="submit" class="btn btn-sm btn-outline-danger border-0 fw-bold">
+                                <i class="fa-solid fa-user-xmark me-1"></i> Espelli
+                            </button>
+                        </form>
+                        <% } else { %>
+                        <small class="text-muted italic">Protetto</small>
+                        <% } %>
                     </td>
                 </tr>
-                <% }
-                } %>
-
+                <% } } %>
                 </tbody>
             </table>
         </div>

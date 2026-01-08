@@ -10,11 +10,16 @@ import java.io.IOException;
 public class IscrizioneGruppoServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+    }
+    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         UtenteBean utente=null;
-                if(session != null) {
-                    utente =  (UtenteBean) session.getAttribute("utente");
-                }
+        if(session != null) {
+            utente =  (UtenteBean) session.getAttribute("utente");
+        }
         if (utente == null) {
             response.sendRedirect("login.jsp");
             return;
@@ -32,15 +37,10 @@ public class IscrizioneGruppoServlet extends HttpServlet {
             // 3. Chiamata al Service
             GestioneGruppoBean service = new GestioneGruppoBean();
             service.iscriviUtenteAlGruppo(idUtente, idGruppo);
-                response.sendRedirect("VisualizzaGruppoServlet?id=" + idGruppo);
+            response.sendRedirect("VisualizzaGruppoServlet?id=" + idGruppo);
 
         } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID Gruppo non valido");
         }
-    }
-    
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
     }
 }
