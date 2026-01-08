@@ -101,7 +101,7 @@ class ModificaDatiServletTest {
         // Test semplice del doGet che mostra il form
         when(request.getSession(false)).thenReturn(session);
         when(session.getAttribute("utente")).thenReturn(new UtenteBean());
-        when(request.getRequestDispatcher("/WEB-INF/ModificaDatiForm.jsp")).thenReturn(dispatcher);
+        when(request.getRequestDispatcher("gestioneUtente.jsp")).thenReturn(dispatcher);
 
         servlet.doGet(request, response);
 
