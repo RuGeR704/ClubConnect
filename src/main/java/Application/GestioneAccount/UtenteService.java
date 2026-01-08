@@ -37,10 +37,22 @@ public class UtenteService {
          * @return true se successo, false se fallisce (es. email duplicata)
          * @throws SQLException se c'è un errore grave di DB che la servlet deve gestire (opzionale)
          */
-        public UtenteBean registraUtente(UtenteBean utente) throws SQLException {
+        public void registraUtente(UtenteBean utente) throws SQLException {
             try (Connection con = ConPool.getConnection()) {
+
+                // 1. Controllo Username Duplicato
+                // Nota: Assicurati che il tuo DAO abbia il metodo che accetta la Connection!
+                if (utenteDAO.doRetrieveByUsername(con, utente.getUsername()) != null) {
+                    throw new IllegalArgumentException("username risulta già registrato");
+                }
+
+                // 2. Controllo Email Duplicata
+                if (utenteDAO.doRetrieveByEmail(con, utente.getEmail()) != null) {
+                    throw new IllegalArgumentException("email risulta già registrata");
+                }
+
+                // 3. Salvataggio
                 utenteDAO.doSave(con, utente);
-                return utente;
             }
         }
     }
