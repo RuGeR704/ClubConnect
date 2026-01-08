@@ -92,16 +92,62 @@ public class GruppoService {
         return gruppoDAO.getRuoliIscritti(con, idGruppo);
     }
 
-    // Metodi aggiuntivi se servono (es. per Dashboard)
+    // --- METODI AGGIUNTI/RECUPERATI DOPO MERGE ---
+
     public int contaMembri(int idGruppo) {
         try (Connection con = ConPool.getConnection()) {
-            return gruppoDAO.contaMembri(con, idGruppo);
+            return contaMembri(con, idGruppo);
         } catch (SQLException e) { return 0; }
+    }
+    // Overload testabile (Mancava nel tuo codice)
+    public int contaMembri(Connection con, int idGruppo) throws SQLException {
+        return gruppoDAO.contaMembri(con, idGruppo);
     }
 
     public void creaGruppo(GruppoBean g, int idUtente) throws SQLException {
         try(Connection con = ConPool.getConnection()){
-            gruppoDAO.doSave(con, g, idUtente);
+            creaGruppo(con, g, idUtente);
         }
+    }
+    // Overload testabile
+    public void creaGruppo(Connection con, GruppoBean g, int idUtente) throws SQLException {
+        gruppoDAO.doSave(con, g, idUtente);
+    }
+
+    // Metodo per EsploraGruppiServlet
+    public List<GruppoBean> recuperaGruppiNonIscritto(int idUtente) throws SQLException {
+        try (Connection con = ConPool.getConnection()) {
+            return utenteDAO.doRetrieveGruppiNonIscritto(con, idUtente);
+        }
+    }
+
+    // Metodo per VisualizzaGruppoServlet
+    public boolean isUtenteIscritto(int idGruppo, int idUtente) throws SQLException {
+        try (Connection con = ConPool.getConnection()) {
+            // Se UtenteDAO non ha un metodo isIscritto diretto, usiamo le liste
+            List<GruppoBean> iscritti = utenteDAO.doRetrieveGruppiIscritto(idUtente);
+            for (GruppoBean g : iscritti) {
+                if (g.getId_gruppo() == idGruppo) return true;
+            }
+            return false;
+        }
+    }
+
+    // Metodo per VisualizzaGruppoServlet (controllo admin)
+    public boolean isUtenteGestore(int idGruppo, int idUtente) throws SQLException {
+        try (Connection con = ConPool.getConnection()) {
+            return gruppoDAO.isGestore(con, idUtente, idGruppo);
+        }
+    }
+    public boolean rimuoviMembro(int idGruppo, int idUtente) {
+        try (Connection con = ConPool.getConnection()) {
+            return rimuoviMembro(con, idGruppo, idUtente);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean rimuoviMembro(Connection con, int idGruppo, int idUtente) throws SQLException {
+        return gruppoDAO.doRimuoviMembro(con, idGruppo, idUtente);
     }
 }

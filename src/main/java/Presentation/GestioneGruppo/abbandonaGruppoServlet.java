@@ -1,35 +1,34 @@
 package Presentation.GestioneGruppo;
 
 import Application.GestioneAccount.UtenteBean;
-import Storage.ConPool;
-import Storage.GruppoDAO;
+import Application.GestioneGruppo.GruppoService; // Usa il service
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 @WebServlet("/abbandonaGruppoServlet")
 public class abbandonaGruppoServlet extends HttpServlet {
 
+    private GruppoService gruppoService = new GruppoService(); // Injection
+
+    public void setGruppoService(GruppoService gs) {
+        this.gruppoService = gs;
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // 1. Controllo Sessione
         HttpSession session = request.getSession(false);
         UtenteBean utente = (session != null) ? (UtenteBean) session.getAttribute("utente") : null;
-        GruppoDAO gruppodao = new GruppoDAO();
 
         if (utente == null) {
             response.sendRedirect("login.jsp");
             return;
         }
 
-        // 2. Recupero Parametri
         String idGruppoStr = request.getParameter("idGruppo");
         int idUtente = utente.getId_utente();
 
@@ -38,30 +37,30 @@ public class abbandonaGruppoServlet extends HttpServlet {
             return;
         }
 
-        try (Connection con = ConPool.getConnection()) {
+        try {
             int idGruppo = Integer.parseInt(idGruppoStr);
 
-            // Esecuzione della logica di business tramite DAO
-            if (gruppodao.doRimuoviMembro(con, idGruppo, idUtente)) {
-                // Successo: l'utente non fa più parte del gruppo
-                session.setAttribute("successMsg", "Hai abbandonato il gruppo correttamente.");
+            // Usa il service invece del DAO diretto.
+            // Nota: Ho aggiunto un metodo wrapper 'abbandonaGruppo' al service per chiarezza,
+            // oppure puoi usare 'espelliUtente' se la logica è identica (rimozione membro),
+            // ma 'espelliUtente' fa controlli di admin che qui non servono (l'utente si rimuove da solo).
+            // Dobbiamo aggiungere 'abbandonaGruppo' al Service o usare direttamente il DAO wrappato se c'è un metodo semplice.
+            // Assumiamo che tu aggiunga 'rimuoviMembro(idGruppo, idUtente)' al Service che non fa controlli admin.
+            boolean esito = gruppoService.rimuoviMembro(idGruppo, idUtente); // DA AGGIUNGERE AL SERVICE
 
-                // Reindirizziamo alla servlet che mostra i gruppi a cui è iscritto
+            if (esito) {
+                session.setAttribute("successMsg", "Hai abbandonato il gruppo correttamente.");
                 response.sendRedirect(request.getContextPath() + "/VisualizzaIscrizioniGruppiServlet");
             } else {
-                // Fallimento (es. l'utente non era iscritto o errore DB)
-                session.setAttribute("errorMsg", "Impossibile abbandonare il gruppo. Riprova più tardi.");
+                session.setAttribute("errorMsg", "Impossibile abbandonare il gruppo.");
                 response.sendRedirect(request.getContextPath() + "/VisualizzaGruppoServlet?id=" + idGruppo);
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // In caso di errore SQL, mandiamo alla pagina di errore generica
-            response.sendRedirect(request.getContextPath() + "/error.jsp");
         } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID Gruppo non valido");
+        } catch (Exception e) { // Catch generico per SQLException dal service
+            e.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/error.jsp");
         }
     }
-
 }
-
