@@ -213,11 +213,12 @@
             </form>
             <% } else { %>
             <% if (isIscritto) { %>
-            <button class="btn btn-outline-secondary rounded-pill fw-bold">
+            <button class="btn btn-outline-secondary rounded-pill fw-bold" disabled>
                 <i class="fa-solid fa-check me-2"></i> Iscritto
             </button>
-            <form action="IscrizioneGruppoServlet" method="POST" onsubmit="return confirm('Vuoi davvero lasciare il gruppo?');">
-                <input type="hidden" name="action" value="leave">
+
+            <form action="abbandonaGruppoServlet" method="POST"
+                  onsubmit="return confirm('Sei sicuro di voler abbandonare il gruppo?');">
                 <input type="hidden" name="idGruppo" value="<%= gruppo.getId_gruppo() %>">
                 <button type="submit" class="btn btn-outline-danger rounded-pill fw-bold ms-2">
                     <i class="fa-solid fa-right-from-bracket"></i>

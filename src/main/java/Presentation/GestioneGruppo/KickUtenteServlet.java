@@ -1,59 +1,59 @@
 package Presentation.GestioneGruppo;
 
 import Application.GestioneAccount.UtenteBean;
-import Application.GestioneGruppo.GruppoService;
+import Application.GestioneGruppo.GestioneGruppoBean;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 
 @WebServlet("/KickUtenteServlet")
 public class KickUtenteServlet extends HttpServlet {
 
-    // 1. CAMPO DELLA CLASSE
-    private GruppoService service = new GruppoService();
-
-    // 2. SETTER PER I TEST
-    public void setGruppoService(GruppoService service) {
-        this.service = service;
-    }
-
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        UtenteBean gestore = (session != null) ? (UtenteBean) session.getAttribute("utente") : null;
 
-        if (gestore == null) {
+        HttpSession session = request.getSession(false);
+        UtenteBean gestoreRichiedente = (session != null) ? (UtenteBean) session.getAttribute("utente") : null;
+
+        if (gestoreRichiedente == null) {
             response.sendRedirect("login.jsp");
             return;
         }
 
+        // Recupero Parametri (ora allineati ai nomi 'idGruppo' e 'idUtente' della JSP)
         String idGruppoStr = request.getParameter("idGruppo");
-        String idTargetStr = request.getParameter("idUtenteDaEspellere");
+        String idUtenteTargetStr = request.getParameter("idUtente");
 
-        if (idGruppoStr == null || idTargetStr == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        if (idGruppoStr == null || idUtenteTargetStr == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Parametri mancanti");
             return;
         }
 
         try {
             int idGruppo = Integer.parseInt(idGruppoStr);
-            int idTarget = Integer.parseInt(idTargetStr);
+            int idUtenteDaEspellere = Integer.parseInt(idUtenteTargetStr);
+            int idGestore = gestoreRichiedente.getId_utente();
 
-            // 3. USIAMO IL CAMPO 'service'
-            boolean successo = service.espelliUtente(idGruppo, idTarget, gestore.getId_utente());
+            GestioneGruppoBean service = new GestioneGruppoBean();
+
+            // Chiamata al Service
+            boolean successo = service.espelliUtente(idGruppo, idUtenteDaEspellere, idGestore);
 
             if (successo) {
-                response.sendRedirect("VisualizzaGruppoServlet?id=" + idGruppo + "&msg=kickOk");
+                // REDIRECT alla lista soci aggiornata invece che alla pagina gruppo
+                response.sendRedirect("VisualizzaSociServlet?id=" + idGruppo + "&success=kickOk");
             } else {
-                request.setAttribute("errore", "Impossibile rimuovere l'utente.");
-                request.getRequestDispatcher("errorPage.jsp").forward(request, response);
+                // In caso di errore, torniamo alla lista soci mostrando un messaggio
+                response.sendRedirect("VisualizzaSociServlet?id=" + idGruppo + "&error=kickFail");
             }
+
         } catch (NumberFormatException e) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID non validi");
         }
     }
 }
