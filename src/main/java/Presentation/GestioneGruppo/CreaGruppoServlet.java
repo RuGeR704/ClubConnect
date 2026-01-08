@@ -4,9 +4,7 @@ import Application.GestioneAccount.UtenteBean;
 import Application.GestioneGruppo.AssociazioneBean;
 import Application.GestioneGruppo.ClubBean;
 import Application.GestioneGruppo.GruppoBean;
-import Storage.ConPool;
-import Storage.GruppoDAO;
-import Storage.UtenteDAO;
+import Application.GestioneGruppo.GruppoService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,19 +16,27 @@ import java.sql.SQLException;
 
 @WebServlet("/CreazioneGruppoServlet")
 @MultipartConfig(
-        fileSizeThreshold = 1024 * 1024 * 2, // 2MB: se supera questa dim., scrive su disco temporaneo
-        maxFileSize = 1024 * 1024 * 10,      // 10MB: dimensione massima per singolo file
-        maxRequestSize = 1024 * 1024 * 50    // 50MB: dimensione massima totale della richiesta
+        fileSizeThreshold = 1024 * 1024 * 2,
+        maxFileSize = 1024 * 1024 * 10,
+        maxRequestSize = 1024 * 1024 * 50
 )
 public class CreaGruppoServlet extends HttpServlet {
 
     private static final String UPLOAD_DIR = "images" + File.separator + "gruppi";
 
+    // Iniezione del Service
+    private GruppoService service = new GruppoService();
+
+    // Setter per i Test
+    public void setGruppoService(GruppoService service) {
+        this.service = service;
+    }
+
     @Override
-    public void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 
         HttpSession session = request.getSession(false);
-        UtenteBean utente = (UtenteBean) session.getAttribute("utente");
+        UtenteBean utente = (session != null) ? (UtenteBean) session.getAttribute("utente") : null;
 
         if (utente == null) {
             response.sendRedirect("login.jsp");
@@ -45,43 +51,33 @@ public class CreaGruppoServlet extends HttpServlet {
         String regole = request.getParameter("regole");
         String tipoGruppoStr = request.getParameter("tipoGruppo");
 
+        // Gestione Upload Immagine
         String logoPath = null;
         try {
             Part part = request.getPart("logo");
             if (part != null && part.getSize() > 0) {
-                // Percorso assoluto dove salvare (nella cartella del server)
-                String applicationPath = request.getServletContext().getRealPath("");
+                String applicationPath = getServletContext().getRealPath("");
                 String uploadFilePath = applicationPath + File.separator + UPLOAD_DIR;
-
-                // Crea la cartella se non esiste
                 File uploadDir = new File(uploadFilePath);
-                if (!uploadDir.exists()) {
-                    uploadDir.mkdirs();
-                }
+                if (!uploadDir.exists()) uploadDir.mkdirs();
 
-                String fileName = part.getSubmittedFileName();
-                // Salviamo il file
+                String fileName = System.currentTimeMillis() + "_" + part.getSubmittedFileName();
                 part.write(uploadFilePath + File.separator + fileName);
-
-                // Salviamo il percorso relativo per il DB
                 logoPath = "./" + UPLOAD_DIR.replace(File.separator, "/") + "/" + fileName;
             }
         } catch (Exception ex) {
-            ex.printStackTrace(); // Gestione errore upload
-            logoPath = null; // Se fallisce, il logo resta null
+            ex.printStackTrace();
         }
 
-        GruppoBean gruppo = null;
-
+        // Creazione Bean
+        GruppoBean gruppo;
         if ("Club".equalsIgnoreCase(tipoGruppoStr)) {
             ClubBean club = new ClubBean();
-
             String importoStr = request.getParameter("importo");
-            int frequenza = Integer.parseInt(request.getParameter("frequenza"));
+            String frequenzaStr = request.getParameter("frequenza");
 
-            double importo = (importoStr != null && !importoStr.isEmpty()) ? Double.parseDouble(importoStr) : 0.0;
-            club.setImporto_retta(importo);
-            club.setFrequenza(frequenza);
+            club.setImporto_retta((importoStr != null && !importoStr.isEmpty()) ? Double.parseDouble(importoStr) : 0.0);
+            club.setFrequenza((frequenzaStr != null && !frequenzaStr.isEmpty()) ? Integer.parseInt(frequenzaStr) : 0);
             club.setTipoGruppo(true);
             gruppo = club;
         } else {
@@ -99,9 +95,9 @@ public class CreaGruppoServlet extends HttpServlet {
         gruppo.setLogo(logoPath);
         gruppo.setStato(true);
 
-        GruppoDAO gruppoDAO = new GruppoDAO();
         try {
-            gruppoDAO.doSave(ConPool.getConnection(), gruppo, utente.getId_utente());
+            // Uso del Service iniettato
+            service.creaGruppo(gruppo, utente.getId_utente());
             response.sendRedirect("feedServlet");
         } catch (SQLException e) {
             e.printStackTrace();
