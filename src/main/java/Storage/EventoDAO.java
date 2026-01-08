@@ -256,17 +256,20 @@ public class EventoDAO {
         return eventi;
     }
 
-    public void DoSavePartecipazioni(Connection con,PartecipazioneBean e) throws SQLException {
+    public void DoSavePartecipazioni(Connection con, PartecipazioneBean e) throws SQLException {
         String queryInsert = "INSERT INTO Partecipazione (id_evento, id_utente, data_registrazione) VALUES (?,?,?)";
-        String queryUpdate = "UPDATE Evento SET capienza_massima = capienza_massima - 1 WHERE id_evento = ?";
+        // CORRETTO: posti_disponibili invece di capienza_massima
+        String queryUpdate = "UPDATE Evento SET posti_disponibili = posti_disponibili - 1 WHERE id_evento = ?";
+
         try (PreparedStatement ps = con.prepareStatement(queryInsert);
-        PreparedStatement pst = con.prepareStatement(queryUpdate) ) {
+             PreparedStatement pst = con.prepareStatement(queryUpdate)) {
+
             ps.setInt(1, e.getId_evento());
             ps.setInt(2, e.getId_utente());
             if (e.getData_registrazione() != null) {
                 ps.setTimestamp(3, java.sql.Timestamp.valueOf(e.getData_registrazione()));
             } else {
-                ps.setNull(3, java.sql.Types.TIMESTAMP);
+                ps.setTimestamp(3, java.sql.Timestamp.valueOf(LocalDateTime.now()));
             }
             ps.executeUpdate();
 
@@ -296,10 +299,15 @@ public class EventoDAO {
     }
 
     public void doRemovePartecipazione(Connection con, PartecipazioneBean e) throws SQLException {
-        String query = "DELETE FROM Partecipazione WHERE id_evento = ?";
-        try (PreparedStatement ps = con.prepareStatement(query)) {
+        // AGGIUNTO: AND id_utente = ?
+        String query = "DELETE FROM Partecipazione WHERE id_evento = ? AND id_utente = ?";
+
+        try (PreparedStatement ps = con.prepareStatement(query)){
+            // Cancella partecipazione
             ps.setInt(1, e.getId_evento());
+            ps.setInt(2, e.getId_utente());
             ps.executeUpdate();
+
         }
     }
 

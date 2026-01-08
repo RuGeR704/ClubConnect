@@ -58,7 +58,17 @@ public class EventoService {
         }
     }
     public boolean rimuoviPartecipazione(Connection con, PartecipazioneBean partecipazione) throws SQLException {
+        // Cancelliamo l'iscrizione dal DB (chiamata al DAO)
         eventoDAO.doRemovePartecipazione(con, partecipazione);
+
+        // Recuperiamo l'evento aggiornato per sapere i posti attuali
+        EventoBean evento = retrieveEvento(con, partecipazione.getId_evento());
+
+        // Aumentiamo i posti disponibili (+1) salvando la modifica
+        if (evento != null) {
+            aumentaPosti(con, evento);
+        }
+
         return true;
     }
 
@@ -130,4 +140,19 @@ public class EventoService {
             return gruppoDAO.doRetrieveByid(con, idGruppo);
         }
     }
+    //per vedere se è già partecipante
+    public boolean isUtentePartecipante(int idUtente, int idEvento) throws SQLException {
+        try (Connection con = ConPool.getConnection()) {
+            return eventoDAO.isUtentePartecipante(con, idUtente, idEvento);
+        }
+    }
+
+    // questo per recuperare il Gestore
+    public boolean isUtenteGestore(int idUtente, int idGruppo) throws SQLException {
+        try (Connection con = ConPool.getConnection()) {
+            GruppoDAO gruppoDAO = new GruppoDAO();
+            return gruppoDAO.isGestore(con, idUtente, idGruppo);
+        }
+    }
+
 }
