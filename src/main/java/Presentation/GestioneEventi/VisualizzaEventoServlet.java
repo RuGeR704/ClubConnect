@@ -18,6 +18,10 @@ public class VisualizzaEventoServlet extends HttpServlet {
 
     private EventoService service = new EventoService();
 
+    public void setService(EventoService service) {
+        this.service = service;
+    }
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         UtenteBean utente = (UtenteBean) session.getAttribute("utente");
