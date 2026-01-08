@@ -2,11 +2,9 @@ package Presentation.GestioneGruppo;
 
 import Application.GestioneAccount.UtenteBean;
 import Application.GestioneComunicazioni.ComunicazioniBean;
+import Application.GestioneComunicazioni.ComunicazioneService;
 import Application.GestioneGruppo.GruppoBean;
-import Storage.ComunicazioneDAO;
-import Storage.ConPool;
-import Storage.GruppoDAO;
-import Storage.UtenteDAO;
+import Application.GestioneGruppo.GruppoService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -16,53 +14,43 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 
 @WebServlet("/VisualizzaGruppoServlet")
 public class VisualizzaGruppoServlet extends HttpServlet {
 
+    // 1. Dependency Injection
+    private GruppoService gruppoService = new GruppoService();
+    private ComunicazioneService comService = new ComunicazioneService();
+
+    // 2. Setters per i Test
+    public void setGruppoService(GruppoService gs) { this.gruppoService = gs; }
+    public void setComunicazioneService(ComunicazioneService cs) { this.comService = cs; }
+
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-
-        String id = request.getParameter("id");
+        String idStr = request.getParameter("id");
         HttpSession session = request.getSession();
         UtenteBean utente = (UtenteBean) session.getAttribute("utente");
 
-        if (id == null || id.isEmpty() || utente == null ) {
+        if (idStr == null || idStr.isEmpty() || utente == null) {
             response.sendRedirect("feedServlet");
             return;
         }
 
-        int idGruppo = Integer.parseInt(id);
-        GruppoDAO dao = new GruppoDAO();
-        UtenteDAO utenteDAO = new UtenteDAO();
-        ComunicazioneDAO comunicazioneDAO = new ComunicazioneDAO();
-
         try {
-            GruppoBean gruppo = dao.doRetrieveByid(ConPool.getConnection(), idGruppo);
+            int idGruppo = Integer.parseInt(idStr);
+
+            // 3. Uso del Service
+            GruppoBean gruppo = gruppoService.recuperaGruppo(idGruppo);
 
             if (gruppo != null) {
-                boolean isAdmin = false;
-                boolean isIscritto = false;
+                // Recupero Comunicazioni
+                List<ComunicazioniBean> comunicazioni = comService.recuperaComunicazioniPerUtente(utente.getId_utente());
 
-                List<GruppoBean> gruppiIscritti = utenteDAO.doRetrieveGruppiIscritto(utente.getId_utente());
-                List<GruppoBean> gruppiAdmin = utenteDAO.doRetrieveGruppiAdmin(ConPool.getConnection(), utente.getId_utente());
-                List<ComunicazioniBean> comunicazioni = comunicazioneDAO.doRetrievebyGruppo(ConPool.getConnection(), idGruppo);
-
-                for (GruppoBean g : gruppiIscritti) {
-                    if (g.getId_gruppo() == gruppo.getId_gruppo()) {
-                        isIscritto = true;
-                        break;
-                    }
-                }
-
-                for (GruppoBean g : gruppiAdmin) {
-                    if (g.getId_gruppo() == gruppo.getId_gruppo()) {
-                        isAdmin = true;
-                        break;
-                    }
-                }
+                // Controllo Permessi (usando i nuovi metodi del service)
+                boolean isIscritto = gruppoService.isUtenteIscritto(idGruppo, utente.getId_utente());
+                boolean isAdmin = gruppoService.isUtenteGestore(idGruppo, utente.getId_utente());
 
                 request.setAttribute("gruppo", gruppo);
                 request.setAttribute("isAdmin", isAdmin);
@@ -72,11 +60,11 @@ public class VisualizzaGruppoServlet extends HttpServlet {
                 RequestDispatcher view = request.getRequestDispatcher("paginaGruppo.jsp");
                 view.forward(request, response);
             } else {
-                System.out.println("DEBUG: Gruppo NON trovato (NULL) -> Redirect Feed");
                 response.sendRedirect("feedServlet");
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            response.sendRedirect("feedServlet");
         }
     }
 

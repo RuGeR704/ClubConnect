@@ -2,8 +2,7 @@ package Presentation.GestioneGruppo;
 
 import Application.GestioneAccount.UtenteBean;
 import Application.GestioneGruppo.GruppoBean;
-import Storage.ConPool;
-import Storage.UtenteDAO;
+import Application.GestioneGruppo.GruppoService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -18,6 +17,12 @@ import java.util.List;
 @WebServlet("/EsploraGruppiServlet")
 public class EsploraGruppiServlet extends HttpServlet {
 
+    private GruppoService service = new GruppoService();
+
+    public void setService(GruppoService service) {
+        this.service = service;
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
@@ -28,10 +33,9 @@ public class EsploraGruppiServlet extends HttpServlet {
             return;
         }
 
-        UtenteDAO dao = new UtenteDAO();
         try {
-            // Recuperiamo i gruppi a cui NON è iscritto
-            List<GruppoBean> gruppiEsplora = dao.doRetrieveGruppiNonIscritto(ConPool.getConnection(), utente.getId_utente());
+            // Service wrappa UtenteDAO.doRetrieveGruppiNonIscritto
+            List<GruppoBean> gruppiEsplora = service.recuperaGruppiNonIscritto(utente.getId_utente());
 
             request.setAttribute("gruppiEsplora", gruppiEsplora);
             request.getRequestDispatcher("esploraGruppi.jsp").forward(request, response);

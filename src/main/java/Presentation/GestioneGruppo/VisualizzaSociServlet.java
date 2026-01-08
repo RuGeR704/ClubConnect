@@ -2,8 +2,8 @@ package Presentation.GestioneGruppo;
 
 import Application.GestioneAccount.UtenteBean;
 import Application.GestioneGruppo.ClubBean;
-import Application.GestioneGruppo.GestioneGruppoBean;
 import Application.GestioneGruppo.GruppoBean;
+import Application.GestioneGruppo.GruppoService;
 import Application.GestionePagamenti.GestionePagamentiBean;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -20,64 +20,58 @@ import java.util.Map;
 @WebServlet(name = "VisualizzaSociServlet", urlPatterns = {"/VisualizzaSociServlet"})
 public class VisualizzaSociServlet extends HttpServlet {
 
+    // 1. CAMPI DELLA CLASSE
+    private GruppoService gruppoService = new GruppoService();
+    private GestionePagamentiBean pagamentiService = new GestionePagamentiBean();
+
+    // 2. SETTERS PER I TEST
+    public void setGruppoService(GruppoService gs) { this.gruppoService = gs; }
+    public void setPagamentiService(GestionePagamentiBean ps) { this.pagamentiService = ps; }
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
-
-        // Controllo login opzionale (se la pagina è riservata)
         if (session.getAttribute("utente") == null) {
             response.sendRedirect("login.jsp");
             return;
         }
 
         String idStr = request.getParameter("id");
-        if (idStr == null || idStr.isEmpty()) {
+        if (idStr == null) {
             response.sendRedirect("feedServlet");
             return;
         }
 
         try {
             int idGruppo = Integer.parseInt(idStr);
-            GestioneGruppoBean gruppoService = new GestioneGruppoBean();
 
-            // Recupero il Gruppo
+            // 3. USIAMO I CAMPI
             GruppoBean gruppo = gruppoService.recuperaGruppo(idGruppo);
+
             if (gruppo == null) {
-                response.sendRedirect("feedServlet"); // Gruppo non trovato
+                response.sendRedirect("feedServlet");
                 return;
             }
 
-            // Recupero la Lista dei Soci
-            // (Nota: Devi aggiungere questo metodo nel tuo GestioneGruppoBean, vedi sotto)
             List<UtenteBean> listaSoci = gruppoService.recuperaSociDelGruppo(idGruppo);
-
-            // Se è un CLUB, calcolo lo stato dei pagamenti
             Map<Integer, Boolean> statoPagamenti = new HashMap<>();
 
             if (gruppo instanceof ClubBean) {
                 ClubBean club = (ClubBean) gruppo;
-                GestionePagamentiBean pagamentiService = new GestionePagamentiBean();
-
-
                 statoPagamenti = pagamentiService.getSituazionePagamenti(club.getId_gruppo(), listaSoci, club.getFrequenza());
             }
 
-            // Imposto gli attributi per la JSP
             request.setAttribute("gruppo", gruppo);
             request.setAttribute("listaSoci", listaSoci);
-            request.setAttribute("statoPagamenti", statoPagamenti); // Sarà vuota se non è un club, ma non null
+            request.setAttribute("statoPagamenti", statoPagamenti);
 
-            // Forward alla JSP
             request.getRequestDispatcher("WEB-INF/VisualizzaSoci.jsp").forward(request, response);
 
-        } catch (NumberFormatException e) {
-            response.sendRedirect("feedServlet");
         } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("errore", "Errore nel recupero dei soci.");
-            request.getRequestDispatcher("feedServlet").forward(request, response); // O pagina errore
+            response.sendRedirect("feedServlet");
         }
     }
 
+    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doGet(request, response);
     }
