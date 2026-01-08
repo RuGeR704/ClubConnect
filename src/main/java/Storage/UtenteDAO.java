@@ -376,4 +376,46 @@ public class UtenteDAO {
             ps.executeUpdate();
         }
     }
+    public UtenteBean doRetrieveByUsername(Connection con,String user) throws SQLException{
+        UtenteBean c = null;
+        try(PreparedStatement ps = con.prepareStatement("SELECT * FROM Utente WHERE  username= ?")){
+            ps.setString(1, user);
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()){
+                    c = new UtenteBean();
+                    c.setId_utente(rs.getInt("id_utente"));
+                    c.setUsername(rs.getString("username"));
+                    c.setNome(rs.getString("nome"));
+                    c.setCognome(rs.getString("cognome"));
+                    c.setEmail(rs.getString("email"));
+                    c.setData_nascita(rs.getDate("data_nascita").toLocalDate());
+                    c.setCellulare(rs.getString("cellulare"));
+                    c.setStato(rs.getInt("stato"));
+                    c.setIsadmin(rs.getBoolean("isAdmin") || c.getId_utente() == 1);;
+                }
+            }
+        }
+        return c;
+    }
+    public UtenteBean doRetrieveByEmail(Connection con,String user) throws SQLException{
+        UtenteBean c = null;
+        try(PreparedStatement ps = con.prepareStatement("SELECT * FROM Utente WHERE  email= ?")){
+            ps.setString(1, user);
+            try (ResultSet rs = ps.executeQuery()){
+                while (rs.next()){
+                    c = new UtenteBean();
+                    c.setId_utente(rs.getInt("id_utente"));
+                    c.setUsername(rs.getString("username"));
+                    c.setNome(rs.getString("nome"));
+                    c.setCognome(rs.getString("cognome"));
+                    c.setEmail(rs.getString("email"));
+                    c.setData_nascita(rs.getDate("data_nascita").toLocalDate());
+                    c.setCellulare(rs.getString("cellulare"));
+                    c.setStato(rs.getInt("stato"));
+                    c.setIsadmin(rs.getBoolean("isAdmin") || c.getId_utente() == 1);;
+                }
+            }
+        }
+        return c;
+    }
 }
