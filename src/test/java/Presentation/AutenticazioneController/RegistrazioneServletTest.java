@@ -67,7 +67,7 @@ class RegistrazioneServletTest {
             "TC1.2_2, Domz, Domenico pasquale antonio marco los tocos giacomo, Ricciardelli, 2004-10-20, d.ricciardelli1@studenti.unisa.it, pass#1234, 3331234567, Nome è troppo lungo",
             "TC1.3_1, Domz, Domenico, '', 2004-10-20, d.ricciardelli1@studenti.unisa.it, pass#1234, 3331234567, Cognome è vuoto",
             "TC1.3_2, Domz, Domenico, Ricciardelli de angelis los todos marcello, 2004-10-20, d.ricciardelli1@studenti.unisa.it, pass#1234, 3331234567, Cognome è troppo lungo",
-            "TC1.4_1, Domz, Domenico, Ricciardelli, '', d.ricciardelli1@studenti.unisa.it, pass#1234, 3331234567, data di nascita è vuota",
+            "TC1.4_1, Domz, Domenico, Ricciardelli, '', d.ricciardelli1@studenti.unisa.it, pass#1234, 3331234567, data di nascita è vuoto",
             "TC1.5_1, Domz, Domenico, Ricciardelli, 2004-10-20, '', pass#1234, 3331234567, email è vuoto",
             "TC1.5_2, Domz, Domenico, Ricciardelli, 2004-10-20, d.ricci@rdelli, pass#1234, 3331234567, email non rispetta il formato",
             "TC1.6_1, Domz, Domenico, Ricciardelli, 2004-10-20, d.ricciardelli1@studenti.unisa.it, '', 3331234567, password è vuoto",
