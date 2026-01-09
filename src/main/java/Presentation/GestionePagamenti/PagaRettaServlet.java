@@ -30,7 +30,7 @@ public class PagaRettaServlet extends HttpServlet {
         String importoStr = request.getParameter("importo");
 
         if (idGruppoStr == null || idMetodoStr == null || importoStr == null) {
-            response.sendRedirect("feedServlet.jsp");
+            response.sendRedirect("feedServlet");
             return;
         }
 
@@ -49,15 +49,15 @@ public class PagaRettaServlet extends HttpServlet {
             } else {
                 // Errore durante il salvataggio
                 request.setAttribute("error", "Errore tecnico durante l'elaborazione del pagamento.");
-                request.getRequestDispatcher("errorePagamento.jsp").forward(request, response);
+                request.getRequestDispatcher("paginaGruppo.jsp").forward(request, response);
             }
 
         } catch (NumberFormatException e) {
-            response.sendRedirect("feedServlet.jsp");
+            response.sendRedirect("feedServlet");
         }
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.sendRedirect("feedServlet.jsp");
+        response.sendRedirect("feedServlet");
     }
 }

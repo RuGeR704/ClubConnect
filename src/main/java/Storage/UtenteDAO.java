@@ -85,7 +85,7 @@ public class UtenteDAO {
 
     public void doSave(Connection con, UtenteBean p) throws SQLException{
         try(PreparedStatement ps = con.prepareStatement(
-                "INSERT INTO Utente (username, passwordhash, nome, cognome, email, data_nascita, cellulare, stato, is_admin) VALUES (?, ?, ?, ?, ?, ? ,?, ?, ?)")) {
+                "INSERT INTO Utente (username, passwordhash, nome, cognome, email, data_nascita, cellulare, stato, is_admin) VALUES (?, ?, ?, ?, ?, ? ,?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, p.getUsername());
             ps.setString(2, p.getPasswordhash());
             ps.setString(3, p.getNome());
@@ -96,6 +96,14 @@ public class UtenteDAO {
             ps.setInt(8, p.getStato());
             ps.setBoolean(9, p.isAdmin());
             ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if(rs.next()) {
+                    int generatedID = rs.getInt(1);
+                    p.setId_utente(generatedID);
+                }
+            }
+
         } catch (SQLException e) {
             if(e.getErrorCode() == 1062) { //se trova duplicati email o username
                 String messaggioErrore = e.getMessage();

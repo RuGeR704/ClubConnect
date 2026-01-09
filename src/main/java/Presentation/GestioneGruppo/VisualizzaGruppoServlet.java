@@ -1,10 +1,12 @@
 package Presentation.GestioneGruppo;
 
+import Application.GestioneAccount.AccountService;
 import Application.GestioneAccount.UtenteBean;
 import Application.GestioneComunicazioni.ComunicazioniBean;
 import Application.GestioneComunicazioni.ComunicazioneService;
 import Application.GestioneGruppo.GruppoBean;
 import Application.GestioneGruppo.GruppoService;
+import Application.GestionePagamenti.MetodoPagamentoBean;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -22,10 +24,12 @@ public class VisualizzaGruppoServlet extends HttpServlet {
     // Dependency Injection
     private GruppoService gruppoService = new GruppoService();
     private ComunicazioneService comService = new ComunicazioneService();
+    private AccountService asService = new AccountService();
 
     // Setters per i Test
     public void setGruppoService(GruppoService gs) { this.gruppoService = gs; }
     public void setComunicazioneService(ComunicazioneService cs) { this.comService = cs; }
+    public void setAccountService(AccountService as) {this.asService = as;}
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -51,6 +55,7 @@ public class VisualizzaGruppoServlet extends HttpServlet {
                 // Controllo Permessi (usando i nuovi metodi del service)
                 boolean isIscritto = gruppoService.isUtenteIscritto(idGruppo, utente.getId_utente());
                 boolean isAdmin = gruppoService.isUtenteGestore(idGruppo, utente.getId_utente());
+                List<MetodoPagamentoBean> metodipagamenti = asService.getMetodiPagamento(utente.getId_utente());
 
                 // Chiedo al Service quanti membri ci sono
                 int numeroMembri = gruppoService.getNumeroMembri(idGruppo);
@@ -65,6 +70,7 @@ public class VisualizzaGruppoServlet extends HttpServlet {
                 request.setAttribute("isAdmin", isAdmin);
                 request.setAttribute("isIscritto", isIscritto);
                 request.setAttribute("comunicazioni", comunicazioni);
+                request.setAttribute("metodiUtente", metodipagamenti);
 
                 RequestDispatcher view = request.getRequestDispatcher("paginaGruppo.jsp");
                 view.forward(request, response);

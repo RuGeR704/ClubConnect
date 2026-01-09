@@ -115,7 +115,8 @@ public class RegistrazioneServlet extends HttpServlet {
             request.getRequestDispatcher("registrazione.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect("error.jsp");
+            request.setAttribute("errore", "Errore: " + e.getMessage());
+            response.sendRedirect("registrazione.jsp");
         }
     }
 

@@ -20,6 +20,7 @@ public class AggiungiMetodoPagamentoServlet extends HttpServlet {
         try {
             HttpSession session = request.getSession(false);
             UtenteBean utente = null;
+
             if (session == null || session.getAttribute("utente") == null) {
                 response.sendRedirect(request.getContextPath() + "/login.jsp"); //manda al login se la sessione non esiste
                 return;
@@ -36,6 +37,7 @@ public class AggiungiMetodoPagamentoServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         LocalDate oggi=LocalDate.now();
         HttpSession session = request.getSession(false);
+
         if (session == null || session.getAttribute("utente") == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
