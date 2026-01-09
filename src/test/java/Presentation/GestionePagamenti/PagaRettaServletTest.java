@@ -52,25 +52,33 @@ class PagaRettaServletTest {
 
         servlet.doPost(request, response);
 
-        // Verifica che il service venga chiamato
         verify(serviceMock).pagaRetta(10, 5, 25.50);
-        // Verifica redirect di successo
         verify(response).sendRedirect(contains("status=success"));
     }
 
     @Test
     void testPagamento_ErroreDB() throws Exception {
+        // 1. SETUP PARAMETRI VALIDI
         when(request.getParameter("idGruppo")).thenReturn("10");
         when(request.getParameter("idMetodo")).thenReturn("5");
         when(request.getParameter("importo")).thenReturn("25.50");
 
-        // Simuliamo eccezione SQL dal service
-        doThrow(new SQLException("Errore Connessione")).when(serviceMock).pagaRetta(anyInt(), anyInt(), anyDouble());
+        // 2. SIMULA ERRORE SQL
+        doThrow(new SQLException("Errore Connessione"))
+                .when(serviceMock).pagaRetta(anyInt(), anyInt(), anyDouble());
 
+        // 3. ESECUZIONE
         servlet.doPost(request, response);
 
-        // Verifica gestione errore
+        // 4. VERIFICHE CORRETTE (Forward con Attributo)
+
+        // Verifica che venga settato il messaggio di errore
         verify(request).setAttribute(eq("error"), contains("Errore tecnico"));
+
+        // Verifica che venga richiesto il dispatcher per la JSP specifica indicata da te
+        verify(request).getRequestDispatcher("pagine_gruppo.jsp");
+
+        // Verifica che venga eseguito il forward (NON il redirect)
         verify(dispatcher).forward(request, response);
     }
 }

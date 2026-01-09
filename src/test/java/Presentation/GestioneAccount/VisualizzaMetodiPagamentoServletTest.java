@@ -18,7 +18,6 @@ import org.mockito.quality.Strictness;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -26,7 +25,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class VisualizzaMetodidiPagamentoServletTest { // Nota il nome con "di"
+class VisualizzaMetodidiPagamentoServletTest {
 
     @Mock HttpServletRequest request;
     @Mock HttpServletResponse response;
@@ -34,7 +33,6 @@ class VisualizzaMetodidiPagamentoServletTest { // Nota il nome con "di"
     @Mock RequestDispatcher dispatcher;
     @Mock AccountService serviceMock;
 
-    // Assicurati che importi la classe corretta della tua Servlet
     VisualizzaMetodiPagamentoServlet servlet;
 
     @BeforeEach
@@ -45,7 +43,7 @@ class VisualizzaMetodidiPagamentoServletTest { // Nota il nome con "di"
         when(request.getSession(false)).thenReturn(session);
         when(request.getRequestDispatcher(anyString())).thenReturn(dispatcher);
 
-        // FIX ERRORE 1: Mockiamo il context path per evitare "null/login.jsp"
+        // FONDAMENTALE: Mockiamo getContextPath() per evitare "null/login.jsp"
         when(request.getContextPath()).thenReturn("");
     }
 
@@ -63,10 +61,9 @@ class VisualizzaMetodidiPagamentoServletTest { // Nota il nome con "di"
         servlet.doGet(request, response);
 
         // Then
-        // FIX ERRORE 2: Usiamo "metodipagamento" (minuscolo) come nel log "Actual"
-        verify(request).setAttribute(eq("metodipagamento"), eq(lista));
-
-        // FIX ERRORE 2: Usiamo "/gestioneUtente.jsp" come nel log "Actual"
+        // Verifica che l'attributo sia "metodiPagamento" (camelCase)
+        verify(request).setAttribute(eq("metodiPagamento"), eq(lista));
+        // Verifica il path corretto della JSP
         verify(request).getRequestDispatcher("/gestioneUtente.jsp");
         verify(dispatcher).forward(request, response);
     }
@@ -77,7 +74,7 @@ class VisualizzaMetodidiPagamentoServletTest { // Nota il nome con "di"
 
         servlet.doGet(request, response);
 
-        // FIX ERRORE 1: Ora che contextPath è "", si aspetta "/login.jsp"
+        // Verifica il redirect corretto (dato che contextPath è vuoto, sarà /login.jsp)
         verify(response).sendRedirect("/login.jsp");
     }
 }
