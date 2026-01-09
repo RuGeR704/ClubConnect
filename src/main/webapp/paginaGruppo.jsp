@@ -13,6 +13,7 @@
 <%@ page import="java.util.Comparator" %>
 <%@ page import="java.time.LocalDateTime" %>
 <%@ page import="java.time.format.DateTimeFormatter" %>
+<%@ page import="Application.GestionePagamenti.MetodoPagamentoBean" %>
 
 <%
     // 1. RECUPERO DATI
@@ -299,9 +300,15 @@
                         <%= freqLeggibile %>
                         </span>
                     </div>
+
+                    <% if (isIscritto) { %>
+                    <hr class="my-2 opacity-25">
+                    <button type="button" class="btn btn-success w-100 rounded-pill fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalPagamentoRetta">
+                        <i class="fa-regular fa-credit-card me-2"></i> Paga Retta
+                    </button>
+                    <% } %>
                 </div>
                 <% } %>
-
                 <div class="mt-3 pt-3 border-top">
                     <small class="text-muted d-block text-uppercase fw-bold mb-2" style="font-size: 0.7rem;">Regole</small>
                     <div class="alert alert-warning small p-2 mb-0">
@@ -730,82 +737,165 @@
                 </div> </div>
         </div>
     </div>
-</div>
 
-<% if(isAdmin) { %>
-<div class="modal fade" id="modalEditInfo" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h5 class="modal-title fw-bold">Modifica Gruppo</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <% if(isAdmin) { %>
+    <div class="modal fade" id="modalEditInfo" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">Modifica Gruppo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="ModificaGruppoServlet" method="POST">
+                    <input type="hidden" name="idGruppo" value="<%= gruppo.getId_gruppo() %>">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nome</label>
+                            <input type="text" class="form-control" name="nome" value="<%= gruppo.getNome() %>">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descrizione</label>
+                            <textarea class="form-control" name="descrizione"><%= gruppo.getDescrizione() %></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button>
+                        <button type="submit" class="btn btn-primary">Salva</button>
+                    </div>
+                </form>
             </div>
-            <form action="ModificaGruppoServlet" method="POST">
-                <input type="hidden" name="idGruppo" value="<%= gruppo.getId_gruppo() %>">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Nome</label>
-                        <input type="text" class="form-control" name="nome" value="<%= gruppo.getNome() %>">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Descrizione</label>
-                        <textarea class="form-control" name="descrizione"><%= gruppo.getDescrizione() %></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button>
-                    <button type="submit" class="btn btn-primary">Salva</button>
-                </div>
-            </form>
         </div>
     </div>
-</div>
 
-<div class="modal fade" id="modalEditImages" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <h5 class="modal-title">Aggiorna Immagini</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form action="UploadImmagineServlet" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="idGruppo" value="<%= gruppo.getId_gruppo() %>">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Tipo</label>
-                        <select name="tipoImg" class="form-select">
-                            <option value="logo">Logo</option>
-                            <option value="copertina">Copertina</option>
-                        </select>
+    <div class="modal fade" id="modalEditImages" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">Aggiorna Immagini</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="UploadImmagineServlet" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="idGruppo" value="<%= gruppo.getId_gruppo() %>">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Tipo</label>
+                            <select name="tipoImg" class="form-select">
+                                <option value="logo">Logo</option>
+                                <option value="copertina">Copertina</option>
+                            </select>
+                        </div>
+                        <input type="file" name="file" class="form-control" required>
                     </div>
-                    <input type="file" name="file" class="form-control" required>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="submit" class="btn btn-primary">Carica</button>
-                </div>
-            </form>
+                    <div class="modal-footer border-0">
+                        <button type="submit" class="btn btn-primary">Carica</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-<% } %>
+        <% } %>
 
-<script>
-    function openForm(type) {
-        document.getElementById('default-post-view').classList.add('d-none');
-        document.getElementById('event-form-view')?.classList.add('d-none');
-        document.getElementById('notice-form-view').classList.add('d-none');
+        <% if (gruppo instanceof ClubBean && isIscritto) {
+    ClubBean clubToPay = (ClubBean) gruppo;
+%>
+    <div class="modal fade" id="modalPagamentoRetta" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
 
-        if (type === 'event') document.getElementById('event-form-view').classList.remove('d-none');
-        else if (type === 'notice') document.getElementById('notice-form-view').classList.remove('d-none');
-    }
+                <div class="modal-header border-0 bg-success bg-opacity-10">
+                    <h5 class="modal-title fw-bold text-success">
+                        <i class="fa-solid fa-wallet me-2"></i>Pagamento Retta
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
 
-    function closeForms() {
-        document.getElementById('event-form-view')?.classList.add('d-none');
-        document.getElementById('notice-form-view').classList.add('d-none');
-        document.getElementById('default-post-view').classList.remove('d-none');
-    }
-</script>
+                <form action="PagaRettaServlet" method="POST">
+                    <input type="hidden" name="idGruppo" value="<%= gruppo.getId_gruppo() %>">
+                    <input type="hidden" name="importo" value="<%= clubToPay.getImporto_retta() %>">
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                    <div class="modal-body p-4">
+                        <div class="text-center mb-4">
+                            <small class="text-muted text-uppercase fw-bold">Stai pagando a</small>
+                            <h4 class="fw-bold mb-0 text-dark"><%= gruppo.getNome() %></h4>
+                            <div class="display-6 fw-bold text-success my-2">
+                                € <%= String.format("%.2f", clubToPay.getImporto_retta()) %>
+                            </div>
+                            <%
+                                int f = clubToPay.getFrequenza();
+                                String freqLeggibile = (f == 1) ? "Settimanale" : (f == 2) ? "Mensile" : "Annuale";
+                            %>
+                            <span class="badge bg-light text-secondary border">Retta <%= freqLeggibile %></span>
+                        </div>
+
+                        <hr>
+
+                        <h6 class="fw-bold mb-3">Seleziona metodo di pagamento:</h6>
+
+                        <div class="d-flex flex-column gap-2">
+                            <%
+                                List<MetodoPagamentoBean> metodiUtente = (List<MetodoPagamentoBean>) request.getAttribute("metodiUtente");
+
+                                if (metodiUtente != null && !metodiUtente.isEmpty()) {
+                                    for (MetodoPagamentoBean mp : metodiUtente) {
+                                        String numeroCarta = mp.getNumero_carta();
+                                        String ultime4 = (numeroCarta.length() > 4) ? numeroCarta.substring(numeroCarta.length() - 4) : "****";
+                            %>
+                            <label class="card border p-3 rounded-3 cursor-pointer hover-effect">
+                                <div class="d-flex align-items-center">
+                                    <input type="radio" name="idMetodoPagamento" value="<%= mp.getId_metodo() %>" class="form-check-input me-3" required>
+                                    <div>
+                                        <div class="fw-bold"><i class="fa-brands fa-cc-visa me-2 text-primary"></i>Carta terminante in <%= ultime4 %></div>
+                                        <small class="text-muted">Scadenza: <%= mp.getScadenza_carta() %></small>
+                                    </div>
+                                </div>
+                            </label>
+                            <%      }
+                            } else { %>
+
+                            <div class="alert alert-warning text-center">
+                                <i class="fa-solid fa-circle-exclamation mb-2"></i><br>
+                                Non hai metodi di pagamento salvati.
+                                <br>
+                                <a href="VisualizzaMetodidiPagamentoServlet" class="fw-bold text-decoration-underline">Aggiungi una carta nel profilo</a>
+                            </div>
+
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Annulla</button>
+                        <% if (metodiUtente != null && !metodiUtente.isEmpty()) { %>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">
+                            Conferma Pagamento <i class="fa-solid fa-check ms-2"></i>
+                        </button>
+                        <% } else { %>
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" disabled>Impossibile Pagare</button>
+                        <% } %>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+        <% } %>
+
+    <script>
+        function openForm(type) {
+            document.getElementById('default-post-view').classList.add('d-none');
+            document.getElementById('event-form-view')?.classList.add('d-none');
+            document.getElementById('notice-form-view').classList.add('d-none');
+
+            if (type === 'event') document.getElementById('event-form-view').classList.remove('d-none');
+            else if (type === 'notice') document.getElementById('notice-form-view').classList.remove('d-none');
+        }
+
+        function closeForms() {
+            document.getElementById('event-form-view')?.classList.add('d-none');
+            document.getElementById('notice-form-view').classList.add('d-none');
+            document.getElementById('default-post-view').classList.remove('d-none');
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
