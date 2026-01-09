@@ -3,11 +3,14 @@ package Application.GestioneAccount;
 import Application.GestioneGruppo.GruppoBean;
 import Application.GestionePagamenti.DettagliPagamentoBean;
 import Application.GestionePagamenti.MetodoPagamentoBean;
+import Storage.ConPool;
+import Storage.PagamentoDAO; // NUOVO DAO
 import Storage.UtenteDAO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic; // Importante per mockare ConPool
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -18,59 +21,51 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AccountServiceTest {
 
     @Mock
-    UtenteDAO utenteDAO; // Il DAO finto
+    UtenteDAO utenteDAO;
 
     @Mock
-    Connection connection; // La connessione finta
+    PagamentoDAO pagamentoDAO; // 1. Aggiungiamo il mock del nuovo DAO
+
+    @Mock
+    Connection connection;
 
     @InjectMocks
-    AccountService accountService; // Il service sotto test
+    AccountService accountService;
+
+    // --- TEST ESISTENTI (READ) ---
+    // Questi usano i metodi "overload" del Service che accettano (Connection con)
 
     @Test
     void testGetGruppiIscritto_Trovati() throws SQLException {
-        // GIVEN
         int idUtente = 1;
         List<GruppoBean> listaAttesa = new ArrayList<>();
-        GruppoBean gruppoFinto = Mockito.mock(GruppoBean.class);
-        listaAttesa.add(gruppoFinto);
+        listaAttesa.add(Mockito.mock(GruppoBean.class));
 
-        // CORREZIONE: Ora il metodo DAO accetta la connessione!
         when(utenteDAO.doRetrieveGruppiIscritto(connection, idUtente)).thenReturn(listaAttesa);
 
-        // WHEN
-        // Usiamo il metodo del Service 'per i test' che accetta la Connection
         List<GruppoBean> risultato = accountService.getGruppiIscritto(connection, idUtente);
 
-        // THEN
         assertNotNull(risultato);
         assertEquals(1, risultato.size());
-
-        // Verifichiamo che il DAO sia stato chiamato passando LA NOSTRA connessione mock
         verify(utenteDAO).doRetrieveGruppiIscritto(connection, idUtente);
     }
 
     @Test
     void testGetGruppiAdmin_Trovati() throws SQLException {
-        // GIVEN
         int idUtente = 5;
         List<GruppoBean> listaAdmin = new ArrayList<>();
-        GruppoBean gruppoAdminFinto = Mockito.mock(GruppoBean.class);
-        listaAdmin.add(gruppoAdminFinto);
+        listaAdmin.add(Mockito.mock(GruppoBean.class));
 
-        // CORREZIONE: Passiamo connection anche qui
         when(utenteDAO.doRetrieveGruppiAdmin(connection, idUtente)).thenReturn(listaAdmin);
 
-        // WHEN
         List<GruppoBean> risultato = accountService.getGruppiAdmin(connection, idUtente);
 
-        // THEN
         assertNotNull(risultato);
         assertEquals(1, risultato.size());
         verify(utenteDAO).doRetrieveGruppiAdmin(connection, idUtente);
@@ -78,21 +73,14 @@ class AccountServiceTest {
 
     @Test
     void testGetMetodiPagamento() throws SQLException {
-        // GIVEN
         int idUtente = 10;
         List<MetodoPagamentoBean> listaMetodi = new ArrayList<>();
         listaMetodi.add(Mockito.mock(MetodoPagamentoBean.class));
 
-        // CORREZIONE: Assumiamo che il DAO ora prenda la connessione
         when(utenteDAO.doRetrieveAllMetodiPagamento(connection, idUtente)).thenReturn(listaMetodi);
 
-        // WHEN
-        // ATTENZIONE: Affinché questo funzioni col Mock, dovresti aggiungere nel Service
-        // un metodo: public List<MetodoPagamentoBean> getMetodiPagamento(Connection con, int id)
-        // Se non lo hai ancora fatto, fallo subito nel Service!
         List<MetodoPagamentoBean> risultato = accountService.getMetodiPagamento(connection, idUtente);
 
-        // THEN
         assertNotNull(risultato);
         assertEquals(1, risultato.size());
         verify(utenteDAO).doRetrieveAllMetodiPagamento(connection, idUtente);
@@ -100,19 +88,14 @@ class AccountServiceTest {
 
     @Test
     void testGetStoricoPagamenti() throws SQLException {
-        // GIVEN
         int idUtente = 20;
         List<DettagliPagamentoBean> listaPagamenti = new ArrayList<>();
         listaPagamenti.add(Mockito.mock(DettagliPagamentoBean.class));
 
-        // CORREZIONE: Passiamo connection
         when(utenteDAO.doRetrievePagamenti(connection, idUtente)).thenReturn(listaPagamenti);
 
-        // WHEN
-        // Anche qui serve il metodo overload nel Service: getStoricoPagamenti(Connection con, int id)
         List<DettagliPagamentoBean> risultato = accountService.getStoricoPagamenti(connection, idUtente);
 
-        // THEN
         assertNotNull(risultato);
         assertEquals(1, risultato.size());
         verify(utenteDAO).doRetrievePagamenti(connection, idUtente);
@@ -120,17 +103,54 @@ class AccountServiceTest {
 
     @Test
     void testModificaDatiUtente() throws SQLException {
-        // GIVEN
         UtenteBean utente = new UtenteBean();
         utente.setId_utente(100);
         utente.setNome("NuovoNomeTest");
 
-        // WHEN
-        // Questo metodo 'per i test' esiste già nel tuo Service, quindi è OK
         accountService.modificaDatiUtente(connection, utente);
 
-        // THEN
-        // Verifichiamo che il DAO venga chiamato con la connessione giusta
         verify(utenteDAO).doUpdate(eq(connection), eq(utente));
+    }
+
+    // --- NUOVI TEST (WRITE / GESTIONE PAGAMENTI) ---
+    // Questi metodi nel Service aprono la connessione internamente con ConPool.getConnection().
+    // Usiamo mockStatic per intercettare quella chiamata.
+
+    @Test
+    void testAggiungiMetodoPagamento() throws SQLException {
+        // GIVEN
+        MetodoPagamentoBean metodo = new MetodoPagamentoBean();
+        metodo.setId_utente(1);
+        metodo.setNumero_carta("1234567812345678");
+
+        // Usiamo il try-with-resources per il MockedStatic (si chiude da solo alla fine del blocco)
+        try (MockedStatic<ConPool> mockedConPool = mockStatic(ConPool.class)) {
+            // Istruiamo Mockito: quando chiami ConPool.getConnection(), restituisci la nostra connection mock
+            mockedConPool.when(ConPool::getConnection).thenReturn(connection);
+
+            // WHEN
+            accountService.aggiungiMetodoPagamento(metodo);
+
+            // THEN
+            // Verifichiamo che il PagamentoDAO sia stato chiamato correttamente
+            verify(pagamentoDAO).doSaveMetodoPagamento(connection, metodo);
+        }
+    }
+
+    @Test
+    void testRimuoviMetodoPagamento() throws SQLException {
+        // GIVEN
+        int idMetodo = 5;
+        int idUtente = 10;
+
+        try (MockedStatic<ConPool> mockedConPool = mockStatic(ConPool.class)) {
+            mockedConPool.when(ConPool::getConnection).thenReturn(connection);
+
+            // WHEN
+            accountService.rimuoviMetodoPagamento(idMetodo, idUtente);
+
+            // THEN
+            verify(pagamentoDAO).doDeleteMetodoPagamento(connection, idMetodo, idUtente);
+        }
     }
 }

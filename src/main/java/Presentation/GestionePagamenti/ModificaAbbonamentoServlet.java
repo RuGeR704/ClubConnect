@@ -1,7 +1,7 @@
 package Presentation.GestionePagamenti;
 
 import Application.GestioneAccount.UtenteBean;
-import Application.GestionePagamenti.GestionePagamentiBean;
+import Application.GestionePagamenti.PagamentoService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,28 +10,35 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
-@WebServlet(name = "ModificaAbbonamentoServlet", urlPatterns = {"/ModificaAbbonamentoServlet"})
+@WebServlet("/ModificaAbbonamentoServlet")
 public class ModificaAbbonamentoServlet extends HttpServlet {
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        UtenteBean utente = (UtenteBean) session.getAttribute("utente");
+    private PagamentoService pagamentoService = new PagamentoService();
 
-        // Controllo Login
+    public void setPagamentoService(PagamentoService service) {
+        this.pagamentoService = service;
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        UtenteBean utente = (session != null) ? (UtenteBean) session.getAttribute("utente") : null;
+
         if (utente == null) {
             response.sendRedirect("login.jsp");
             return;
         }
 
-        // Recupero Parametri
         String idGruppoStr = request.getParameter("idGruppo");
         String importoStr = request.getParameter("importo");
         String frequenzaStr = request.getParameter("frequenza");
 
+        // Validazione Input
         if (idGruppoStr == null || importoStr == null || frequenzaStr == null) {
             request.setAttribute("errore", "Dati mancanti per la modifica.");
-            // response.sendRedirect("VisualizzaGruppoServlet?id=" + idGruppoStr);
+            request.getRequestDispatcher("feedServlet").forward(request, response);
             return;
         }
 
@@ -40,32 +47,33 @@ public class ModificaAbbonamentoServlet extends HttpServlet {
             double importo = Double.parseDouble(importoStr);
             int frequenza = Integer.parseInt(frequenzaStr);
 
-            GestionePagamentiBean service = new GestionePagamentiBean();
-
-            // Controllo Permessi: L'utente è il gestore?
-            if (!service.isUtenteGestore(utente.getId_utente(), idGruppo)) {
-                response.sendRedirect("feedServlet"); // O pagina di errore "Non autorizzato"
+            // 1. Controllo Permessi (tramite Service)
+            if (!pagamentoService.isUtenteGestore(utente.getId_utente(), idGruppo)) {
+                response.sendRedirect("feedServlet"); // O pagina "Accesso Negato"
                 return;
             }
 
-            // Esecuzione Modifica
-            // Chiamiamo modificaAbbonamento (o impostaAbbonamento, è uguale)
-            boolean successo = service.modificaAbbonamento(idGruppo, importo, frequenza);
+            // 2. Esecuzione Modifica
+            // Nota: impostaAbbonamento e modificaAbbonamento fanno la stessa cosa (UPDATE)
+            pagamentoService.impostaAbbonamento(idGruppo, importo, frequenza);
 
-            if (successo) {
-                // Redirect alla pagina del gruppo con messaggio di successo
-                response.sendRedirect("VisualizzaGruppoServlet?id=" + idGruppo + "&msg=ModificaOk");
-            } else {
-                request.setAttribute("errore", "Errore durante la modifica (Il gruppo è un Club?)");
-                request.getRequestDispatcher("feedServlet").forward(request, response);
-            }
+            // 3. Successo
+            response.sendRedirect("VisualizzaGruppoServlet?id=" + idGruppo + "&msg=ModificaOk");
 
         } catch (NumberFormatException e) {
             e.printStackTrace();
-            response.sendRedirect("feedServlet"); // Errore formato numeri
+            response.sendRedirect("feedServlet");
+        } catch (IllegalArgumentException e) {
+            // Es. ID gruppo non valido
+            request.setAttribute("errore", e.getMessage());
+            request.getRequestDispatcher("VisualizzaGruppoServlet?id=" + idGruppoStr).forward(request, response);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            response.sendRedirect("error.jsp");
         }
     }
 
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.sendRedirect("feedServlet");
     }
