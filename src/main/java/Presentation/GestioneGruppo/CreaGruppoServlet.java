@@ -107,6 +107,11 @@ public class CreaGruppoServlet extends HttpServlet {
         String logoPath = null;
         try {
             Part part = request.getPart("logo");
+            if (part != null && part.getSize() > 1024 * 1024 * 10) {
+                request.setAttribute("errore", "Errore: La creazione del gruppo non è andata a buon fine poichè il file immagine del logo è troppo grande");
+                request.getRequestDispatcher("crea_gruppo.jsp").forward(request, response);
+                return;
+            }
             if (part != null && part.getSize() > 0) {
                 String applicationPath = getServletContext().getRealPath("");
                 String uploadFilePath = applicationPath + File.separator + UPLOAD_DIR;
@@ -136,7 +141,6 @@ public class CreaGruppoServlet extends HttpServlet {
         }
 
         gruppo.setNome(nome);
-        // Tag rimosso
         gruppo.setSettore(settore);
         gruppo.setSlogan(slogan);
         gruppo.setDescrizione(descrizione);
