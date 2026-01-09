@@ -57,8 +57,8 @@ class VisualizzaGruppoServletTest {
 
     @Test
     void testDoGet_MostraGruppo() throws Exception {
-        // --- 1. SETUP FONDAMENTALE (Senza questo il test fallisce subito) ---
-        when(request.getParameter("id")).thenReturn("1"); // Simuliamo che l'ID nella URL sia "1"
+        // --- 1. SETUP FONDAMENTALE ---
+        when(request.getParameter("id")).thenReturn("1");
 
         // --- 2. SETUP UTENTE ---
         UtenteBean utente = new UtenteBean();
@@ -66,16 +66,13 @@ class VisualizzaGruppoServletTest {
         when(session.getAttribute("utente")).thenReturn(utente);
 
         // --- 3. SETUP GRUPPO ---
-        // Usiamo ClubBean perché GruppoBean è astratta
         ClubBean gruppo = new ClubBean();
-        gruppo.setId_gruppo(1); // Controlla se il tuo metodo è setId() o setId_gruppo()
+        gruppo.setId_gruppo(1);
         gruppo.setNome("Club Test");
 
-        // Istruiamo il service a restituire questo gruppo
         when(gruppoServiceMock.recuperaGruppo(1)).thenReturn(gruppo);
 
         // --- 4. SETUP PERMESSI/ISCRIZIONE ---
-        // Simuliamo che l'utente sia iscritto
         List<GruppoBean> listaIscritti = new ArrayList<>();
         listaIscritti.add(gruppo);
         when(accountServiceMock.getGruppiIscritto(10)).thenReturn(listaIscritti);
@@ -84,12 +81,13 @@ class VisualizzaGruppoServletTest {
         servlet.doGet(request, response);
 
         // --- 6. VERIFICHE ---
-        // Ora la servlet dovrebbe arrivare fino in fondo
         verify(request).setAttribute(eq("gruppo"), eq(gruppo));
         verify(request).setAttribute(eq("isIscritto"), eq(true));
 
-        // Verifica che venga chiamata la JSP corretta
-        verify(request).getRequestDispatcher("visualizza_gruppo.jsp");
+        // --- CORREZIONE QUI ---
+        // La Servlet usa "paginaGruppo.jsp", quindi adattiamo il test
+        verify(request).getRequestDispatcher("paginaGruppo.jsp");
+
         verify(dispatcher).forward(request, response);
     }
 }
