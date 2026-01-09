@@ -746,7 +746,7 @@
                     <h5 class="modal-title fw-bold">Modifica Gruppo</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="ModificaGruppoServlet" method="POST">
+                <form action="demo.jsp">
                     <input type="hidden" name="idGruppo" value="<%= gruppo.getId_gruppo() %>">
                     <div class="modal-body">
                         <div class="mb-3">
@@ -774,7 +774,7 @@
                     <h5 class="modal-title">Aggiorna Immagini</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="UploadImmagineServlet" method="POST" enctype="multipart/form-data">
+                <form action="demo.jsp">
                     <input type="hidden" name="idGruppo" value="<%= gruppo.getId_gruppo() %>">
                     <div class="modal-body">
                         <div class="mb-3">

@@ -76,7 +76,7 @@ public class ModificaDatiServlet extends HttpServlet {
         if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) errori.append("Email non valida. ");
         if (nome == null || nome.trim().isEmpty()) errori.append("Nome obbligatorio. ");
         if (cognome == null || cognome.trim().isEmpty()) errori.append("Cognome obbligatorio. ");
-        if (cellulare != null && !cellulare.trim().isEmpty() && !cellulare.matches("^[0-9]{7,15}$"))
+        if (cellulare == null && !cellulare.trim().isEmpty() && !cellulare.matches("^[0-9]{7,15}$"))
             errori.append("Telefono non valido. ");
 
         if (errori.length() > 0) {

@@ -100,15 +100,22 @@ public class VisualizzaGruppoServlet extends HttpServlet {
 
                 // 3. Controllo se è Gestore
                 boolean isGestore = pagamentoService.isUtenteGestore(utente.getId_utente(), idGruppo);
-                request.setAttribute("isGestore", isGestore);
+                request.setAttribute("isAdmin", isGestore);
 
                 // 4. Recupero Metodi di Pagamento (per eventuale iscrizione)
                 List<MetodoPagamentoBean> metodi = accountService.getMetodiPagamento(utente.getId_utente());
-                request.setAttribute("metodiPagamento", metodi);
+                request.setAttribute("metodiUtente", metodi);
+
+                int numeroMembri = gruppoService.contaMembri(gruppo.getId_gruppo());
+                request.setAttribute("numeroMembri", numeroMembri);
+
+                int numeroEventi = gruppoService.getNumeroEventiProgrammati(gruppo.getId_gruppo());
+                request.setAttribute("numeroEventi", numeroEventi);
+
             }
 
             // C. Forward alla JSP
-            request.getRequestDispatcher("visualizza_gruppo.jsp").forward(request, response);
+            request.getRequestDispatcher("paginaGruppo.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
             response.sendRedirect("feedServlet");
