@@ -106,6 +106,9 @@ public class VisualizzaGruppoServlet extends HttpServlet {
                 List<MetodoPagamentoBean> metodi = accountService.getMetodiPagamento(utente.getId_utente());
                 request.setAttribute("metodiUtente", metodi);
 
+                boolean hasPaid = pagamentoService.isPagato(idGruppo, utente.getId_utente());
+                request.setAttribute("hasPaid", hasPaid);
+
                 int numeroMembri = gruppoService.contaMembri(gruppo.getId_gruppo());
                 request.setAttribute("numeroMembri", numeroMembri);
 

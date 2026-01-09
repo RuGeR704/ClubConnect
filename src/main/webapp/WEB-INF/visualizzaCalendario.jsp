@@ -88,6 +88,37 @@
   </div>
 </nav>
 
+<%
+  String esito = request.getParameter("esito");
+  if (esito != null) {
+%>
+<div class="container mt-3">
+  <% if ("success".equals(esito)) { %>
+  <div class="alert alert-success alert-dismissible fade show shadow-sm border-start border-success border-4" role="alert">
+    <i class="fa-solid fa-check-circle me-2 fs-5"></i>
+    <strong>Ottimo!</strong> L'evento è stato rimosso correttamente.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  <% } else if ("errore".equals(esito)) { %>
+  <div class="alert alert-danger alert-dismissible fade show shadow-sm border-start border-danger border-4" role="alert">
+    <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
+    <strong>Errore:</strong> Impossibile rimuovere l'evento. Riprova più tardi.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  <% } %>
+</div>
+
+<script>
+  setTimeout(function() {
+    let alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+      let bsAlert = new bootstrap.Alert(alert);
+      bsAlert.close();
+    });
+  }, 4000); // 4000 ms = 4 secondi
+</script>
+<% } %>
+
 <div class="container py-4">
   <div class="row g-4">
     <div class="col-lg-3 d-none d-lg-block">
