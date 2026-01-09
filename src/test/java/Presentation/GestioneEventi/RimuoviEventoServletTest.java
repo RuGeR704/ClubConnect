@@ -35,6 +35,6 @@ class RimuoviEventoServletTest {
         servlet.doPost(request, response);
 
         verify(serviceMock).rimuoviEvento(123);
-        verify(response).sendRedirect(contains("visualizzaCalendario.jsp"));
+        verify(response).sendRedirect(contains("VisualizzaCalendarioEventiServlet"));
     }
 }
