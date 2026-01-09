@@ -1,7 +1,8 @@
 package Presentation.GestioneSistema;
 
 import Application.GestioneAccount.UtenteBean;
-import Application.GestioneSistema.*;
+import Application.GestioneSistema.GestioneSistemaInterface;
+import Application.GestioneSistema.GestioneSistemaProxy;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -9,6 +10,13 @@ import java.io.IOException;
 
 @WebServlet(name = "BannaUtenteServlet", urlPatterns = {"/BannaUtenteServlet"})
 public class BannaUtenteServlet extends HttpServlet {
+
+    private GestioneSistemaInterface sistemaTest;
+
+    public void setSistemaTest(GestioneSistemaInterface sistemaTest) {
+        this.sistemaTest = sistemaTest;
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
@@ -16,25 +24,27 @@ public class BannaUtenteServlet extends HttpServlet {
 
         String idStr = request.getParameter("idUtente");
 
-        if (idStr != null) {
+        if (idStr != null && !idStr.isEmpty()) {
             try {
                 int idDaBannare = Integer.parseInt(idStr);
 
-                // Proxy Check
-                GestioneSistemaInterface sistema = new GestioneSistemaProxy(utente);
+                GestioneSistemaInterface sistema = (sistemaTest != null)
+                        ? sistemaTest
+                        : new GestioneSistemaProxy(utente);
+
                 sistema.bannaUtente(idDaBannare);
 
-                // Successo: Ricarico la lista per vedere l'utente colorato di rosso
                 response.sendRedirect("VisualizzaListaClientiServlet?msg=UtenteBannato");
 
             } catch (SecurityException e) {
                 response.sendRedirect("FeedServlet?error=Unauthorized");
+            } catch (NumberFormatException e) {
+                response.sendRedirect("VisualizzaListaClientiServlet?error=InvalidID");
             } catch (Exception e) {
                 e.printStackTrace();
                 response.sendRedirect("FeedServlet?error=GenericError");
             }
         } else {
-            // Nessun ID passato
             response.sendRedirect("VisualizzaListaClientiServlet");
         }
     }
