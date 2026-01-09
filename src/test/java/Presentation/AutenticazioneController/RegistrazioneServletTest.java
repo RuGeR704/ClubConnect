@@ -35,7 +35,20 @@ class RegistrazioneServletTest {
     void setUp() {
         servlet = new RegistrazioneServlet();
         servlet.setUtenteService(serviceMock);
+
+        // --- AGGIUNTO PER GESTIRE LA NUOVA LOGICA DI SESSIONE ---
+
+        // 1. Quando la servlet chiede una nuova sessione: getSession(true) -> restituisci il mock
+        when(request.getSession(true)).thenReturn(session);
+
+        // 2. Quando la servlet controlla se c'è una vecchia sessione: getSession(false) -> restituisci null (simuliamo che non ci sia)
+        when(request.getSession(false)).thenReturn(null);
+
+        // Manteniamo questo per sicurezza (compatibilità con chiamate standard)
         when(request.getSession()).thenReturn(session);
+
+        // --------------------------------------------------------
+
         when(request.getRequestDispatcher(anyString())).thenReturn(dispatcher);
     }
 
@@ -75,8 +88,6 @@ class RegistrazioneServletTest {
             "TC1.7_2, Domz, Domenico, Ricciardelli, 2004-10-20, d.ricciardelli1@studenti.unisa.it, pass#1234, '+39,67a4', cellulare non rispetta il formato",
 
             // --- NUOVO: TC1.4_2 Data di nascita non valida (Formato Errato) ---
-            // Passiamo una data come '30-02-2024' (che LocalDate.parse accetterebbe solo se esiste, ma qui testiamo il parsing fallito con stringa sporca)
-            // Oppure una stringa non data 'dataErrata'
             "TC1.4_2, Domz, Domenico, Ricciardelli, dataErrata, d.ricciardelli1@studenti.unisa.it, pass#1234, 3331234567, data di nascita non rispetta il formato"
     })
     void testRegistrazione_ErroriValidazione(
@@ -94,20 +105,16 @@ class RegistrazioneServletTest {
 
     /**
      * Test Parametrico per errori di BUSINESS LOGIC (Duplicati nel DB)
-     * Questi richiedono che il mock del Service lanci un'eccezione.
      */
     @ParameterizedTest(name = "{0}: {1}")
     @CsvSource({
-            // ID Test, Messaggio Eccezione Atteso (dal Service), Messaggio Errore Atteso (nella JSP)
             "TC1.1_2, username risulta già registrato, username risulta già registrato",
-            "TC1.5_3, email risulta già registrata, email risulta già registrata" // Aggiungi questo caso se presente nel PDF
+            "TC1.5_3, email risulta già registrata, email risulta già registrata"
     })
     void testRegistrazione_EccezioniService(String testId, String msgException, String expectedError) throws Exception {
 
-        // Setup input validi di base
         setupRequestMock("Domz", "Domenico", "Ricciardelli", "2004-10-20", "test@email.it", "pass#1234", "3331234567");
 
-        // Simuliamo che il service lanci l'eccezione specifica (Username o Email duplicati)
         doThrow(new IllegalArgumentException(msgException))
                 .when(serviceMock).registraUtente(any(UtenteBean.class));
 
@@ -116,7 +123,6 @@ class RegistrazioneServletTest {
         verify(request).setAttribute(eq("errore"), contains(expectedError));
     }
 
-    // Metodo helper per evitare ripetizioni
     private void setupRequestMock(String user, String nome, String cognome, String data, String email, String pass, String tel) {
         when(request.getParameter("username")).thenReturn(user);
         when(request.getParameter("nome")).thenReturn(nome);

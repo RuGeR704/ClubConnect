@@ -136,22 +136,23 @@ public class UtenteDAO {
         }
         return c;
     }
-    public List<GruppoBean> doRetrieveGruppiIscritto( int id_utente) throws SQLException{
+    public List<GruppoBean> doRetrieveGruppiIscritto(Connection con, int id_utente) throws SQLException {
         List<GruppoBean> gruppi = new ArrayList<>();
-        try (Connection con = ConPool.getConnection();
-             PreparedStatement ps = con.prepareStatement(
-                     "SELECT Gruppo.*  FROM Iscrizione JOIN Gruppo ON Iscrizione.id_gruppo=Gruppo.id_gruppo WHERE id_utente=? ")) {
+        String query = "SELECT Gruppo.* FROM Iscrizione JOIN Gruppo ON Iscrizione.id_gruppo=Gruppo.id_gruppo WHERE id_utente=?";
+
+        // CORREZIONE: ps dentro il try
+        try (PreparedStatement ps = con.prepareStatement(query)) {
             ps.setInt(1, id_utente);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     GruppoBean c;
-                    boolean tipo=rs.getBoolean("tipoGruppo");
-                    if(tipo){
-                        ClubBean club= new ClubBean();
+                    boolean tipo = rs.getBoolean("tipoGruppo");
+                    if (tipo) {
+                        ClubBean club = new ClubBean();
                         club.setImporto_retta(rs.getDouble("importo_retta"));
                         club.setFrequenza(rs.getInt("frequenza"));
-                        c=club;
-                    }else{
+                        c = club;
+                    } else {
                         c = new AssociazioneBean();
                     }
                     c.setId_gruppo(rs.getInt("id_gruppo"));
@@ -171,14 +172,16 @@ public class UtenteDAO {
         return gruppi;
     }
 
-    public List<MetodoPagamentoBean> doRetrieveAllMetodiPagamento(int id_utente) throws SQLException{
-        List<MetodoPagamentoBean> metodi = new ArrayList<MetodoPagamentoBean>();
-        try(Connection con = ConPool.getConnection();
-            PreparedStatement ps = con.prepareStatement(
-                    "SELECT Metodo_Pagamento.* FROM Metodo_Pagamento JOIN Utente ON Metodo_Pagamento.id_utente=Utente.id_utente WHERE Utente.id_utente=?")) {
+
+    public List<MetodoPagamentoBean> doRetrieveAllMetodiPagamento(Connection con, int id_utente) throws SQLException {
+        List<MetodoPagamentoBean> metodi = new ArrayList<>();
+        String query = "SELECT Metodo_Pagamento.* FROM Metodo_Pagamento JOIN Utente ON Metodo_Pagamento.id_utente=Utente.id_utente WHERE Utente.id_utente=?";
+
+        // CORREZIONE: ps dentro il try
+        try (PreparedStatement ps = con.prepareStatement(query)) {
             ps.setInt(1, id_utente);
             try (ResultSet rs = ps.executeQuery()) {
-                while(rs.next()) {
+                while (rs.next()) {
                     MetodoPagamentoBean m = new MetodoPagamentoBean();
                     m.setId_metodo(rs.getInt("id_metodo"));
                     m.setId_utente(rs.getInt("id_utente"));
@@ -261,15 +264,16 @@ public class UtenteDAO {
         return gruppiAdmin;
     }
 
-    public List<DettagliPagamentoBean> doRetrievePagamenti(int id_utente) throws SQLException{
+    public List<DettagliPagamentoBean> doRetrievePagamenti(Connection con, int id_utente) throws SQLException {
         List<DettagliPagamentoBean> DettagliPagamenti = new ArrayList<>();
-        try (Connection con = ConPool.getConnection();
-             PreparedStatement ps = con.prepareStatement(
-                     "SELECT Pagamento.*  FROM Metodo_Pagamento JOIN Pagamento ON Metodo_Pagamento.id_metodo=Pagamento.id_metodo WHERE Metodo_Pagamento.id_utente=?")) {
+        String query = "SELECT Pagamento.* FROM Metodo_Pagamento JOIN Pagamento ON Metodo_Pagamento.id_metodo=Pagamento.id_metodo WHERE Metodo_Pagamento.id_utente=?";
+
+        // CORREZIONE: ps dentro il try
+        try (PreparedStatement ps = con.prepareStatement(query)) {
             ps.setInt(1, id_utente);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    DettagliPagamentoBean c= new DettagliPagamentoBean();
+                    DettagliPagamentoBean c = new DettagliPagamentoBean();
                     c.setId_pagamento(rs.getInt("id_pagamento"));
                     c.setId_gruppo(rs.getInt("id_gruppo"));
                     c.setId_metodo(rs.getInt("id_metodo"));

@@ -19,7 +19,7 @@ public class AccountService {
         this.utenteDAO = new UtenteDAO();
     }
 
-    // Costruttore per i TEST (Dependency Injection)
+    // Costruttore per  TEST (Dependency Injection)
     public AccountService(UtenteDAO utenteDAO) {
         this.utenteDAO = utenteDAO;
     }
@@ -33,7 +33,7 @@ public class AccountService {
     }
     // Per i test
     public List<GruppoBean> getGruppiIscritto(Connection con, int idUtente) throws SQLException {
-        return utenteDAO.doRetrieveGruppiIscritto(idUtente); // Nota: se il DAO apre la connessione da solo, va modificato per accettarla, altrimenti qui mockiamo il DAO intero.
+        return utenteDAO.doRetrieveGruppiIscritto(con,idUtente);
     }
 
     public List<GruppoBean> getGruppiAdmin(int idUtente) throws SQLException {
@@ -48,14 +48,23 @@ public class AccountService {
 
     public List<MetodoPagamentoBean> getMetodiPagamento(int idUtente) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
-            return utenteDAO.doRetrieveAllMetodiPagamento(idUtente);
+
+            return utenteDAO.doRetrieveAllMetodiPagamento(con, idUtente);
         }
+    }
+
+    public List<MetodoPagamentoBean> getMetodiPagamento(Connection con, int idUtente) throws SQLException {
+        return utenteDAO.doRetrieveAllMetodiPagamento(con, idUtente);
     }
 
     public List<DettagliPagamentoBean> getStoricoPagamenti(int idUtente) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
-            return utenteDAO.doRetrievePagamenti(idUtente);
+            return utenteDAO.doRetrievePagamenti(con, idUtente);
         }
+    }
+
+    public List<DettagliPagamentoBean> getStoricoPagamenti(Connection con, int idUtente) throws SQLException {
+        return utenteDAO.doRetrievePagamenti(con, idUtente);
     }
 
     // --- METODI DI MODIFICA (UPDATE) ---

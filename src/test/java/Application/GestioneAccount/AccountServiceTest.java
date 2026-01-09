@@ -38,23 +38,22 @@ class AccountServiceTest {
         // GIVEN
         int idUtente = 1;
         List<GruppoBean> listaAttesa = new ArrayList<>();
-
-        // SOLUZIONE CLASSE ASTRATTA:
-        // Chiediamo a Mockito di creare un'istanza finta di GruppoBean
         GruppoBean gruppoFinto = Mockito.mock(GruppoBean.class);
         listaAttesa.add(gruppoFinto);
 
-        // Istruiamo il DAO
-        when(utenteDAO.doRetrieveGruppiIscritto(idUtente)).thenReturn(listaAttesa);
+        // CORREZIONE: Ora il metodo DAO accetta la connessione!
+        when(utenteDAO.doRetrieveGruppiIscritto(connection, idUtente)).thenReturn(listaAttesa);
 
         // WHEN
-        // Usiamo il metodo che accetta la Connection
+        // Usiamo il metodo del Service 'per i test' che accetta la Connection
         List<GruppoBean> risultato = accountService.getGruppiIscritto(connection, idUtente);
 
         // THEN
         assertNotNull(risultato);
         assertEquals(1, risultato.size());
-        verify(utenteDAO).doRetrieveGruppiIscritto(idUtente);
+
+        // Verifichiamo che il DAO sia stato chiamato passando LA NOSTRA connessione mock
+        verify(utenteDAO).doRetrieveGruppiIscritto(connection, idUtente);
     }
 
     @Test
@@ -62,12 +61,10 @@ class AccountServiceTest {
         // GIVEN
         int idUtente = 5;
         List<GruppoBean> listaAdmin = new ArrayList<>();
-
-        // Mockiamo anche qui perché GruppoBean è astratto
         GruppoBean gruppoAdminFinto = Mockito.mock(GruppoBean.class);
         listaAdmin.add(gruppoAdminFinto);
 
-        // Nota: Qui il metodo del DAO accetta la connessione nei parametri (come da tuo codice precedente)
+        // CORREZIONE: Passiamo connection anche qui
         when(utenteDAO.doRetrieveGruppiAdmin(connection, idUtente)).thenReturn(listaAdmin);
 
         // WHEN
@@ -84,18 +81,21 @@ class AccountServiceTest {
         // GIVEN
         int idUtente = 10;
         List<MetodoPagamentoBean> listaMetodi = new ArrayList<>();
-        // Usiamo il mock per sicurezza, va bene anche se la classe non è astratta
         listaMetodi.add(Mockito.mock(MetodoPagamentoBean.class));
 
-        when(utenteDAO.doRetrieveAllMetodiPagamento(idUtente)).thenReturn(listaMetodi);
+        // CORREZIONE: Assumiamo che il DAO ora prenda la connessione
+        when(utenteDAO.doRetrieveAllMetodiPagamento(connection, idUtente)).thenReturn(listaMetodi);
 
         // WHEN
-        List<MetodoPagamentoBean> risultato = accountService.getMetodiPagamento(idUtente); // Qui usa il metodo che chiama il DAO senza Connection esplicita se non l'abbiamo overloadato, oppure usa l'overload se l'hai creato.
+        // ATTENZIONE: Affinché questo funzioni col Mock, dovresti aggiungere nel Service
+        // un metodo: public List<MetodoPagamentoBean> getMetodiPagamento(Connection con, int id)
+        // Se non lo hai ancora fatto, fallo subito nel Service!
+        List<MetodoPagamentoBean> risultato = accountService.getMetodiPagamento(connection, idUtente);
 
         // THEN
         assertNotNull(risultato);
         assertEquals(1, risultato.size());
-        verify(utenteDAO).doRetrieveAllMetodiPagamento(idUtente);
+        verify(utenteDAO).doRetrieveAllMetodiPagamento(connection, idUtente);
     }
 
     @Test
@@ -105,15 +105,17 @@ class AccountServiceTest {
         List<DettagliPagamentoBean> listaPagamenti = new ArrayList<>();
         listaPagamenti.add(Mockito.mock(DettagliPagamentoBean.class));
 
-        when(utenteDAO.doRetrievePagamenti(idUtente)).thenReturn(listaPagamenti);
+        // CORREZIONE: Passiamo connection
+        when(utenteDAO.doRetrievePagamenti(connection, idUtente)).thenReturn(listaPagamenti);
 
         // WHEN
-        List<DettagliPagamentoBean> risultato = accountService.getStoricoPagamenti(idUtente);
+        // Anche qui serve il metodo overload nel Service: getStoricoPagamenti(Connection con, int id)
+        List<DettagliPagamentoBean> risultato = accountService.getStoricoPagamenti(connection, idUtente);
 
         // THEN
         assertNotNull(risultato);
         assertEquals(1, risultato.size());
-        verify(utenteDAO).doRetrievePagamenti(idUtente);
+        verify(utenteDAO).doRetrievePagamenti(connection, idUtente);
     }
 
     @Test
@@ -124,11 +126,11 @@ class AccountServiceTest {
         utente.setNome("NuovoNomeTest");
 
         // WHEN
-        // Passiamo la connessione mockata
+        // Questo metodo 'per i test' esiste già nel tuo Service, quindi è OK
         accountService.modificaDatiUtente(connection, utente);
 
         // THEN
-        // Verifichiamo che il DAO venga chiamato con la connessione giusta e l'utente giusto
+        // Verifichiamo che il DAO venga chiamato con la connessione giusta
         verify(utenteDAO).doUpdate(eq(connection), eq(utente));
     }
 }

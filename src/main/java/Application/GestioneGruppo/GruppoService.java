@@ -138,7 +138,7 @@ public class GruppoService {
     public boolean isUtenteIscritto(int idGruppo, int idUtente) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
             // Se UtenteDAO non ha un metodo isIscritto diretto, usiamo le liste
-            List<GruppoBean> iscritti = utenteDAO.doRetrieveGruppiIscritto(idUtente);
+            List<GruppoBean> iscritti = utenteDAO.doRetrieveGruppiIscritto(con,idUtente);
             for (GruppoBean g : iscritti) {
                 if (g.getId_gruppo() == idGruppo) return true;
             }
