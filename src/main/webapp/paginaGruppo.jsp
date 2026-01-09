@@ -33,6 +33,10 @@
         response.sendRedirect("feedServlet");
         return;
     }
+
+    // Recuperiamo il booleano dalla Servlet (default false se null)
+    boolean hasPaid = (request.getAttribute("hasPaid") != null) ? (boolean) request.getAttribute("hasPaid") : false;
+
 %>
 
 <!DOCTYPE html>
@@ -303,9 +307,15 @@
 
                     <% if (isIscritto) { %>
                     <hr class="my-2 opacity-25">
+                    <% if (hasPaid) { %>
+                    <button type="button" class="btn btn-outline-success w-100 rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#modalPagamentoRetta">
+                        <i class="fa-solid fa-check me-2"></i> Abbonamento Attivo
+                    </button>
+                    <% } else { %>
                     <button type="button" class="btn btn-success w-100 rounded-pill fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalPagamentoRetta">
                         <i class="fa-regular fa-credit-card me-2"></i> Paga Retta
                     </button>
+                    <% } %>
                     <% } %>
                 </div>
                 <% } %>
@@ -798,17 +808,41 @@
         <% if (gruppo instanceof ClubBean && isIscritto) {
     ClubBean clubToPay = (ClubBean) gruppo;
 %>
+
+
     <div class="modal fade" id="modalPagamentoRetta" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4">
 
-                <div class="modal-header border-0 bg-success bg-opacity-10">
-                    <h5 class="modal-title fw-bold text-success">
+                <div class="modal-header border-0 <%= hasPaid ? "bg-success" : "bg-primary" %> bg-opacity-10">
+                    <h5 class="modal-title fw-bold <%= hasPaid ? "text-success" : "text-primary" %>">
+                        <% if (hasPaid) { %>
+                        <i class="fa-solid fa-circle-check me-2"></i>Stato Abbonamento
+                        <% } else { %>
                         <i class="fa-solid fa-wallet me-2"></i>Pagamento Retta
+                        <% } %>
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
+                <% if (hasPaid) { %>
+                <div class="modal-body p-5 text-center">
+                    <div class="mb-4">
+                        <i class="fa-solid fa-award fa-5x text-success animate-fade-in"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark">Tutto in regola!</h3>
+                    <p class="text-muted">Hai già pagato la retta per questo periodo.</p>
+
+                    <div class="alert alert-success border-0 bg-success bg-opacity-10 mt-4">
+                        <small class="fw-bold text-uppercase text-success">Stato Iscrizione</small>
+                        <div class="fs-5 fw-bold text-success">ATTIVA</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0 justify-content-center">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Chiudi</button>
+                </div>
+
+                <% } else { %>
                 <form action="PagaRettaServlet" method="POST">
                     <input type="hidden" name="idGruppo" value="<%= gruppo.getId_gruppo() %>">
                     <input type="hidden" name="importo" value="<%= clubToPay.getImporto_retta() %>">
@@ -818,7 +852,7 @@
                             <small class="text-muted text-uppercase fw-bold">Stai pagando a</small>
                             <h4 class="fw-bold mb-0 text-dark"><%= gruppo.getNome() %></h4>
                             <div class="display-6 fw-bold text-success my-2">
-                                € <%= String.format("%.2f", clubToPay.getImporto_retta()) %>
+                                € <%= new java.text.DecimalFormat("0.00").format(clubToPay.getImporto_retta()) %>
                             </div>
                             <%
                                 int f = clubToPay.getFrequenza();
@@ -842,7 +876,7 @@
                             %>
                             <label class="card border p-3 rounded-3 cursor-pointer hover-effect">
                                 <div class="d-flex align-items-center">
-                                    <input type="radio" name="idMetodoPagamento" value="<%= mp.getId_metodo() %>" class="form-check-input me-3" required>
+                                    <input type="radio" name="idMetodo" value="<%= mp.getId_metodo() %>" class="form-check-input me-3" required>
                                     <div>
                                         <div class="fw-bold"><i class="fa-brands fa-cc-visa me-2 text-primary"></i>Carta terminante in <%= ultime4 %></div>
                                         <small class="text-muted">Scadenza: <%= mp.getScadenza_carta() %></small>
@@ -874,11 +908,60 @@
                         <% } %>
                     </div>
                 </form>
-            </div>
+                <% } %> </div>
         </div>
     </div>
         <% } %>
 
+        <%
+    String esitoPagamento = request.getParameter("esito");
+    if (esitoPagamento != null) {
+        boolean isSuccess = "pagamento_ok".equals(esitoPagamento);
+%>
+
+    <div class="modal fade" id="modalEsitoPagamento" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 text-center p-4">
+
+                <div class="modal-body">
+                    <% if (isSuccess) { %>
+                    <div class="mb-3 text-success">
+                        <i class="fa-regular fa-circle-check fa-5x animate-fade-in"></i>
+                    </div>
+                    <h3 class="fw-bold text-success mb-2">Pagamento Riuscito!</h3>
+                    <p class="text-muted">La tua quota è stata versata correttamente.<br>Ora hai pieno accesso al Club.</p>
+                    <% } else { %>
+                    <div class="mb-3 text-danger">
+                        <i class="fa-regular fa-circle-xmark fa-5x animate-fade-in"></i>
+                    </div>
+                    <h3 class="fw-bold text-danger mb-2">Pagamento Fallito</h3>
+                    <p class="text-muted">C'è stato un problema con la transazione.<br>Per favore controlla il metodo di pagamento e riprova.</p>
+                    <% } %>
+                </div>
+
+                <div class="d-grid">
+                    <button type="button" class="btn <%= isSuccess ? "btn-success" : "btn-danger" %> rounded-pill py-2 fw-bold" data-bs-dismiss="modal">
+                        Ho capito
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var myModal = new bootstrap.Modal(document.getElementById('modalEsitoPagamento'));
+            myModal.show();
+
+            // (Opzionale) Pulisce l'URL per non mostrare il popup se si ricarica la pagina
+            const url = new URL(window.location);
+            url.searchParams.delete('esito');
+            window.history.replaceState(null, '', url);
+        });
+    </script>
+
+        <% } %>
     <script>
         function openForm(type) {
             document.getElementById('default-post-view').classList.add('d-none');

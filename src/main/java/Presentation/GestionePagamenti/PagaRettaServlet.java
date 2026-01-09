@@ -1,6 +1,7 @@
 package Presentation.GestionePagamenti;
 
 import Application.GestioneAccount.UtenteBean;
+import Application.GestioneGruppo.GruppoBean;
 import Application.GestionePagamenti.PagamentoService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -47,16 +48,18 @@ public class PagaRettaServlet extends HttpServlet {
 
             // 1. Chiamata al Service
             pagamentoService.pagaRetta(idGruppo, idMetodo, importo);
+            boolean isPagato = pagamentoService.isPagato(idGruppo, utente.getId_utente());
+
+            request.setAttribute("hasPaid", isPagato);
 
             // 2. Successo
-            response.sendRedirect("VisualizzaGruppoServlet?id=" + idGruppo + "&status=success");
+            response.sendRedirect("VisualizzaGruppoServlet?id=" + idGruppo + "&esito=pagamento_ok");
 
-        } catch (NumberFormatException e) {
-            response.sendRedirect("feedServlet");
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Errore tecnico durante l'elaborazione del pagamento.");
-            request.getRequestDispatcher("pagine_gruppo.jsp").forward(request, response);
+
+            //errore:
+            response.sendRedirect("VisualizzaGruppoServlet?id=" + idGruppoStr + "&esito=pagamento_errore");
         }
     }
 

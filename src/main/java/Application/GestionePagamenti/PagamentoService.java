@@ -75,7 +75,7 @@ public class PagamentoService {
         try (Connection con = ConPool.getConnection()) {
             for (UtenteBean socio : soci) {
                 // Passiamo la connessione 'con' per evitare di aprirne una nuova per ogni socio (Performance)
-                boolean inRegola = pagamentoDAO.isAbbonamentoValido(con, socio.getId_utente(), idGruppo, frequenzaGiorni);
+                boolean inRegola = pagamentoDAO.isAbbonamentoValido(con, socio.getId_utente(), idGruppo);
                 mappa.put(socio.getId_utente(), inRegola);
             }
         } catch (SQLException e) {
@@ -96,6 +96,25 @@ public class PagamentoService {
             pagamento.setData_tansazione(LocalDateTime.now());
 
             pagamentoDAO.doSaveDettagliPagamento(con, pagamento);
+        }
+    }
+
+    public boolean isPagato(int idGruppo, int idUtente) {
+        try {
+            boolean inRegola = pagamentoDAO.isAbbonamentoValido(ConPool.getConnection(), idUtente, idGruppo);
+            return inRegola;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean isPagatoCon (Connection con, int idGruppo, int idUtente) {
+        try {
+            return pagamentoDAO.isAbbonamentoValido(con, idUtente, idGruppo);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }

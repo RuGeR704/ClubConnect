@@ -22,8 +22,15 @@ public class RimuoviEventoServlet extends HttpServlet {
             String idStr = request.getParameter("idEvento");
             if(idStr == null) throw new IllegalArgumentException("ID mancante");
 
-            service.rimuoviEvento(Integer.parseInt(idStr));
-            response.sendRedirect("visualizzaCalendario.jsp?msg=rimosso_ok");
+            try {
+                service.rimuoviEvento(Integer.parseInt(idStr));
+                // Aggiungo il parametro all'URL
+                response.sendRedirect("VisualizzaCalendarioEventiServlet?esito=success");
+            } catch (Exception e) {
+                e.printStackTrace();
+                // In caso di errore
+                response.sendRedirect("VisualizzaCalendarioEventiServlet?esito=errore");
+            }
 
         } catch (Exception e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
