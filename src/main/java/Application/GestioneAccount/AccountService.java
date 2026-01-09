@@ -4,6 +4,7 @@ import Application.GestioneGruppo.GruppoBean;
 import Application.GestionePagamenti.DettagliPagamentoBean;
 import Application.GestionePagamenti.MetodoPagamentoBean;
 import Storage.ConPool;
+import Storage.PagamentoDAO;
 import Storage.UtenteDAO;
 
 import java.sql.Connection;
@@ -13,64 +14,95 @@ import java.util.List;
 public class AccountService {
 
     private UtenteDAO utenteDAO;
+    private PagamentoDAO pagamentoDAO;
 
     // Costruttore standard
     public AccountService() {
         this.utenteDAO = new UtenteDAO();
+        this.pagamentoDAO = new PagamentoDAO();
     }
 
-    // Costruttore per i TEST (Dependency Injection)
-    public AccountService(UtenteDAO utenteDAO) {
+    // Setters per Dependency Injection (Test)
+    public void setUtenteDAO(UtenteDAO utenteDAO) {
         this.utenteDAO = utenteDAO;
     }
 
-    // --- METODI DI RECUPERO DATI (READ) ---
+    public void setPagamentoDAO(PagamentoDAO pagamentoDAO) {
+        this.pagamentoDAO = pagamentoDAO;
+    }
 
+    // ============================================================
+    //  SEZIONE GESTIONE PAGAMENTI (Nuovi metodi)
+    // ============================================================
+
+    public void aggiungiMetodoPagamento(MetodoPagamentoBean metodo) throws SQLException {
+        try (Connection con = ConPool.getConnection()) {
+            pagamentoDAO.doSaveMetodoPagamento(con, metodo);
+        }
+    }
+
+    public void rimuoviMetodoPagamento(int idMetodo, int idUtente) throws SQLException {
+        try (Connection con = ConPool.getConnection()) {
+            pagamentoDAO.doDeleteMetodoPagamento(con, idMetodo, idUtente);
+        }
+    }
+
+    // ============================================================
+    //  SEZIONE DATI UTENTE (Metodi con Overload per i Test)
+    // ============================================================
+
+    // --- 1. Gruppi Iscritto ---
     public List<GruppoBean> getGruppiIscritto(int idUtente) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
             return getGruppiIscritto(con, idUtente);
         }
     }
-    // Per i test
+    // OVERLOAD PER I TEST (Risolve il primo errore)
     public List<GruppoBean> getGruppiIscritto(Connection con, int idUtente) throws SQLException {
-        return utenteDAO.doRetrieveGruppiIscritto(idUtente); // Nota: se il DAO apre la connessione da solo, va modificato per accettarla, altrimenti qui mockiamo il DAO intero.
+        return utenteDAO.doRetrieveGruppiIscritto(con, idUtente);
     }
 
+    // --- 2. Gruppi Admin ---
     public List<GruppoBean> getGruppiAdmin(int idUtente) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
             return getGruppiAdmin(con, idUtente);
         }
     }
-    // Per i test
+    // OVERLOAD PER I TEST (Risolve il secondo errore)
     public List<GruppoBean> getGruppiAdmin(Connection con, int idUtente) throws SQLException {
         return utenteDAO.doRetrieveGruppiAdmin(con, idUtente);
     }
 
+    // --- 3. Metodi Pagamento (Read) ---
     public List<MetodoPagamentoBean> getMetodiPagamento(int idUtente) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
-            return utenteDAO.doRetrieveAllMetodiPagamento(idUtente);
+            return getMetodiPagamento(con, idUtente);
         }
     }
+    // OVERLOAD PER I TEST (Risolve il terzo errore)
+    public List<MetodoPagamentoBean> getMetodiPagamento(Connection con, int idUtente) throws SQLException {
+        return utenteDAO.doRetrieveAllMetodiPagamento(con, idUtente);
+    }
 
+    // --- 4. Storico Pagamenti ---
     public List<DettagliPagamentoBean> getStoricoPagamenti(int idUtente) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
-            return utenteDAO.doRetrievePagamenti(idUtente);
+            return getStoricoPagamenti(con, idUtente);
         }
     }
+    // OVERLOAD PER I TEST (Risolve il quarto errore)
+    public List<DettagliPagamentoBean> getStoricoPagamenti(Connection con, int idUtente) throws SQLException {
+        return utenteDAO.doRetrievePagamenti(con, idUtente);
+    }
 
-    // --- METODI DI MODIFICA (UPDATE) ---
-
+    // --- 5. Modifica Dati ---
     public void modificaDatiUtente(UtenteBean utente) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
             modificaDatiUtente(con, utente);
         }
     }
-
-    // Per i test
+    // OVERLOAD PER I TEST (Risolve l'ultimo errore)
     public void modificaDatiUtente(Connection con, UtenteBean utente) throws SQLException {
-        // Qui potresti spostare la validazione (date, regex) se volessi pulire la Servlet
         utenteDAO.doUpdate(con, utente);
-        // Commit manuale se necessario, ma col try-with-resources spesso basta il close o autocommit
-        con.commit();
     }
 }

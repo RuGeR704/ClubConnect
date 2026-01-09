@@ -2,9 +2,8 @@ package Presentation.GestioneGruppo;
 
 import Application.GestioneAccount.UtenteBean;
 import Application.GestioneGruppo.AssociazioneBean;
-import Application.GestioneGruppo.ClubBean;
 import Application.GestioneGruppo.GruppoService;
-import Application.GestionePagamenti.GestionePagamentiBean;
+import Application.GestionePagamenti.PagamentoService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,7 +33,8 @@ class VisualizzaSociServletTest {
     @Mock HttpSession session;
     @Mock RequestDispatcher dispatcher;
     @Mock GruppoService gruppoService;
-    @Mock GestionePagamentiBean pagamentiService;
+    @Mock
+    PagamentoService pagamentiService;
 
     VisualizzaSociServlet servlet;
 

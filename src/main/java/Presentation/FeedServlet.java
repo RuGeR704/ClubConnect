@@ -1,10 +1,9 @@
 package Presentation;
 
 import Application.GestioneAccount.UtenteBean;
-import Application.GestioneComunicazioni.ComunicazioniBean;
 import Application.GestioneEventi.EventoBean;
+import Application.GestioneFeed.FeedService;
 import Application.GestioneGruppo.GruppoBean;
-import Storage.*;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,14 +13,17 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 @WebServlet("/feedServlet")
 public class FeedServlet extends HttpServlet {
+
+    private FeedService feedService = new FeedService();
+
+    public void setFeedService(FeedService feedService) {
+        this.feedService = feedService;
+    }
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -33,50 +35,36 @@ public class FeedServlet extends HttpServlet {
             return;
         }
 
-        UtenteDAO utenteDAO = new UtenteDAO();
-        GruppoDAO gruppoDAO = new GruppoDAO();
-        ComunicazioneDAO comunicazioneDAO = new ComunicazioneDAO();
-        EventoDAO eventoDAO = new EventoDAO();
-        List<Object> feedMisto = new ArrayList<>();
-        Collection<GruppoBean> gruppiSuggeriti = new ArrayList<>();
-        boolean hasIscrizione = false;
+        try {
+            // 1. Controlliamo se ha iscrizioni
+            List<GruppoBean> gruppiIscritti = feedService.getGruppiIscritto(utente.getId_utente());
+            List<EventoBean> eventiPrenotati = feedService.getEventiPrenotati(utente.getId_utente());
 
-        // APRIAMO UNA SOLA CONNESSIONE PER TUTTA LA DURATA DELLA RICHIESTA
-        try (java.sql.Connection con = ConPool.getConnection()) {
+            boolean hasIscrizioni = (gruppiIscritti != null && !gruppiIscritti.isEmpty());
 
-            // Passiamo la stessa connessione 'con' a tutti i metodi del DAO
-            List<GruppoBean> gruppi = utenteDAO.doRetrieveGruppiIscritto(utente.getId_utente());
-            // Nota: Se utenteDAO non accetta 'con', dovresti aggiornare il metodo o usare la connessione per gli altri
-
-            List<EventoBean> iscrizioniEventi = eventoDAO.doRetrieveEventiByUtente(con, utente.getId_utente());
-
-            if (gruppi != null && !gruppi.isEmpty()) {
-                hasIscrizione = true;
-
-                List<ComunicazioniBean> comunicazioni = comunicazioneDAO.doRetrievebyGroup(con, utente.getId_utente());
-                List<EventoBean> eventi = eventoDAO.doRetrievebyGruppiIscritti(con, utente.getId_utente());
-
-                if(comunicazioni != null) feedMisto.addAll(comunicazioni);
-                if(eventi != null) feedMisto.addAll(eventi);
-
-                Collections.shuffle(feedMisto);
+            if (hasIscrizioni) {
+                // 2A. Se iscritto -> Carichiamo il feed misto
+                List<Object> feedMisto = feedService.getFeedMisto(utente.getId_utente());
+                request.setAttribute("feedMisto", feedMisto);
+                request.setAttribute("gruppiSuggeriti", new ArrayList<>()); // Vuoto per evitare null in JSP
             } else {
-                hasIscrizione = false;
-                gruppiSuggeriti = gruppoDAO.doRetrieveAll(con);
+                // 2B. Se NON iscritto -> Carichiamo i suggerimenti
+                List<GruppoBean> suggeriti = feedService.getSuggerimenti();
+                request.setAttribute("gruppiSuggeriti", suggeriti);
+                request.setAttribute("feedMisto", new ArrayList<>()); // Vuoto
             }
 
-            request.setAttribute("hasIscrizioni", hasIscrizione);
-            request.setAttribute("feedMisto", feedMisto);
-            request.setAttribute("gruppiSuggeriti", gruppiSuggeriti);
-            request.setAttribute("eventiPrenotati", iscrizioniEventi);
+            // 3. Impostiamo gli attributi comuni
+            request.setAttribute("hasIscrizioni", hasIscrizioni);
+            request.setAttribute("eventiPrenotati", eventiPrenotati);
 
-        } catch (SQLException e) {
+            RequestDispatcher view = request.getRequestDispatcher("feed.jsp");
+            view.forward(request, response);
+
+        } catch (Exception e) {
             e.printStackTrace();
-            // Opzionale: rimanda a una pagina di errore se la connessione fallisce
+            response.sendRedirect("error.jsp");
         }
-
-        RequestDispatcher view = request.getRequestDispatcher("feed.jsp");
-        view.forward(request, response);
     }
 
     @Override

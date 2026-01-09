@@ -1,7 +1,7 @@
 package Presentation.GestionePagamenti;
 
 import Application.GestioneAccount.UtenteBean;
-import Application.GestionePagamenti.GestionePagamentiBean;
+import Application.GestionePagamenti.PagamentoService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,21 +10,27 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
-@WebServlet(name = "PagaRettaServlet", urlPatterns = {"/PagaRettaServlet"})
+@WebServlet("/PagaRettaServlet")
 public class PagaRettaServlet extends HttpServlet {
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        UtenteBean utente = (UtenteBean) session.getAttribute("utente");
+    private PagamentoService pagamentoService = new PagamentoService();
 
-        // Controllo Login
+    public void setPagamentoService(PagamentoService service) {
+        this.pagamentoService = service;
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession(false);
+        UtenteBean utente = (session != null) ? (UtenteBean) session.getAttribute("utente") : null;
+
         if (utente == null) {
             response.sendRedirect("login.jsp");
             return;
         }
 
-        // Recupero Parametri
         String idGruppoStr = request.getParameter("idGruppo");
         String idMetodoStr = request.getParameter("idMetodo");
         String importoStr = request.getParameter("importo");
@@ -39,24 +45,22 @@ public class PagaRettaServlet extends HttpServlet {
             int idMetodo = Integer.parseInt(idMetodoStr);
             double importo = Double.parseDouble(importoStr);
 
-            // Esecuzione del pagamento tramite Bean
-            GestionePagamentiBean service = new GestionePagamentiBean();
-            boolean successo = service.pagaRetta(idGruppo, idMetodo, importo);
+            // 1. Chiamata al Service
+            pagamentoService.pagaRetta(idGruppo, idMetodo, importo);
 
-            if (successo) {
-                // Pagamento riuscito: torniamo alla pagina del club
-                response.sendRedirect("VisualizzaGruppoServlet?id=" + idGruppo + "&status=success");
-            } else {
-                // Errore durante il salvataggio
-                request.setAttribute("error", "Errore tecnico durante l'elaborazione del pagamento.");
-                request.getRequestDispatcher("paginaGruppo.jsp").forward(request, response);
-            }
+            // 2. Successo
+            response.sendRedirect("VisualizzaGruppoServlet?id=" + idGruppo + "&status=success");
 
         } catch (NumberFormatException e) {
             response.sendRedirect("feedServlet");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Errore tecnico durante l'elaborazione del pagamento.");
+            request.getRequestDispatcher("pagine_gruppo.jsp").forward(request, response);
         }
     }
 
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.sendRedirect("feedServlet");
     }

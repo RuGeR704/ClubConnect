@@ -105,8 +105,16 @@ public class RegistrazioneServlet extends HttpServlet {
 
             utenteService.registraUtente(nuovoUtente);
 
-            HttpSession session = request.getSession();
-            session.setAttribute("utente", nuovoUtente);
+            HttpSession oldSession = request.getSession(false);
+
+            // 2. Se esiste una sessione vecchia, distruggila completamente!
+            if (oldSession != null) {
+                oldSession.invalidate();
+            }
+
+            // 3. Ora crea una sessione NUOVA e PULITA per il nuovo utente
+            HttpSession newSession = request.getSession(true);
+            newSession.setAttribute("utente", nuovoUtente);
             // NOTA: Qui facciamo REDIRECT, quindi il test deve verificare sendRedirect
             response.sendRedirect("feedServlet");
 
