@@ -129,7 +129,7 @@ public class GruppoDAO {
                 ps.setDouble(10,c.getImporto_retta());
                 ps.setInt(11, c.getFrequenza());
             }
-            if(gruppo instanceof AssociazioneBean) {
+            else if(gruppo instanceof AssociazioneBean) {
                 ps.setNull(10,java.sql.Types.DOUBLE);
                 ps.setNull(11,java.sql.Types.INTEGER);
             }

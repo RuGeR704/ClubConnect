@@ -6,6 +6,7 @@ import Application.GestioneComunicazioni.ComunicazioneService;
 import Application.GestioneGruppo.GruppoBean;
 import Application.GestioneGruppo.GruppoService;
 import Application.GestionePagamenti.MetodoPagamentoBean;
+import jakarta.servlet.RequestDispatcher;
 import Application.GestionePagamenti.PagamentoService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -59,9 +60,17 @@ public class VisualizzaGruppoServlet extends HttpServlet {
         try {
             int idGruppo = Integer.parseInt(idStr);
 
-            // A. Recupera Info Gruppo
-            // NOTA: Assicurati che nel GruppoService il metodo si chiami 'visualizzaGruppo' o 'doRetrieveByid'
-            GruppoBean gruppo = gruppoService.visualizzaGruppo(idGruppo);
+            // Uso del Service
+            GruppoBean gruppo = gruppoService.recuperaGruppo(idGruppo);
+
+            if (gruppo != null) {
+                // Recupero Comunicazioni
+                List<ComunicazioniBean> comunicazioni = comService.recuperaComunicazioniPerUtente(utente.getId_utente());
+
+                // Controllo Permessi (usando i nuovi metodi del service)
+                boolean isIscritto = gruppoService.isUtenteIscritto(idGruppo, utente.getId_utente());
+                boolean isAdmin = gruppoService.isUtenteGestore(idGruppo, utente.getId_utente());
+                List<MetodoPagamentoBean> metodipagamenti = asService.getMetodiPagamento(utente.getId_utente());
 
             if (gruppo == null) {
                 response.sendRedirect("feedServlet");
@@ -86,6 +95,8 @@ public class VisualizzaGruppoServlet extends HttpServlet {
                     isIscritto = false;
                 }
                 request.setAttribute("isIscritto", isIscritto);
+                request.setAttribute("comunicazioni", comunicazioni);
+                request.setAttribute("metodiUtente", metodipagamenti);
 
                 // 2. Controllo se è Gestore
                 boolean isGestore = pagamentoService.isUtenteGestore(utente.getId_utente(), idGruppo);

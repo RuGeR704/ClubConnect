@@ -136,6 +136,17 @@
                         </div>
                     </div>
                     <% } %>
+                    <% } else { %>
+                    <div class="col-12 text-center py-5">
+
+                        <div class="mb-3 text-muted opacity-50">
+                            <i class="fa-regular fa-credit-card fa-3x"></i>
+                        </div>
+                        <h5 class="fw-bold text-muted">Nessun metodo di pagamento</h5>
+                        <p class="text-muted small mb-0">Non hai ancora salvato nessuna carta.</p>
+                        <button class="btn btn-link text-decoration-none fw-bold" data-bs-toggle="modal" data-bs-target="#modalPagamento">Aggiungine una ora</button>
+                    </div>
+
                     <% } %>
                 </div>
                 <% } %>

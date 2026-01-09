@@ -36,7 +36,7 @@ public class PagaRettaServlet extends HttpServlet {
         String importoStr = request.getParameter("importo");
 
         if (idGruppoStr == null || idMetodoStr == null || importoStr == null) {
-            response.sendRedirect("feedServlet"); // O gestione errore migliore
+            response.sendRedirect("feedServlet");
             return;
         }
 
