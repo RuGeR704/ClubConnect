@@ -176,7 +176,7 @@
                                 </div>
                             </a>
                             <form action="IscrizioneGruppoServlet" method="POST">
-                                <input type="hidden" name="idGruppo" value="<%= g.getId_gruppo() %>">
+                                <input type="hidden" name="id_gruppo" value="<%= g.getId_gruppo() %>">
                                 <button type="submit" class="btn btn-sm btn-club-primary rounded-pill px-3">Iscriviti</button>
                             </form>
                         </div>

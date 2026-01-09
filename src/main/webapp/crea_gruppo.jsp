@@ -86,7 +86,7 @@
   </div>
   <% } %>
 
-  <form action="CreazioneGruppoServlet" method="POST" enctype="multipart/form-data" class="card p-4 p-md-5 rounded-4 shadow-sm">
+  <form action="CreaGruppoServlet" method="POST" enctype="multipart/form-data" class="card p-4 p-md-5 rounded-4 shadow-sm">
 
     <h4 class="form-section-title"><i class="fa-solid fa-layer-group me-2"></i>Tipo di Organizzazione</h4>
     <div class="row g-4 mb-4">

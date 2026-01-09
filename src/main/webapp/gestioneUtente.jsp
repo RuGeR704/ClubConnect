@@ -9,10 +9,7 @@
     String errorMsg = (String) session.getAttribute("errorMsg");
     if (errorMsg != null) { session.removeAttribute("errorMsg"); }
 
-    // Recupero la lista caricata dalla VisualizzaMetodiPagamentoServlet
     List<MetodoPagamentoBean> metodipagamento = (List<MetodoPagamentoBean>) request.getAttribute("metodipagamento");
-
-    // Capiamo quale tab mostrare (se i dati o i pagamenti)
     boolean showPagamenti = (metodipagamento != null);
 %>
 <!DOCTYPE html>
@@ -31,9 +28,10 @@
         .profile-avatar { width: 80px; height: 80px; background: white; border-radius: 50%; padding: 4px; margin-top: -40px; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .content-card { background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
         .btn-club-teal { background-color: #26A9BC; color: white; border: none; }
-
-        /* Stili Alert */
         .alert-custom-error { background-color: #fef2f2; border-left: 4px solid #E65142; color: #991b1b; border-radius: 12px; }
+        /* Fix per il modale se coperto da altri elementi */
+        .modal-backdrop { z-index: 1040 !important; }
+        .modal { z-index: 1050 !important; }
     </style>
 </head>
 <body>
@@ -62,7 +60,6 @@
 
 <div class="container py-4">
     <div class="row g-4">
-
         <div class="col-lg-3">
             <div class="feed-card text-center pb-3">
                 <div class="profile-card-header"></div>
@@ -88,7 +85,6 @@
         </div>
 
         <div class="col-lg-9">
-
             <% if (errorMsg != null) { %>
             <div class="alert alert-custom-error shadow-sm d-flex align-items-center mb-4"><i class="fa-solid fa-circle-exclamation fs-4 me-3"></i><div><%= errorMsg %></div></div>
             <% } %>
@@ -121,7 +117,7 @@
                 <% } else { %>
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h4 class="fw-bold mb-0" style="color: #1E3A5F;">I Tuoi Metodi di Pagamento</h4>
-                    <button class="btn btn-club-teal btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalPagamento">
+                    <button type="button" class="btn btn-club-teal btn-sm rounded-pill px-3 fw-bold" data-bs-toggle="modal" data-bs-target="#modalPagamento">
                         <i class="fa-solid fa-plus me-1"></i> Aggiungi Metodo
                     </button>
                 </div>
@@ -156,9 +152,8 @@
                         </div>
                         <h5 class="fw-bold text-muted">Nessun metodo di pagamento</h5>
                         <p class="text-muted small mb-0">Non hai ancora salvato nessuna carta.</p>
-                        <button class="btn btn-link text-decoration-none fw-bold" data-bs-toggle="modal" data-bs-target="#modalPagamento">Aggiungine una ora</button>
+                        <button type="button" class="btn btn-link text-decoration-none fw-bold" data-bs-toggle="modal" data-bs-target="#modalPagamento">Aggiungine una ora</button>
                     </div>
-
                     <% } %>
                 </div>
                 <% } %>
@@ -207,13 +202,27 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-    document.getElementById('scadenzaInput').addEventListener('input', function (e) {
-        var input = e.target.value;
-        if (input.length === 2 && !input.includes('/')) {
-            e.target.value = input + '/';
+    // Script reso sicuro per non bloccare la pagina se l'input non esiste
+    document.addEventListener("DOMContentLoaded", function() {
+        var scadenzaInput = document.getElementById('scadenzaInput');
+
+        if (scadenzaInput) {
+            scadenzaInput.addEventListener('input', function (e) {
+                var input = e.target.value;
+                // Aggiunge automaticamente lo slash dopo 2 numeri
+                if (input.length === 2 && !input.includes('/')) {
+                    e.target.value = input + '/';
+                }
+                // Evita che l'utente cancelli lo slash e rompa il formato
+                if (input.length === 2 && e.inputType === 'deleteContentBackward') {
+                    e.target.value = input.substring(0, 1);
+                }
+            });
         }
     });
 </script>
+
 </body>
 </html>
