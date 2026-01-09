@@ -102,6 +102,18 @@
                         <div class="col-md-6"><div class="form-floating"><input type="text" class="form-control" name="cognome" value="<%= utente.getCognome() %>" required><label>Cognome</label></div></div>
                         <div class="col-md-6"><div class="form-floating"><input type="text" class="form-control" name="username" value="<%= utente.getUsername() %>" required><label>Username</label></div></div>
                         <div class="col-md-6"><div class="form-floating"><input type="email" class="form-control" name="email" value="<%= utente.getEmail() %>" required><label>Email</label></div></div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="tel" class="form-control" name="cellulare" value="<%= (utente.getCellulare() != null) ? utente.getCellulare() : "" %>">
+                                <label>Cellulare</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="date" class="form-control" name="datanascita" value="<%= utente.getData_nascita() %>" required>
+                                <label>Data di Nascita</label>
+                            </div>
+                        </div>
                         <div class="col-12 mt-3 pt-3 border-top"><div class="form-floating"><input type="password" class="form-control" name="password" required><label>Password per confermare</label></div></div>
                     </div>
                     <button type="submit" class="btn btn-primary w-100 mt-4 py-3 rounded-4 fw-bold shadow-sm" style="background-color: #1E3A5F; border: none;">Salva Modifiche</button>
