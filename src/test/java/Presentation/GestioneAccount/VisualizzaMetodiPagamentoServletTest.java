@@ -61,10 +61,12 @@ class VisualizzaMetodidiPagamentoServletTest {
         servlet.doGet(request, response);
 
         // Then
-        // Verifica che l'attributo sia "metodiPagamento" (camelCase)
-        verify(request).setAttribute(eq("metodiPagamento"), eq(lista));
-        // Verifica il path corretto della JSP
-        verify(request).getRequestDispatcher("/gestioneUtente.jsp");
+        // 1. Modificato "metodiPagamento" in "metodipagamento" (tutto minuscolo)
+        verify(request).setAttribute(eq("metodipagamento"), eq(lista));
+
+        // 2. Modificato "/gestioneUtente.jsp" in "gestioneUtente.jsp" (senza slash)
+        verify(request).getRequestDispatcher("gestioneUtente.jsp");
+
         verify(dispatcher).forward(request, response);
     }
 
