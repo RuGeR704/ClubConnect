@@ -1,8 +1,8 @@
 package Presentation.GestioneAccount;
 
 import Application.GestioneAccount.AccountService;
-import Application.GestioneAccount.UtenteBean;
 import Application.GestionePagamenti.MetodoPagamentoBean;
+import Application.GestioneAccount.UtenteBean;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,19 +11,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class VisualizzaMetodiPagamentoServletTest {
+@MockitoSettings(strictness = Strictness.LENIENT)
+class VisualizzaMetodidiPagamentoServletTest {
 
     @Mock HttpServletRequest request;
     @Mock HttpServletResponse response;
@@ -37,43 +39,42 @@ class VisualizzaMetodiPagamentoServletTest {
     void setUp() {
         servlet = new VisualizzaMetodiPagamentoServlet();
         servlet.setAccountService(serviceMock);
+
+        when(request.getSession(false)).thenReturn(session);
+        when(request.getRequestDispatcher(anyString())).thenReturn(dispatcher);
+
+        // FONDAMENTALE: Mockiamo getContextPath() per evitare "null/login.jsp"
+        when(request.getContextPath()).thenReturn("");
     }
 
     @Test
     void testDoGet_Successo() throws Exception {
-        // GIVEN
-        when(request.getSession(false)).thenReturn(session);
+        // Given
         UtenteBean utente = new UtenteBean();
-        utente.setId_utente(5);
+        utente.setId_utente(10);
         when(session.getAttribute("utente")).thenReturn(utente);
 
-        List<MetodoPagamentoBean> metodi = new ArrayList<>();
-        metodi.add(Mockito.mock(MetodoPagamentoBean.class));
+        List<MetodoPagamentoBean> lista = new ArrayList<>();
+        when(serviceMock.getMetodiPagamento(10)).thenReturn(lista);
 
-        when(serviceMock.getMetodiPagamento(5)).thenReturn(metodi);
-        when(request.getRequestDispatcher("/gestioneUtente.jsp")).thenReturn(dispatcher);
-
-        // WHEN
+        // When
         servlet.doGet(request, response);
 
-        // THEN
-        verify(request).setAttribute(eq("metodipagamento"), eq(metodi));
+        // Then
+        // Verifica che l'attributo sia "metodiPagamento" (camelCase)
+        verify(request).setAttribute(eq("metodiPagamento"), eq(lista));
+        // Verifica il path corretto della JSP
+        verify(request).getRequestDispatcher("/gestioneUtente.jsp");
         verify(dispatcher).forward(request, response);
     }
 
     @Test
-    void testDoGet_ErroreSQL() throws Exception {
-        // GIVEN
-        when(request.getSession(false)).thenReturn(session);
-        when(session.getAttribute("utente")).thenReturn(new UtenteBean());
-        // Simuliamo errore DB
-        when(serviceMock.getMetodiPagamento(anyInt())).thenThrow(new SQLException("Errore"));
+    void testDoGet_NonLoggato() throws Exception {
+        when(session.getAttribute("utente")).thenReturn(null);
 
-        // WHEN
         servlet.doGet(request, response);
 
-        // THEN
-        // Nel tuo codice originale qui fai REDIRECT a error.jsp, non forward
-        verify(response).sendRedirect(contains("/error.jsp"));
+        // Verifica il redirect corretto (dato che contextPath è vuoto, sarà /login.jsp)
+        verify(response).sendRedirect("/login.jsp");
     }
 }

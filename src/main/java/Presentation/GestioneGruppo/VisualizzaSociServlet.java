@@ -4,7 +4,7 @@ import Application.GestioneAccount.UtenteBean;
 import Application.GestioneGruppo.ClubBean;
 import Application.GestioneGruppo.GruppoBean;
 import Application.GestioneGruppo.GruppoService;
-import Application.GestionePagamenti.GestionePagamentiBean;
+import Application.GestionePagamenti.PagamentoService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -21,10 +21,10 @@ import java.util.Map;
 public class VisualizzaSociServlet extends HttpServlet {
 
     private GruppoService gruppoService = new GruppoService();
-    private GestionePagamentiBean pagamentiService = new GestionePagamentiBean();
+    private PagamentoService pagamentiService = new PagamentoService();
 
     public void setGruppoService(GruppoService gs) { this.gruppoService = gs; }
-    public void setPagamentiService(GestionePagamentiBean ps) { this.pagamentiService = ps; }
+    public void setPagamentiService(PagamentoService ps) { this.pagamentiService = ps; }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();

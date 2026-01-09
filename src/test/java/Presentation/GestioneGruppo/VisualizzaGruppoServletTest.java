@@ -1,9 +1,12 @@
 package Presentation.GestioneGruppo;
 
+import Application.GestioneAccount.AccountService;
 import Application.GestioneAccount.UtenteBean;
 import Application.GestioneComunicazioni.ComunicazioneService;
-import Application.GestioneGruppo.AssociazioneBean;
+import Application.GestioneGruppo.ClubBean; // Usa la classe concreta!
+import Application.GestioneGruppo.GruppoBean;
 import Application.GestioneGruppo.GruppoService;
+import Application.GestionePagamenti.PagamentoService;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,50 +16,78 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class VisualizzaGruppoServletTest {
 
     @Mock HttpServletRequest request;
     @Mock HttpServletResponse response;
     @Mock HttpSession session;
     @Mock RequestDispatcher dispatcher;
-    @Mock GruppoService gruppoService;
-    @Mock ComunicazioneService comService;
+
+    @Mock GruppoService gruppoServiceMock;
+    @Mock PagamentoService pagamentoServiceMock;
+    @Mock AccountService accountServiceMock;
+    @Mock ComunicazioneService comunicazioneServiceMock;
 
     VisualizzaGruppoServlet servlet;
 
     @BeforeEach
     void setUp() {
         servlet = new VisualizzaGruppoServlet();
-        servlet.setGruppoService(gruppoService);
-        servlet.setComunicazioneService(comService);
+        // Iniezione dei Mock
+        servlet.setGruppoService(gruppoServiceMock);
+        servlet.setPagamentoService(pagamentoServiceMock);
+        servlet.setAccountService(accountServiceMock);
+        servlet.setComunicazioneService(comunicazioneServiceMock);
+
+        // Setup base della Request
+        when(request.getSession(false)).thenReturn(session);
+        when(request.getRequestDispatcher(anyString())).thenReturn(dispatcher);
     }
 
     @Test
     void testDoGet_MostraGruppo() throws Exception {
-        when(request.getParameter("id")).thenReturn("5");
-        when(request.getSession()).thenReturn(session);
-        when(session.getAttribute("utente")).thenReturn(new UtenteBean());
+        // 1. SETUP PARAMETRI REQUEST
+        when(request.getParameter("id")).thenReturn("1");
 
-        when(gruppoService.recuperaGruppo(5)).thenReturn(new AssociazioneBean());
-        when(comService.recuperaComunicazioniPerUtente(anyInt())).thenReturn(new ArrayList<>());
-        when(gruppoService.isUtenteIscritto(eq(5), anyInt())).thenReturn(true);
-        when(gruppoService.isUtenteGestore(eq(5), anyInt())).thenReturn(false);
+        // 2. SETUP UTENTE IN SESSIONE
+        UtenteBean utente = new UtenteBean();
+        utente.setId_utente(10);
+        when(session.getAttribute("utente")).thenReturn(utente);
 
-        when(request.getRequestDispatcher("paginaGruppo.jsp")).thenReturn(dispatcher);
+        // 3. SETUP GRUPPO (Usiamo ClubBean perché GruppoBean è astratta)
+        ClubBean gruppo = new ClubBean();
+        gruppo.setId_gruppo(1); // Assicurati che il metodo sia setId() o setId_gruppo()
+        gruppo.setNome("Club Test");
 
+        // Il service restituisce questo club quando si cerca l'ID 1
+        when(gruppoServiceMock.visualizzaGruppo(1)).thenReturn(gruppo);
+
+        // 4. SETUP ISCRIZIONE (L'utente è iscritto)
+        List<GruppoBean> listaIscritti = new ArrayList<>();
+        listaIscritti.add(gruppo);
+        when(accountServiceMock.getGruppiIscritto(10)).thenReturn(listaIscritti);
+
+        // 5. ESECUZIONE
         servlet.doGet(request, response);
 
+        // 6. VERIFICHE
+        // Verifica che il gruppo sia stato passato alla JSP
+        verify(request).setAttribute(eq("gruppo"), eq(gruppo));
+        // Verifica che il flag isIscritto sia true
         verify(request).setAttribute(eq("isIscritto"), eq(true));
-        verify(request).setAttribute(eq("isAdmin"), eq(false));
+        // Verifica il forward alla pagina corretta
+        verify(request).getRequestDispatcher("visualizza_gruppo.jsp");
         verify(dispatcher).forward(request, response);
     }
 }

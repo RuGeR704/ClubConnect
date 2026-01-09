@@ -27,7 +27,12 @@ public class GruppoService {
 
     // --- METODI ---
 
-    public GruppoBean recuperaGruppo(int idGruppo) {
+    // 1. RECUPERO GRUPPO (Alias per la Servlet)
+    public GruppoBean visualizzaGruppo(int idGruppo) throws SQLException {
+        return recuperaGruppo(idGruppo);
+    }
+
+    public GruppoBean recuperaGruppo(int idGruppo) throws SQLException{
         try (Connection con = ConPool.getConnection()) {
             return recuperaGruppo(con, idGruppo);
         } catch (SQLException e) {
@@ -40,6 +45,7 @@ public class GruppoService {
         return gruppoDAO.doRetrieveByid(con, idGruppo);
     }
 
+    // 2. RECUPERO SOCI
     public List<UtenteBean> recuperaSociDelGruppo(int idGruppo) {
         try (Connection con = ConPool.getConnection()) {
             return recuperaSociDelGruppo(con, idGruppo);
@@ -52,6 +58,7 @@ public class GruppoService {
         return gruppoDAO.doRetrieveSoci(con, idGruppo);
     }
 
+    // 3. ISCRIZIONE
     public void iscriviUtenteAlGruppo(int idUtente, int idGruppo) {
         try (Connection con = ConPool.getConnection()) {
             iscriviUtenteAlGruppo(con, idUtente, idGruppo);
@@ -63,6 +70,7 @@ public class GruppoService {
         gruppoDAO.doIscrizione(con, idUtente, idGruppo);
     }
 
+    // 4. ESPELLERE UTENTE
     public boolean espelliUtente(int idGruppo, int idUtenteDaEspellere, int idRichiedente) {
         try (Connection con = ConPool.getConnection()) {
             return espelliUtente(con, idGruppo, idUtenteDaEspellere, idRichiedente);
@@ -80,6 +88,7 @@ public class GruppoService {
         return gruppoDAO.doRimuoviMembro(con, idGruppo, idUtenteDaEspellere);
     }
 
+    // 5. RUOLI
     public Map<Integer, Boolean> recuperaMappaRuoli(int idGruppo) {
         try (Connection con = ConPool.getConnection()) {
             return recuperaMappaRuoli(con, idGruppo);
@@ -92,66 +101,80 @@ public class GruppoService {
         return gruppoDAO.getRuoliIscritti(con, idGruppo);
     }
 
-    // Alias per la Servlet (chiama il metodo sotto) affinché la Servlet lo trovi
+    // 6. CONTA MEMBRI
     public int getNumeroMembri(int idGruppo) {
         return contaMembri(idGruppo);
     }
-    // Metodo Principale (gestisce la connessione)
     public int contaMembri(int idGruppo) {
         try (Connection con = ConPool.getConnection()) {
             return contaMembri(con, idGruppo);
         } catch (SQLException e) { return 0; }
     }
-    // Overload (riceve la connessione)
     public int contaMembri(Connection con, int idGruppo) throws SQLException {
         return gruppoDAO.contaMembri(con, idGruppo);
     }
 
-    // Per sfruttare il metodo che c'è già in GruppoDAO (contaEventiInProgramma)
+    // 7. CONTA EVENTI
     public int getNumeroEventiProgrammati(int idGruppo) {
         try (Connection con = ConPool.getConnection()) {
-
-            return gruppoDAO.contaEventiInProgramma(con, idGruppo);
+            return getNumeroEventiProgrammati(con, idGruppo);
         } catch (SQLException e) {
             return 0;
         }
     }
+    // Overload aggiunto per i test
+    public int getNumeroEventiProgrammati(Connection con, int idGruppo) throws SQLException {
+        return gruppoDAO.contaEventiInProgramma(con, idGruppo);
+    }
 
+    // 8. CREA GRUPPO
     public void creaGruppo(GruppoBean g, int idUtente) throws SQLException {
         try(Connection con = ConPool.getConnection()){
             creaGruppo(con, g, idUtente);
         }
     }
-    // Overload testabile
     public void creaGruppo(Connection con, GruppoBean g, int idUtente) throws SQLException {
         gruppoDAO.doSave(con, g, idUtente);
     }
 
-    // Metodo per EsploraGruppiServlet
+    // 9. RECUPERA GRUPPI NON ISCRITTO (Per EsploraGruppiServlet)
     public List<GruppoBean> recuperaGruppiNonIscritto(int idUtente) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
-            return utenteDAO.doRetrieveGruppiNonIscritto(con, idUtente);
+            return recuperaGruppiNonIscritto(con, idUtente);
         }
     }
+    // Overload aggiunto
+    public List<GruppoBean> recuperaGruppiNonIscritto(Connection con, int idUtente) throws SQLException {
+        return utenteDAO.doRetrieveGruppiNonIscritto(con, idUtente);
+    }
 
-    // Metodo per VisualizzaGruppoServlet
+    // 10. ISCRITTO (Per VisualizzaGruppoServlet)
     public boolean isUtenteIscritto(int idGruppo, int idUtente) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
-            // Se UtenteDAO non ha un metodo isIscritto diretto, usiamo le liste
-            List<GruppoBean> iscritti = utenteDAO.doRetrieveGruppiIscritto(con,idUtente);
-            for (GruppoBean g : iscritti) {
-                if (g.getId_gruppo() == idGruppo) return true;
-            }
-            return false;
+            return isUtenteIscritto(con, idGruppo, idUtente);
         }
+    }
+    // Overload aggiunto per Mockito
+    public boolean isUtenteIscritto(Connection con, int idGruppo, int idUtente) throws SQLException {
+        List<GruppoBean> iscritti = utenteDAO.doRetrieveGruppiIscritto(con, idUtente);
+        for (GruppoBean g : iscritti) {
+            if (g.getId_gruppo() == idGruppo) return true;
+        }
+        return false;
     }
 
-    // Metodo per VisualizzaGruppoServlet (controllo admin)
+    // 11. GESTORE (Per VisualizzaGruppoServlet)
     public boolean isUtenteGestore(int idGruppo, int idUtente) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
-            return gruppoDAO.isGestore(con, idUtente, idGruppo);
+            return isUtenteGestore(con, idGruppo, idUtente);
         }
     }
+    // Overload aggiunto per Mockito
+    public boolean isUtenteGestore(Connection con, int idGruppo, int idUtente) throws SQLException {
+        return gruppoDAO.isGestore(con, idUtente, idGruppo);
+    }
+
+    // 12. RIMUOVI MEMBRO
     public boolean rimuoviMembro(int idGruppo, int idUtente) {
         try (Connection con = ConPool.getConnection()) {
             return rimuoviMembro(con, idGruppo, idUtente);

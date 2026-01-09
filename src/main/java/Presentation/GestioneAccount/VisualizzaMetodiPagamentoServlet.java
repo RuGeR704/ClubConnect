@@ -34,7 +34,7 @@ public class VisualizzaMetodiPagamentoServlet extends HttpServlet {
             // Service
             List<MetodoPagamentoBean> metodipagamento = accountService.getMetodiPagamento(utente.getId_utente());
 
-            request.setAttribute("metodipagamento", metodipagamento);
+            request.setAttribute("metodiPagamento", metodipagamento);
             request.getRequestDispatcher("/gestioneUtente.jsp").forward(request,response);
 
         } catch (SQLException sql) {

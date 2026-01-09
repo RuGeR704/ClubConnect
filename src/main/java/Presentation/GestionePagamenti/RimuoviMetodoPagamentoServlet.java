@@ -1,39 +1,57 @@
 package Presentation.GestionePagamenti;
+
+import Application.GestioneAccount.AccountService;
 import Application.GestioneAccount.UtenteBean;
-import Application.GestionePagamenti.MetodoPagamentoBean;
-import Storage.ConPool;
-import Storage.PagamentoDAO;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 
-@WebServlet(name = "RimuoviMetodoPagamentoServlet", value = "/RimuoviMetodoPagamentoServlet")
+@WebServlet("/RimuoviMetodoPagamentoServlet")
 public class RimuoviMetodoPagamentoServlet extends HttpServlet {
+
+    private AccountService accountService = new AccountService();
+
+    // Setter per i test
+    public void setAccountService(AccountService service) {
+        this.accountService = service;
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try (Connection con= ConPool.getConnection()){
-            HttpSession session = request.getSession(false);
-            if (session == null || session.getAttribute("utente") == null) {
-                response.sendRedirect(request.getContextPath() + "/login.jsp"); //manda al login se la sessione non esiste
-                return;
+        HttpSession session = request.getSession(false);
+        UtenteBean utente = (session != null) ? (UtenteBean) session.getAttribute("utente") : null;
+
+        // 1. Controllo Login
+        if (utente == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        String idParam = request.getParameter("id_metodo_pagamento");
+
+        try {
+            if (idParam != null && !idParam.isEmpty()) {
+                int idMetodo = Integer.parseInt(idParam);
+
+                // 2. Chiamata al Service (Rimuove la carta dal DB)
+                accountService.rimuoviMetodoPagamento(idMetodo, utente.getId_utente());
             }
-            UtenteBean utente = (UtenteBean) session.getAttribute("utente");
-            int id_utente=utente.getId_utente();
-            String idParam = request.getParameter("id_metodo_pagamento");
-            if(idParam == null || idParam.isEmpty()) {
-                response.sendRedirect(request.getContextPath() + "/VisualizzaMetodidiPagamentoServlet?error=missingId");
-                return;
-            }
-            int id_metodo_pagamento = Integer.parseInt(idParam);
-            PagamentoDAO dao = new PagamentoDAO();
-            dao.doDeleteMetodoPagamento(con,id_metodo_pagamento,id_utente);
-            response.sendRedirect(request.getContextPath() + "/VisualizzaMetodidiPagamentoServlet");
+
+            // 3. Redirect alla lista aggiornata
+            response.sendRedirect("VisualizzaMetodidiPagamentoServlet");
+
+        } catch (NumberFormatException e) {
+            // Se l'ID non è valido, torniamo semplicemente alla lista
+            response.sendRedirect("VisualizzaMetodidiPagamentoServlet");
         } catch (SQLException e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/VisualizzaMetodidiPagamentoServlet");
+            response.sendRedirect("error.jsp");
         }
     }
 }
