@@ -57,36 +57,38 @@ class VisualizzaGruppoServletTest {
 
     @Test
     void testDoGet_MostraGruppo() throws Exception {
-        // 1. SETUP PARAMETRI REQUEST
-        when(request.getParameter("id")).thenReturn("1");
+        // --- 1. SETUP FONDAMENTALE (Senza questo il test fallisce subito) ---
+        when(request.getParameter("id")).thenReturn("1"); // Simuliamo che l'ID nella URL sia "1"
 
-        // 2. SETUP UTENTE IN SESSIONE
+        // --- 2. SETUP UTENTE ---
         UtenteBean utente = new UtenteBean();
         utente.setId_utente(10);
         when(session.getAttribute("utente")).thenReturn(utente);
 
-        // 3. SETUP GRUPPO (Usiamo ClubBean perché GruppoBean è astratta)
+        // --- 3. SETUP GRUPPO ---
+        // Usiamo ClubBean perché GruppoBean è astratta
         ClubBean gruppo = new ClubBean();
-        gruppo.setId_gruppo(1); // Assicurati che il metodo sia setId() o setId_gruppo()
+        gruppo.setId_gruppo(1); // Controlla se il tuo metodo è setId() o setId_gruppo()
         gruppo.setNome("Club Test");
 
-        // Il service restituisce questo club quando si cerca l'ID 1
-        when(gruppoServiceMock.visualizzaGruppo(1)).thenReturn(gruppo);
+        // Istruiamo il service a restituire questo gruppo
+        when(gruppoServiceMock.recuperaGruppo(1)).thenReturn(gruppo);
 
-        // 4. SETUP ISCRIZIONE (L'utente è iscritto)
+        // --- 4. SETUP PERMESSI/ISCRIZIONE ---
+        // Simuliamo che l'utente sia iscritto
         List<GruppoBean> listaIscritti = new ArrayList<>();
         listaIscritti.add(gruppo);
         when(accountServiceMock.getGruppiIscritto(10)).thenReturn(listaIscritti);
 
-        // 5. ESECUZIONE
+        // --- 5. ESECUZIONE ---
         servlet.doGet(request, response);
 
-        // 6. VERIFICHE
-        // Verifica che il gruppo sia stato passato alla JSP
+        // --- 6. VERIFICHE ---
+        // Ora la servlet dovrebbe arrivare fino in fondo
         verify(request).setAttribute(eq("gruppo"), eq(gruppo));
-        // Verifica che il flag isIscritto sia true
         verify(request).setAttribute(eq("isIscritto"), eq(true));
-        // Verifica il forward alla pagina corretta
+
+        // Verifica che venga chiamata la JSP corretta
         verify(request).getRequestDispatcher("visualizza_gruppo.jsp");
         verify(dispatcher).forward(request, response);
     }
