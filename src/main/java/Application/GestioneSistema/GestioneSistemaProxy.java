@@ -5,7 +5,7 @@ import java.util.List;
 
 public class GestioneSistemaProxy implements GestioneSistemaInterface {
 
-    private GestioneSistemaBean realSubject;
+    private GestioneSistemaInterface realSubject; // Cambiato tipo per flessibilità
     private UtenteBean utenteCorrente;
 
     public GestioneSistemaProxy(UtenteBean utente) {
@@ -13,10 +13,14 @@ public class GestioneSistemaProxy implements GestioneSistemaInterface {
         this.realSubject = new GestioneSistemaBean();
     }
 
+    // Setter per i TEST
+    public void setRealSubject(GestioneSistemaInterface realSubject) {
+        this.realSubject = realSubject;
+    }
+
     private void checkAdmin() {
-        // Controllo basato su UtenteDAO (isAdmin)
         if (utenteCorrente == null || !utenteCorrente.isAdmin()) {
-            throw new SecurityException("Accesso Negato: Richiesti privilegi di Amministratore.");
+            throw new SecurityException("Accesso Negato");
         }
     }
 
@@ -46,7 +50,6 @@ public class GestioneSistemaProxy implements GestioneSistemaInterface {
 
     @Override
     public boolean isManutenzioneAttiva() {
-        // La lettura dello stato è pubblica, ma se vogliamo restringerla: checkAdmin()
         return realSubject.isManutenzioneAttiva();
     }
 
