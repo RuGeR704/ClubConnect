@@ -22,8 +22,6 @@ public class EventoService {
         this.eventoDAO = eventoDAO;
     }
 
-    // --- METODI ---
-
     public void creaEvento(EventoBean evento) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
             creaEvento(con, evento);
@@ -84,7 +82,7 @@ public class EventoService {
     public void diminuisciPosti(EventoBean evento) throws SQLException {
         evento.setPosti_disponibili(evento.getPosti_disponibili() - 1);
         try (Connection con = ConPool.getConnection()) {
-            modificaEvento(con, evento); // Riutilizziamo il metodo interno
+            modificaEvento(con, evento);
         }
     }
     // Overload per testare la logica senza aprire connessioni vere
@@ -136,7 +134,6 @@ public class EventoService {
     public GruppoBean retrieveGruppo(int idGruppo) throws SQLException {
         try (Connection con = ConPool.getConnection()) {
             GruppoDAO gruppoDAO = new GruppoDAO();
-            // Il DAO restituirà un'istanza concreta (es. GruppoStudio o GruppoSportivo)
             return gruppoDAO.doRetrieveByid(con, idGruppo);
         }
     }

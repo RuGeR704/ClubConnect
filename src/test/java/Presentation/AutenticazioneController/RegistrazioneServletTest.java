@@ -36,18 +36,15 @@ class RegistrazioneServletTest {
         servlet = new RegistrazioneServlet();
         servlet.setUtenteService(serviceMock);
 
-        // --- AGGIUNTO PER GESTIRE LA NUOVA LOGICA DI SESSIONE ---
-
-        // 1. Quando la servlet chiede una nuova sessione: getSession(true) -> restituisci il mock
+        // 1. Quando la servlet chiede una nuova sessione, restituisci il mock
         when(request.getSession(true)).thenReturn(session);
 
-        // 2. Quando la servlet controlla se c'è una vecchia sessione: getSession(false) -> restituisci null (simuliamo che non ci sia)
+        // 2. Quando la servlet controlla se c'è una vecchia sessione, restituisci null
         when(request.getSession(false)).thenReturn(null);
 
-        // Manteniamo questo per sicurezza (compatibilità con chiamate standard)
+
         when(request.getSession()).thenReturn(session);
 
-        // --------------------------------------------------------
 
         when(request.getRequestDispatcher(anyString())).thenReturn(dispatcher);
     }
@@ -70,11 +67,10 @@ class RegistrazioneServletTest {
     }
 
     /**
-     * Test Parametrico per errori di VALIDAZIONE (Input non validi formali)
+     * Test Parametrico per errori di VALIDAZIONE
      */
     @ParameterizedTest(name = "{0}: {8}")
     @CsvSource({
-            // Username, Nome, Cognome... (Errori già presenti)
             "TC1.1_1, '', Domenico, Ricciardelli, 2004-10-20, d.ricciardelli1@studenti.unisa.it, pass#1234, 3331234567, Username è vuoto",
             "TC1.2_1, Domz, '', Ricciardelli, 2004-10-20, d.ricciardelli1@studenti.unisa.it, pass#1234, 3331234567, Nome è vuoto",
             "TC1.2_2, Domz, Domenico pasquale antonio marco los tocos giacomo, Ricciardelli, 2004-10-20, d.ricciardelli1@studenti.unisa.it, pass#1234, 3331234567, Nome è troppo lungo",
@@ -87,7 +83,7 @@ class RegistrazioneServletTest {
             "TC1.7_1, Domz, Domenico, Ricciardelli, 2004-10-20, d.ricciardelli1@studenti.unisa.it, pass#1234, '', cellulare è vuoto",
             "TC1.7_2, Domz, Domenico, Ricciardelli, 2004-10-20, d.ricciardelli1@studenti.unisa.it, pass#1234, '+39,67a4', cellulare non rispetta il formato",
 
-            // --- NUOVO: TC1.4_2 Data di nascita non valida (Formato Errato) ---
+            //TC1.4_2 Data di nascita non valida (Formato Errato)
             "TC1.4_2, Domz, Domenico, Ricciardelli, dataErrata, d.ricciardelli1@studenti.unisa.it, pass#1234, 3331234567, data di nascita non rispetta il formato"
     })
     void testRegistrazione_ErroriValidazione(
@@ -104,7 +100,7 @@ class RegistrazioneServletTest {
     }
 
     /**
-     * Test Parametrico per errori di BUSINESS LOGIC (Duplicati nel DB)
+     * Test Parametrico per errori Duplicati nel DB
      */
     @ParameterizedTest(name = "{0}: {1}")
     @CsvSource({

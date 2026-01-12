@@ -42,7 +42,7 @@ class GestioneSistemaProxyTest {
         // WHEN & THEN: Deve lanciare eccezione
         assertThrows(SecurityException.class, () -> proxy.bannaUtente(1));
 
-        // Il realSubject NON deve essere mai chiamato
+        // Il realSubject non viene chiamato
         verifyNoInteractions(realSubjectMock);
     }
 

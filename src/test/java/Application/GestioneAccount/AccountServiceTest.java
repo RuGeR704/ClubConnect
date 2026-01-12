@@ -30,7 +30,7 @@ class AccountServiceTest {
     UtenteDAO utenteDAO;
 
     @Mock
-    PagamentoDAO pagamentoDAO; // 1. Aggiungiamo il mock del nuovo DAO
+    PagamentoDAO pagamentoDAO; //Aggiungiamo il mock del nuovo DAO
 
     @Mock
     Connection connection;
@@ -38,7 +38,6 @@ class AccountServiceTest {
     @InjectMocks
     AccountService accountService;
 
-    // --- TEST ESISTENTI (READ) ---
     // Questi usano i metodi "overload" del Service che accettano (Connection con)
 
     @Test
@@ -112,26 +111,23 @@ class AccountServiceTest {
         verify(utenteDAO).doUpdate(eq(connection), eq(utente));
     }
 
-    // --- NUOVI TEST (WRITE / GESTIONE PAGAMENTI) ---
+    //  TEST (WRITE / GESTIONE PAGAMENTI)
     // Questi metodi nel Service aprono la connessione internamente con ConPool.getConnection().
     // Usiamo mockStatic per intercettare quella chiamata.
 
     @Test
     void testAggiungiMetodoPagamento() throws SQLException {
-        // GIVEN
         MetodoPagamentoBean metodo = new MetodoPagamentoBean();
         metodo.setId_utente(1);
         metodo.setNumero_carta("1234567812345678");
 
-        // Usiamo il try-with-resources per il MockedStatic (si chiude da solo alla fine del blocco)
+        // Usiamo il try-with-resources per il MockedStatic
         try (MockedStatic<ConPool> mockedConPool = mockStatic(ConPool.class)) {
-            // Istruiamo Mockito: quando chiami ConPool.getConnection(), restituisci la nostra connection mock
+            // Istruiamo Mockito, restituisci la nostra connection mock
             mockedConPool.when(ConPool::getConnection).thenReturn(connection);
 
-            // WHEN
             accountService.aggiungiMetodoPagamento(metodo);
 
-            // THEN
             // Verifichiamo che il PagamentoDAO sia stato chiamato correttamente
             verify(pagamentoDAO).doSaveMetodoPagamento(connection, metodo);
         }
