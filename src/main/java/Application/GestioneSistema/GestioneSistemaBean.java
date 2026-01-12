@@ -67,7 +67,6 @@ public class GestioneSistemaBean implements GestioneSistemaInterface {
     @Override
     public List<UtenteBean> visualizzaListaClienti() {
         try (Connection con = ConPool.getConnection()){
-            // Nota: Ho aggiunto la connessione anche qui per coerenza col testing
             return utenteDAO.doRetrieveAll();
         } catch (SQLException e) {
             e.printStackTrace();

@@ -231,7 +231,7 @@
             </form>
             <% } else { %>
             <form action="IscrizioneGruppoServlet" method="POST">
-                <input type="hidden" name="idGruppo" value="<%= gruppo.getId_gruppo() %>">
+                <input type="hidden" name="id_gruppo" value="<%= gruppo.getId_gruppo() %>">
                 <button type="submit" class="btn btn-join shadow-sm">
                     <i class="fa-solid fa-plus me-2"></i> Iscriviti
                 </button>

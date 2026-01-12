@@ -34,7 +34,7 @@ class GestioneSistemaBeanTest {
 
             bean.bannaUtente(10);
 
-            // Verifica che il DAO venga chiamato con stato 0 (Bannato)
+            // Verifica che utemte viene bannato
             verify(utenteDAO).doUpdateStato(connection, 10, 0);
         }
     }

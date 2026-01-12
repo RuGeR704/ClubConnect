@@ -74,7 +74,7 @@ class GeneraReportServletTest {
     @Test
     void testGenera_CategorieMancanti() throws Exception {
         setupValidUser();
-        when(request.getParameterValues("categorie")).thenReturn(null); // Nessuna checkbox
+        when(request.getParameterValues("categorie")).thenReturn(null);
 
         servlet.doPost(request, response);
 
@@ -118,7 +118,7 @@ class GeneraReportServletTest {
 
         when(gruppoServiceMock.recuperaGruppo(1)).thenReturn(new ClubBean());
 
-        // Simuliamo una lista di 150 utenti (> 100)
+        // Simuliamo una lista
         List<UtenteBean> tantiSoci = new ArrayList<>();
         for(int i=0; i<150; i++) tantiSoci.add(new UtenteBean());
 
@@ -127,17 +127,17 @@ class GeneraReportServletTest {
         servlet.doPost(request, response);
 
         verify(request).setAttribute(eq("msg"), contains("inviato via e-mail"));
-        // Verifica che NON generi il PDF
+        // Verifica che non generi il PDF
         verify(response, never()).setContentType("application/pdf");
     }
 
-    // TCS 3.5: Successo Standard (Download PDF)
+    // TCS 3.5: Successo Standard
     @Test
     void testGenera_SuccessoStandard() throws Exception {
         setupValidUser();
         when(request.getParameterValues("categorie")).thenReturn(new String[]{"Eventi"});
 
-        // Dati validi (pochi)
+        // Dati validi
         ClubBean club = new ClubBean(); club.setNome("Club Test");
         when(gruppoServiceMock.recuperaGruppo(1)).thenReturn(club);
 
@@ -156,7 +156,6 @@ class GeneraReportServletTest {
         verify(response).setHeader(contains("Content-Disposition"), contains("Report_Club_Test.pdf"));
     }
 
-    // Helper method
     private void setupUser(int id) {
         UtenteBean u = new UtenteBean();
         u.setId_utente(id);

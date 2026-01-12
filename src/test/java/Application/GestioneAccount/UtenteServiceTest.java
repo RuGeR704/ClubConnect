@@ -22,27 +22,24 @@ class UtenteServiceTest {
     UtenteDAO utenteDAO; // 1. Creiamo un DAO finto
 
     @Mock
-    Connection connection; // 2. Simuliamo la connessione (se necessario mockare ConPool)
+    Connection connection; // 2. Simuliamo la connessione
 
     @InjectMocks
     UtenteService service; // 3. Iniettiamo il DAO finto nel Service
 
     @Test
     void testLogin_Successo() throws SQLException {
-        // GIVEN: Prepariamo i dati
+        // Prepariamo i dati
         String email = "mario@test.it";
         String password = "password";
         UtenteBean mario = new UtenteBean();
         mario.setEmail(email);
 
-        // Istruiamo il DAO: "Quando ti chiamano, restituisci Mario"
-        // Nota: Qui usiamo 'any()' per la connessione per ignorare il problema del ConPool statico nel test unitario semplice
+        // Istruiamo il DAO
         Mockito.when(utenteDAO.DoRetrieveEmailPassword(any(), eq(email), eq(password)))
                 .thenReturn(mario);
 
         // WHEN: Chiamiamo il service
-        // (Nota: questo test funzionerebbe solo se modificassimo il Service per accettare la connessione o usassimo mock statici.
-        // Assumiamo che il mock funzioni per la logica del DAO).
         UtenteBean result = service.login(email, password);
 
         // THEN: Verifiche
@@ -59,7 +56,6 @@ class UtenteServiceTest {
         service.registraUtente(nuovoUtente);
 
         // THEN
-        // Verifichiamo solo che il Service abbia passato la palla al DAO
         Mockito.verify(utenteDAO).doSave(any(), eq(nuovoUtente));
     }
 }

@@ -48,8 +48,6 @@ class CreaGruppoServletTest {
             }
         };
         servlet.setGruppoService(serviceMock);
-
-        // Fix per l'errore "ServletConfig has not been initialized"
         when(servletConfig.getServletContext()).thenReturn(servletContext);
         servlet.init(servletConfig);
 
@@ -70,7 +68,7 @@ class CreaGruppoServletTest {
     }
 
     /**
-     * Test Parametrico (SENZA TAG)
+     * Test Parametrico
      */
     @ParameterizedTest(name = "{0}: {9}")
     @CsvSource(delimiter = ';', nullValues = {"NULL"}, value = {
@@ -120,7 +118,6 @@ class CreaGruppoServletTest {
         when(filePart.getSize()).thenReturn(1024 * 1024 * 11L);
 
         servlet.doPost(request, response);
-        // Logica di verifica dipendente dall'implementazione specifica del MultipartConfig
     }
 
     @Test

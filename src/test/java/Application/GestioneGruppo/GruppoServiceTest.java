@@ -48,7 +48,7 @@ class GruppoServiceTest {
 
     @Test
     void testEspelliUtente_Successo() throws SQLException {
-        // GIVEN: Richiedente (10) è gestore, Target (99) è diverso da Richiedente
+        // GIVEN: Richiedente è gestore, Target è diverso da Richiedente
         when(gruppoDAO.isGestore(any(), eq(10), eq(5))).thenReturn(true);
         when(gruppoDAO.doRimuoviMembro(any(), eq(5), eq(99))).thenReturn(true);
 
@@ -61,7 +61,7 @@ class GruppoServiceTest {
 
     @Test
     void testEspelliUtente_FallimentoNonGestore() throws SQLException {
-        // GIVEN: Richiedente (10) NON è gestore
+        // GIVEN: Richiedente non è gestore
         when(gruppoDAO.isGestore(any(), eq(10), eq(5))).thenReturn(false);
 
         // WHEN
