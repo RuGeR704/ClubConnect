@@ -16,10 +16,10 @@ public class ConPool {
             synchronized (ConPool.class) {
                 if (datasource == null) {
                     PoolProperties p = new PoolProperties();
-                    p.setUrl("jdbc:mysql://avnadmin:AVNS__TRf8_zf0Qwhep82k5B@mysql-20c49e1a-gerardorusso7704-edea.g.aivencloud.com:10470/defaultdb?ssl-mode=REQUIRED");
+                    p.setUrl("//DATABASE URL");
                     p.setDriverClassName("com.mysql.cj.jdbc.Driver");
-                    p.setUsername("avnadmin");
-                    p.setPassword("AVNS__TRf8_zf0Qwhep82k5B");
+                    p.setUsername("//DATABASE USERNAME");
+                    p.setPassword("//DATABASE PASSWORD");
                     p.setMaxActive(100);
                     p.setInitialSize(10);
                     p.setMinIdle(10);
